@@ -4,10 +4,10 @@ import os
 import pickle
 import zipfile
 
-root_folder = 'datasets/mnist/'
-train_file = 'mnist_train'
-test_file  = 'mnist_test'
-pickle_file = 'mnist.pickle'
+root_folder = 'datasets/fashion-mnist/'
+train_file = 'fashion-mnist_train'
+test_file  = 'fashion-mnist_test'
+pickle_file = 'fashion-mnist.pickle'
 
 
 def maybe_extract(zip_file):
@@ -88,6 +88,5 @@ with open(pickle_file, 'wb') as f:
 		'test_labels': test_labels, 
 	}
 	pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-
 stat_info = os.stat(pickle_file)
 print('Compressed pickle size: ', stat_info.st_size)
