@@ -1,8 +1,9 @@
+import pickle
 import sys
 import os
-import numpy as np 
-import pickle
-import tensorflow as tf 
+
+import numpy as np
+import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 
@@ -32,80 +33,76 @@ def run(seed, use_saved_model=False):
 
 	graph = tf.Graph()
 	with graph.as_default():
-		
+
 		#Inputs
-		tf_train_dataset = tf.placeholder(tf.float32, shape=(BATCH_SIZE, IMAGE_SIZE*IMAGE_SIZE))
+		tf_train_dataset = tf.placeholder(tf.float32, shape=(BATCH_SIZE, IMAGE_SIZE * IMAGE_SIZE))
 		tf_train_labels = tf.placeholder(tf.float32, shape=(BATCH_SIZE, NUM_LABELS))
-		
+
 		tf_valid_dataset = tf.constant(valid_dataset)
 		tf_test_dataset = tf.constant(test_dataset)
-		
-		#Variables
-		weights = {
-			'hidden': tf.Variable(tf.truncated_normal([IMAGE_SIZE * IMAGE_SIZE, HIDDEN_NODES])),
-			'output': tf.Variable(tf.truncated_normal([HIDDEN_NODES, NUM_LABELS]))
-		}
-		
-		biases = {
-			'hidden': tf.Variable(tf.zeros([HIDDEN_NODES])),
-			'output': tf.Variable(tf.zeros([NUM_LABELS]))
-		}
-		
 
-		# Model.
-		def model(data):
-			hidden = tf.matmul(data, weights['hidden']) + biases['hidden']
-			hidden = tf.nn.relu(hidden)
-			return tf.matmul(hidden, weights['output']) + biases['output']
+		#Model
+		def model(inputs):
+			hidden = tf.contrib.layers.fully_connected(
+				inputs=inputs,
+				num_outputs=HIDDEN_NODES,
+				activation_fn=tf.nn.relu
+			)
 
+			logits = tf.contrib.layers.fully_connected(
+				inputs=hidden,
+				num_outputs=NUM_LABELS,
+				activation_fn=tf.nn.relu
+			)
+			return logits
 
 		logits = model(tf_train_dataset)
 		loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits))
 		
-		l2_hidden = tf.nn.l2_loss(weights['hidden'])
-		l2_output = tf.nn.l2_loss(weights['output'])
-		loss = tf.reduce_mean(loss + BETA * (l2_hidden + l2_output))
+		#l2_loss
 		
-		# Optimizer
+
+		#Optimizer
 		optimizer = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
 		
-		#Prediction for Training, Validation and Test data
+		#Predictions for Training Validation and Test
 		train_prediction = tf.nn.softmax(logits)
 		valid_prediction = tf.nn.softmax(model(tf_valid_dataset))
-		test_prediction  = tf.nn.softmax(model(tf_test_dataset))
+		test_prediction = tf.nn.softmax(model(tf_test_dataset))
 
 		#Saver
 		saver = tf.train.Saver()
-	
+
 
 	tf.set_random_seed(seed)
 
-	with tf.Session(graph=graph) as session:
+	with tf.Session(graph=graph) as sess:
 		tf.global_variables_initializer().run()
+		if use_saved_model:
+			print('Modelo restaurado')
+			saver.restore(sess, '/tmp/model.ckpt')
 
 		for step in range(STEPS):
 
-			# Pick an offset within the training data, which has been randomized.
-			# Note: we could use better randomization across epochs.
 			offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
 
-			# Generate a minibatch.
 			batch_data = train_dataset[offset:(offset + BATCH_SIZE), :]
 			batch_labels = train_labels[offset:(offset + BATCH_SIZE), :]
 
-			# Prepare a dictionary telling the session where to feed the minibatch.
-			# The key of the dictionary is the placeholder node of the graph to be fed,
-			# and the value is the numpy array to feed to it.
 			feed_dict = {
-				tf_train_dataset : batch_data, 
-				tf_train_labels : batch_labels
+				tf_train_dataset: batch_data,
+				tf_train_labels: batch_labels
 			}
-			_, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
+
+			_, l, predictions = sess.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
 			if (step % 500 == 0):
 				print("Minibatch loss at step %d: %f" % (step, l))
 				print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
 				print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
 		print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+
+		save_path = saver.save(sess, '/tmp/model.ckpt')
+		print('Modelo salvo')
 
 
 if __name__ == '__main__':
