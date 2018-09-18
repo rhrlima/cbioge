@@ -8,7 +8,6 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 from six.moves import range
 
-tf.logging.set_verbosity(tf.logging.ERROR)
 
 def reformat(dataset, labels):
 	dataset = dataset.reshape( (-1, image_size, image_size, num_channels) ).astype(np.float32)
@@ -82,25 +81,22 @@ def run():
 
 		tf.global_variables_initializer().run()
 		
-		gvars = tf.global_variables()
-		print(session.run(gvars[0]))
-
-		# print('Initialized')
-		# for step in range(num_steps):
-		# 	offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
-		# 	batch_data = train_dataset[offset:(offset + batch_size), :, :, :]
-		# 	batch_labels = train_labels[offset:(offset + batch_size), :]
-		# 	feed_dict = {
-		# 		tf_train_dataset : batch_data,
-		# 		tf_train_labels : batch_labels
-		# 	}
-		# 	_, l, predictions = session.run(
-		# 		[optimizer, loss, train_prediction], feed_dict=feed_dict)
-		# 	if (step % 50 == 0):
-		# 		print('Minibatch loss at step %d: %f' % (step, l))
-		# 		print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
-		# 		print('Validation accuracy: %.1f%%' % accuracy(valid_prediction.eval(), valid_labels))
-		# print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
+		print('Initialized')
+		for step in range(num_steps):
+			offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+			batch_data = train_dataset[offset:(offset + batch_size), :, :, :]
+			batch_labels = train_labels[offset:(offset + batch_size), :]
+			feed_dict = {
+				tf_train_dataset : batch_data,
+				tf_train_labels : batch_labels
+			}
+			_, l, predictions = session.run(
+				[optimizer, loss, train_prediction], feed_dict=feed_dict)
+			if (step % 50 == 0):
+				print('Minibatch loss at step %d: %f' % (step, l))
+				print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
+				print('Validation accuracy: %.1f%%' % accuracy(valid_prediction.eval(), valid_labels))
+		print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
 
 
 if __name__ == '__main__':
