@@ -1,0 +1,13 @@
+<cnn> ::= <input_node> <hidden_node> <output_node>
+<input_node> ::= <node> "INPUT_SHAPE"
+<hidden_node> ::= <node> | "EMPTY"
+<output_node> ::= "DENSE" "OUTPUT_SHAPE" "SOFTMAX"
+<node> ::=  "CONV2D" <filters> <size> <activation> 
+		|	"MAXPOOL2D" <size> 
+		|	"DROPOUT" <droprate> 
+		|	"DENSE" <num_con> <activation>
+<activation> ::= "RELU"
+<filters> ::= [1-256]
+<size> ::= [1-5]
+<droprate> ::= [0.1-1.0]
+<num_con> ::= [1-1024]
