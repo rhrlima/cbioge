@@ -12,7 +12,7 @@ def load_grammar(file):
 			line = re.sub('\\s+|\n', '', line) #remove spaces and '\n'
 			if re.match('<[a-z_]+>::=', line) == None:
 				lines[len(lines)-1] += line
-			else:
+			elif line != '':
 				lines.append(line)
 
 	global grammar
@@ -59,4 +59,8 @@ if __name__ == '__main__':
 		
 	load_grammar(grammar_file)
 	phen = parse(ind)
-	print(phen)
+	print(phen \
+		.replace('\"\"', '@') \
+		.replace('\"', '') \
+		.split('@')
+	)
