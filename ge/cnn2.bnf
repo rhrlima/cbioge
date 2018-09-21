@@ -1,0 +1,11 @@
+<cnn> ::= <input_node> <hidden_node> <output_node>
+
+<input_node> ::= <node> "INPUT_SHAPE"
+
+<hidden_node> ::= <node> | "EMPTY"
+ 
+<output_node> ::= "DENSE" "NUM_OUTPUTS" "SOFTMAX"
+
+<node> ::=  "DENSE" <units>
+
+<units> ::= "32" | "64"
