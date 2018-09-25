@@ -39,21 +39,23 @@ print('Building model')
 
 model = Sequential()
 
-model.add(Flatten(input_shape=(1, 28, 28)))
-model.add(eval('Dense(32)'))
-model.add(Dense(10, activation='softmax'))
+#model.add(Conv2D(32, (3, 3), input_shape=(1, 28, 28)))
+#model.add(Dense(10, activation='softmax'))
+#model.add(Flatten())
+#model.add(Dense(10))
+#model.add(Activation('softmax'))
 
-# model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(1, 28, 28)))
+
 # model.add(Conv2D(32, (3, 3), activation='relu'))
 # model.add(MaxPooling2D(pool_size=(2, 2)))
 # model.add(Dropout(0.25))
 
-# model.add(Flatten())
+model.add(Flatten())
 # model.add(Dense(128, activation='relu'))
 # model.add(Dropout(0.5))
-# model.add(Dense(10, activation='softmax'))
+model.add(Dense(10, activation='softmax'))
 
-model.summary()
+
 
 #--------------------------------------------------------
 
@@ -63,6 +65,8 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 # print('Train')
 model.fit(X_train, Y_train, batch_size=128, epochs=1, verbose=1)
+
+model.summary()
 
 # print('Test')
 score = model.evaluate(X_test, Y_test, verbose=0)

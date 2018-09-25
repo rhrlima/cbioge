@@ -1,11 +1,25 @@
-<cnn> ::= <input_node> <hidden_node> <output_node>
+<cnn> ::= <c_layer> <h_layer> <d_layer>
 
-<input_node> ::= <node> "INPUT_SHAPE"
 
-<hidden_node> ::= <node> | "EMPTY"
- 
-<output_node> ::= "DENSE" "NUM_OUTPUTS" "SOFTMAX"
+<c_layer> ::= <conv>
 
-<node> ::=  "DENSE" <units>
+<h_layer> ::= <h_node> <h_layer> | '&'
 
-<units> ::= "32" | "64"
+<d_layer> ::= <d_node> <dense>
+
+
+<h_node> ::= <conv> <h_node> | '&'
+
+<d_node> ::= <dense> <d_node> | '&'
+
+
+<conv> ::= 'Conv' <filters> <k_size>
+
+<dense> ::= 'Dense' <units>
+
+
+<filters> ::= '32' | '64'
+
+<k_size> ::= '(3, 3)' | '(5, 5)'
+
+<units> ::= '32' | '64'
