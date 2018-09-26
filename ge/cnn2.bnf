@@ -1,21 +1,19 @@
-<cnn> ::= <c_layer> <h_layer> <d_layer>
+<cnn> ::= <conv> <c_layer> <d_layer> <dense>
 
 
-<c_layer> ::= <conv>
+<c_layer> ::= <c_layer> <c_layer> | <c_node> | '&'
 
-<h_layer> ::= <h_node> <h_layer> | '&'
-
-<d_layer> ::= <d_node> <dense>
+<d_layer> ::= <d_node> <d_node> | <d_node> | '&'
 
 
-<h_node> ::= <conv> <h_node> | '&'
+<c_node> ::= <conv>
 
-<d_node> ::= <dense> <d_node> | '&'
+<d_node> ::= <dense>
 
 
-<conv> ::= 'Conv' <filters> <k_size>
+<conv> ::= 'class_name' 'Conv2D' 'filters' <filters> 'kernel_size' <k_size>
 
-<dense> ::= 'Dense' <units>
+<dense> ::= 'class_name' 'Dense' 'units' <units>
 
 
 <filters> ::= '32' | '64'
