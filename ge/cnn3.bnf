@@ -1,0 +1,19 @@
+<cnn> ::= 'Conv' <filters> <k_size> 'INPUT_SHAPE' <layer> <out_layer>
+
+
+<layer> ::= <node> <layer> | '&'
+
+<node> ::= 'Conv' <filters> <k_size> | 'Pooling'
+
+
+<out_layer> ::= 'Flatten' 'Dense' <units> <d_node> 'OUTPUT_SHAPE' 'SOFTMAX'
+
+<d_node> ::= 'Dense' <units> <d_node> | 'Dropout' <d_node> | '&'
+
+
+
+<filters> ::= '32' | '64'
+
+<k_size> ::= '(3, 3)' | '(5, 5)'
+
+<units> ::= '32' | '64'

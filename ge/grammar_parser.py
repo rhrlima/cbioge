@@ -26,11 +26,11 @@ def load_grammar(file):
 def parse(ind):
 	index = 0
 	loop_count = 0
-	match= 0
+	match = 0
 
 	prod = grammar['<start>']
 	while match != None:
-		match= re.search('<[a-z_]+>', prod)
+		match = re.search('<[a-z_]+>', prod)
 		if match != None:
 			token = match.group(0)
 			repl = ind[index] % len(grammar[token])

@@ -1,0 +1,4 @@
+[X] criar modelo a partir da gramatica
+[ ] criar modelo a partir do json
+[ ] otimizar gramatica
+[ ] problema receber arquivo pickle
