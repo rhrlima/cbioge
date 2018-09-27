@@ -2,3 +2,5 @@
 [ ] criar modelo a partir do json
 [ ] otimizar gramatica
 [ ] problema receber arquivo pickle
+[ ] expandir a gramatica
+[ ] corrigir problema do tipo de atributo do eval
