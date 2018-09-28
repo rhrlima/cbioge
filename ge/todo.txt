@@ -4,3 +4,5 @@
 [ ] problema receber arquivo pickle
 [ ] expandir a gramatica
 [ ] corrigir problema do tipo de atributo do eval
+[ ] criar algoritmo ge
+[ ] adicionar input shape e num classes no .pickle

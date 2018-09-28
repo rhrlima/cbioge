@@ -5,21 +5,35 @@ import sys
 MAX_LOOPS = 1000
 grammar = None
 
+
 def load_grammar(file):
+
+	global grammar
+
 	lines = []
 	with open(file, 'r') as gf:
+
 		for line in gf:
-			line = re.sub('\\s+|\n', '', line) #remove spaces and '\n'
+
+			# remove spaces and '\n'
+			line = re.sub('\\s+|\n', '', line)
+
+			# if line does not match 'new rule line', append to previous
 			if re.match('<[a-z_]+>::=', line) == None:
 				lines[len(lines)-1] += line
+
 			elif line != '':
 				lines.append(line)
 
-	global grammar
 	grammar = {'<start>': None}
 	for line in lines:
+
+		# split into key and productions
 		rule, prod = line.split('::=')
+
+		# split productions in options
 		grammar[rule] = prod.split('|')
+
 		if grammar['<start>'] == None: grammar['<start>'] = rule
 
 
@@ -46,12 +60,16 @@ def parse(ind):
 		.replace('\'', '') \
 		.split('@')
 
+	print('prod', prod)
 	prod = list(filter(lambda x: x != '&', prod))
 
 	return prod
 
 
 if __name__ == '__main__':
+	
+	#test
+
 	rand = np.random
 
 	load_grammar(sys.argv[1])
