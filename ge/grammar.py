@@ -51,24 +51,23 @@ def parse(ind):
 			prod = prod.replace(token, grammar[token][repl], 1)
 			index += 1
 			if index >= len(ind): index = 0
+		
 		loop_count += 1
-		if loop_count >= MAX_LOOPS:
-			print('infinite loop')
+
+		# infinite loop
+		if loop_count >= MAX_LOOPS: 
 			return None
 
 	prod = prod.replace('\'\'', '@')\
 		.replace('\'', '') \
 		.split('@')
 
-	print('prod', prod)
-	prod = list(filter(lambda x: x != '&', prod))
-
-	return prod
+	return list(filter(lambda x: x != '&', prod))
 
 
 if __name__ == '__main__':
 	
-	#test
+	print('testing mode')
 
 	rand = np.random
 
