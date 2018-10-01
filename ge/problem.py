@@ -1,5 +1,6 @@
 import grammar as parser
 import pickle
+import json
 
 from keras import layers
 from keras.models import Sequential, model_from_json
@@ -32,7 +33,6 @@ class CnnProblem(BaseProblem):
 	num_classes = None
 
 	def load_dataset_from_pickle(self, pickle_file):
-		print('Loading the dataset')
 		with open(pickle_file, 'rb') as f:
 			temp = pickle.load(f)
 			
@@ -45,36 +45,34 @@ class CnnProblem(BaseProblem):
 			self.x_test = temp['test_dataset']
 			self.y_test = temp['test_labels']
 
+			self.input_shape = temp['input_shape']
+			self.num_classes = temp['num_classes']
+
 			del temp
-			print('Training set', self.x_train.shape, self.y_train.shape)
-			print('Validation set', self.x_valid.shape, self.y_valid.shape)
-			print('Test set', self.x_test.shape, self.y_test.shape)
 
-		self.x_train = self.x_train.reshape(self.x_train.shape[0], 1, 28, 28)
-		self.x_test = self.x_test.reshape(self.x_test.shape[0], 1, 28, 28)
+		self.x_train = self.x_train.reshape(
+			(self.x_train.shape[0],)+self.input_shape)
+		self.x_valid = self.x_valid.reshape(
+			(self.x_valid.shape[0],)+self.input_shape)
+		self.x_test = self.x_test.reshape(
+			(self.x_test.shape[0],)+self.input_shape)
 
-		self.y_train = np_utils.to_categorical(self.y_train, 10)
-		self.y_test = np_utils.to_categorical(self.y_test, 10)
+		self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
+		self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
+		self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
 
 
 	def map_genotype_to_phenotype(self, solution):
 		add_input_shape = True
 		add_flatten = True
 		add_output_shape = True
-
-		print('genotype')
-		print(solution.genotype)
 		
 		deriv = parser.parse(solution.genotype)
 		if not deriv: return
-		
-		print('phenotype')
-		print(deriv)
 
 		nodes = []
 		node = {'class_name': None, 'config': {}}
 
-		print('parsing')
 		index = 0
 		while index < len(deriv):
 
@@ -94,10 +92,8 @@ class CnnProblem(BaseProblem):
 					nodes.append({'class_name': 'Flatten', 'config': {}})
 					add_flatten = False
 
-				print('{}: {}'.format(key, value))
 				node[key] = value
 			else:
-				print('\t{}: {}'.format(key, value))
 				node['config'][key] = eval(value)
 
 			index += 2
@@ -106,65 +102,42 @@ class CnnProblem(BaseProblem):
 				node['config']['units'] = self.num_classes
 				add_output_shape = False
 			nodes.append(node)
-			nodes.append(\
+			nodes.append(
 				{'class_name': 'Activation', 'config': {'activation': 'softmax'}})
 
-		print('building')
-		model = Sequential()
-		for n in nodes:
-			print(n)
-			node = layers.deserialize(n)
-			model.add(node)
-		solution.phenotype = model
+		model = {'class_name': 'Sequential', 'config': []}
+		for n in nodes: 
+			model['config'].append(n)
+		solution.phenotype = model_from_json(json.dumps(model))
 
 
-	def evaluate(self, solution):
+	def evaluate(self, solution, verbose=0):
 
 		self.map_genotype_to_phenotype(solution)
 
-		if not solution.phenotype:
-			print('invalid solution')
-			return
+		if not solution.phenotype: return -1
 
 		model = solution.phenotype
+		
 		model.compile(
 			loss='categorical_crossentropy', 
 			optimizer='adam', 
 			metrics=['accuracy']
 		)
-		model.fit(p.x_train, p.y_train, batch_size=128, epochs=1, verbose=1)
-		score = model.evaluate(p.x_test, p.y_test, verbose=0)
+		model.fit(
+			self.x_train, 
+			self.y_train, 
+			batch_size=128, 
+			epochs=1, 
+			verbose=verbose
+		)
+
+		score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 		
 		print('Score -> loss: {}\taccuracy: {}'.format(score[0], score[1]))
-		
-
-class Solution:
-
-	genotype = None
-	phenotype = None
-
-	def __init__(self, genes=None):
-		self.genotype = rand.randint(0, 255, rand.randint(1, 10)) \
-		if not genes else genes
-
-
-def test():
-	return parser.grammar
+		return score[1]
 
 
 if __name__ == '__main__':
-	p = CnnProblem()
 
-	parser.load_grammar('cnn2.bnf')
-
-	pickle_file = '../datasets/mnist/mnist.pickle'
-	p.load_dataset_from_pickle(pickle_file)
-	p.input_shape = (1, 28, 28)
-	p.num_classes = 10
-	
-	import numpy as np
-	rand = np.random
-	solution = Solution()
-	print(solution.genotype)
-
-	p.evaluate(solution)
+	print('testing mode')

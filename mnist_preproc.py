@@ -5,8 +5,10 @@ import pickle
 import zipfile
 
 root_folder = 'datasets/mnist/'
+
 train_file = 'mnist_train'
 test_file  = 'mnist_test'
+
 pickle_file = 'mnist.pickle'
 
 
@@ -32,7 +34,7 @@ def load_dataset_from_csv(file, min_images=None, force=False):
 		for i, line in enumerate(f):
 			line = line.replace('\n', '').split(',')
 			label = line[0]
-			img_data = (np.array(line[1:], dtype=float) - pixel_depth / 2) / pixel_depth
+			img_data = np.array(line[1:], dtype=float) / pixel_depth
 			dataset.append(img_data)
 			labels.append(label)
 
@@ -61,33 +63,35 @@ def split_dataset(dataset, labels, split_size):
 	return train_dataset, train_labels, valid_dataset, valid_labels
 
 
+if __name__ == '__main__':
+	maybe_extract(train_file)
+	maybe_extract(test_file)
 
-maybe_extract(train_file)
-maybe_extract(test_file)
+	train_dataset, train_labels = load_dataset_from_csv(train_file)
+	test_dataset, test_labels = load_dataset_from_csv(test_file)
 
-train_dataset, train_labels = load_dataset_from_csv(train_file)
-test_dataset, test_labels = load_dataset_from_csv(test_file)
+	train_dataset, train_labels = randomize(train_dataset, train_labels)
+	test_dataset, test_labels = randomize(test_dataset, test_labels)
 
-train_dataset, train_labels = randomize(train_dataset, train_labels)
-test_dataset, test_labels = randomize(test_dataset, test_labels)
+	train_dataset, train_labels, valid_dataset, valid_labels = split_dataset(train_dataset, train_labels, 10000)
 
-train_dataset, train_labels, valid_dataset, valid_labels = split_dataset(train_dataset, train_labels, 10000)
+	print(train_dataset.shape, train_labels.shape)
+	print(valid_dataset.shape, valid_labels.shape)
+	print(test_dataset.shape, test_labels.shape)
 
-print(train_dataset.shape, train_labels.shape)
-print(valid_dataset.shape, valid_labels.shape)
-print(test_dataset.shape, test_labels.shape)
+	pickle_file = os.path.join(root_folder, pickle_file)
+	with open(pickle_file, 'wb') as f:
+		save = {
+			'train_dataset': train_dataset, 
+			'train_labels': train_labels, 
+			'valid_dataset': valid_dataset, 
+			'valid_labels': valid_labels, 
+			'test_dataset': test_dataset, 
+			'test_labels': test_labels, 
+			'input_shape': (1, 28, 28), 
+			'num_classes': 10
+		}
+		pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
 
-pickle_file = os.path.join(root_folder, pickle_file)
-with open(pickle_file, 'wb') as f:
-	save = {
-		'train_dataset': train_dataset, 
-		'train_labels': train_labels, 
-		'valid_dataset': valid_dataset, 
-		'valid_labels': valid_labels, 
-		'test_dataset': test_dataset, 
-		'test_labels': test_labels, 
-	}
-	pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-
-stat_info = os.stat(pickle_file)
-print('Compressed pickle size: ', stat_info.st_size)
+	stat_info = os.stat(pickle_file)
+	print('Compressed pickle size: ', stat_info.st_size)
