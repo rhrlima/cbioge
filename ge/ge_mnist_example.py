@@ -16,8 +16,8 @@ mnist_problem.load_dataset_from_pickle(pickle_file)
 ge.problem = mnist_problem
 
 # changing GE default parameters
-ge.POP_SIZE = 1
-ge.MAX_EVALS = 1
+ge.POP_SIZE = 10
+ge.MAX_EVALS = 20
 
 # ----
 
