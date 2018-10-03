@@ -2,9 +2,10 @@
 [X] criar modelo a partir do json
 [ ] otimizar gramatica (substituir regras com 1 produção)
 [X] problema receber arquivo pickle
-[ ] expandir a gramatica (adicionar demais possibilidades)
-[ ] corrigir problema do tipo de atributo do eval (para valores string)
+[X] expandir a gramatica (adicionar demais possibilidades)
+[X] corrigir problema do tipo de atributo do eval (para valores string)
 [X] criar algoritmo ge
 [X] adicionar input shape e num classes no .pickle
 [ ] paralelizar avaliações
-[ ] implementar operadores prune e duplication
+[X] implementar operadores prune e duplication
+[ ] adicionar mais customização do optimizer

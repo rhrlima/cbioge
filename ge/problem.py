@@ -1,6 +1,8 @@
 import grammar as parser
-import pickle
 import json
+import numpy as np
+import pickle
+import re
 
 from keras import layers
 from keras.models import Sequential, model_from_json
@@ -9,6 +11,9 @@ from keras.utils import np_utils
 #label first
 from keras import backend as K
 K.set_image_dim_ordering('th')
+
+
+DEBUG = False
 
 
 class BaseProblem:
@@ -62,13 +67,14 @@ class CnnProblem(BaseProblem):
 		self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
 
 
-	def map_genotype_to_phenotype(self, solution):
+	def map_genotype_to_phenotype(self, genotype):
 		add_input_shape = True
 		add_flatten = True
 		add_output_shape = True
 		
-		deriv = parser.parse(solution.genotype)
-		if not deriv: return
+		deriv = parser.parse(genotype)
+
+		if not deriv: return None
 
 		nodes = []
 		node = {'class_name': None, 'config': {}}
@@ -84,40 +90,63 @@ class CnnProblem(BaseProblem):
 					nodes.append(node)
 					node = {'class_name': None, 'config': {}}
 
+				# first Conv node needs input_shape parameter
 				if add_input_shape:
 					node['config']['input_shape'] = self.input_shape
 					add_input_shape = False
 
+				# first Dense node needs Flatten before
 				if value == 'Dense' and add_flatten:
 					nodes.append({'class_name': 'Flatten', 'config': {}})
 					add_flatten = False
 
 				node[key] = value
 			else:
-				node['config'][key] = eval(value)
+				# range pattern
+				m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+				if m:
+					min_ = eval(m.group(1))
+					max_ = eval(m.group(2))
+					if type(min_) == int and type(max_) == int:
+						value = np.random.randint(min_, max_)
+					elif type(min_) == float and type(max_) == float:
+						value = np.random.uniform(min_, max_)
+					else:
+						raise TypeError('type mismatch')
+				else:
+					# kernel size pattern
+					m1 = re.match('\\((\\d+),\\s*(\\d+)\\)', value)
+					m2 = re.match('^\\d+$', value)
+					if m1 or m2:
+						value = eval(value)
+
+				node['config'][key] = value
 
 			index += 2
 		else:
+			# last node needs output_shape as number of classes
+			# and softmax activation
 			if add_output_shape:
 				node['config']['units'] = self.num_classes
+				node['config']['activation'] = 'softmax'
 				add_output_shape = False
 			nodes.append(node)
-			nodes.append(
-				{'class_name': 'Activation', 'config': {'activation': 'softmax'}})
 
 		model = {'class_name': 'Sequential', 'config': []}
 		for n in nodes: 
+			if DEBUG: print(n)
 			model['config'].append(n)
-		solution.phenotype = model_from_json(json.dumps(model))
+
+		return model_from_json(json.dumps(model))
 
 
 	def evaluate(self, solution, verbose=0):
 
-		self.map_genotype_to_phenotype(solution)
+		model = self.map_genotype_to_phenotype(solution.genotype)
 
-		if not solution.phenotype: return -1
+		if not model: return -1
 
-		model = solution.phenotype
+		solution.phenotype = model
 		
 		model.compile(
 			loss='categorical_crossentropy', 
@@ -141,3 +170,21 @@ class CnnProblem(BaseProblem):
 if __name__ == '__main__':
 
 	print('testing mode')
+
+	import numpy as np
+
+	parser.load_grammar('cnn2.bnf')
+
+	p = CnnProblem()
+	p.input_shape = (1, 28, 28)
+	p.num_classes = 10
+
+	genes = np.random.randint(0, 255, np.random.randint(1, 10))
+
+	print(genes)
+	model = p.map_genotype_to_phenotype(genes)
+
+	if model:
+		model.summary()
+	else:
+		print('None')

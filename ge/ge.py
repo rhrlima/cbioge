@@ -10,6 +10,8 @@ MAX_EVALS = 2000
 
 CROSS_RATE = 0.8
 MUT_RATE = 0.1
+PRUNE_RATE = 0.1
+DUPL_RATE = 0.1
 
 MINIMIZE = False
 
@@ -90,14 +92,18 @@ def mutate(offspring):
 
 
 def prune(offspring):
-	# if rand.rand() < PRUNE_RATE:
-	for off in offspring:
-		cut = rand.randint(1, len(off.genotype))
-		off.genotype = of.genotype[:cut]
+	if rand.rand() < PRUNE_RATE:
+		for off in offspring:
+			cut = rand.randint(1, len(off.genotype))
+			off.genotype = off.genotype[:cut]
 
 
 def duplicate(offspring):
-	pass
+	if rand.rand() < DUPL_RATE:
+		for off in offspring:
+			cut = rand.randint(1, len(off.genotype))
+			genes = off.genotype
+			off.genotype = np.concatenate((genes, genes[:cut]))
 
 
 def replace(population, offspring):
@@ -125,6 +131,10 @@ def execute():
 		offspring = crossover(parents)
 		
 		mutate(offspring)
+
+		prune(offspring)
+
+		duplicate(offspring)
 
 		evaluate_population(offspring)
 

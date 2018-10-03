@@ -6,18 +6,32 @@
 <d_layer> ::= <d_node> <d_node> | <d_node> | '&'
 
 
-<c_node> ::= <conv>
+<c_node> ::= <conv> | <maxpool> | <avgpool>
 
-<d_node> ::= <dense>
+<d_node> ::= <dense> | <dropout>
 
 
-<conv> ::= 'class_name' 'Conv2D' 'filters' <filters> 'kernel_size' <k_size>
+<conv> ::= 'class_name' 'Conv2D' 'filters' <filters> 'kernel_size' <k_size> 'activation' <activation>
 
 <dense> ::= 'class_name' 'Dense' 'units' <units>
 
+<dropout> ::= 'class_name' 'Dropout' 'rate' <rate>
+
+<maxpool> ::= 'class_name' 'MaxPooling2D' 'pool_size' <p_size> 'padding' <padding>
+
+<avgpool> ::= 'class_name' 'AveragePooling2D' 'pool_size' <p_size> 'padding' <padding>
+
+
+<activation> ::= 'relu' | 'tanh' | 'linear'
+
+<padding> ::= 'valid' | 'same'
 
 <filters> ::= '32' | '64'
 
 <k_size> ::= '(3, 3)' | '(5, 5)'
 
+<p_size> ::= '(2, 2)' | '(4, 4)'
+
 <units> ::= '32' | '64'
+
+<rate> ::= '[0.0, 1.0]'
