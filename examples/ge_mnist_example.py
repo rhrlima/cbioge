@@ -1,10 +1,9 @@
-import sys
+import sys, os
 sys.path.append('..')
 
 from algorithms import ge
 from grammars import grammar
 from problems import problem
-
 
 # dataset and grammar
 pickle_file = '../datasets/mnist/mnist.pickle'
@@ -19,12 +18,12 @@ mnist_problem.load_dataset_from_pickle(pickle_file)
 ge.problem = mnist_problem
 
 # changing GE default parameters
+ge.SEED = 42
 ge.POP_SIZE = 50
 ge.MAX_EVALS = 2000
 
-# ----
-
-print('Running GE')
+print('--config--')
+print('SEED', ge.SEED)
 print('POP', ge.POP_SIZE)
 print('EVALS', ge.MAX_EVALS)
 print('CROSS', ge.CROSS_RATE)
@@ -32,13 +31,14 @@ print('MUT', ge.MUT_RATE)
 print('PRUN', ge.PRUN_RATE)
 print('DUPL', ge.DUPL_RATE)
 
+print('--running ge--')
 best = ge.execute()
 
-print('Best Solution')
+print('--best solution--')
 print(best)
 best.phenotype.summary()
 
-print('Testing')
+print('--testing--')
 best.phenotype.compile
 score = best.phenotype.evaluate(mnist_problem.x_test, mnist_problem.y_test, 1)
 print('Score -> loss: {}\taccuracy: {}'.format(score[0], score[1]))

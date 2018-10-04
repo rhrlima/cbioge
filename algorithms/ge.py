@@ -3,6 +3,8 @@ import random
 
 rand = np.random
 
+SEED = None
+
 POP_SIZE = 5
 MIN_GENES = 1
 MAX_GENES = 10
@@ -10,7 +12,7 @@ MAX_EVALS = 2000
 
 CROSS_RATE = 0.8
 MUT_RATE = 0.1
-PRUNE_RATE = 0.1
+PRUN_RATE = 0.1
 DUPL_RATE = 0.1
 
 MINIMIZE = False
@@ -71,10 +73,10 @@ def selection(population):
 	return [p1, p2]
 
 
-def crossover(parents):
+def crossover(parents, prob):
 	off1 = parents[0].copy()
 	off2 = parents[1].copy()
-	if rand.rand() < CROSS_RATE:
+	if rand.rand() < prob:
 		p1 = off1.genotype[:]
 		p2 = off2.genotype[:]
 		min_ = min(len(p1), len(p2))
@@ -84,24 +86,24 @@ def crossover(parents):
 	return [off1, off2]
 
 
-def mutate(offspring):
-	if rand.rand() < MUT_RATE:
+def mutate(offspring, prob):
+	if rand.rand() < prob:
 		for off in offspring:
 			index = rand.randint(0, len(off.genotype))
 			off.genotype[index] = rand.randint(0, 255)
 
 
-def prune(offspring):
-	if rand.rand() < PRUNE_RATE:
+def prune(offspring, prob):
+	if rand.rand() < prob:
 		for off in offspring:
-			cut = rand.randint(1, len(off.genotype))
+			cut = rand.randint(0, len(off.genotype))
 			off.genotype = off.genotype[:cut]
 
 
-def duplicate(offspring):
-	if rand.rand() < DUPL_RATE:
+def duplicate(offspring, prob):
+	if rand.rand() < prob:
 		for off in offspring:
-			cut = rand.randint(1, len(off.genotype))
+			cut = rand.randint(0, len(off.genotype))
 			genes = off.genotype
 			off.genotype = np.concatenate((genes, genes[:cut]))
 
@@ -115,11 +117,13 @@ def replace(population, offspring):
 
 def execute():
 	
+	np.random.seed(SEED)
+
 	population = create_population(POP_SIZE)
 	evaluate_population(population)
 
 	population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
-	
+
 	evals = len(population)
 
 	while evals < MAX_EVALS:
@@ -128,13 +132,13 @@ def execute():
 
 		parents = selection(population)
 
-		offspring = crossover(parents)
+		offspring = crossover(parents, CROSS_RATE)
 		
-		mutate(offspring)
+		mutate(offspring, MUT_RATE)
 
-		prune(offspring)
+		prune(offspring, PRUN_RATE)
 
-		duplicate(offspring)
+		duplicate(offspring, DUPL_RATE)
 
 		evaluate_population(offspring)
 
