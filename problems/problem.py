@@ -1,4 +1,4 @@
-import grammar as parser
+from grammars import grammar as parser
 import json
 import numpy as np
 import pickle
