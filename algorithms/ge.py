@@ -111,8 +111,6 @@ def replace(population, offspring):
 	population.sort(key=lambda x: x.fitness, reverse=not MINIMIZE)
 	population.pop()
 	population.pop()
-	for p in population:
-		print(p.fitness)
 
 
 def execute():
@@ -120,6 +118,8 @@ def execute():
 	population = create_population(POP_SIZE)
 	evaluate_population(population)
 
+	population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
+	
 	evals = len(population)
 
 	while evals < MAX_EVALS:
@@ -142,5 +142,6 @@ def execute():
 
 		evals += len(offspring)
 
-	population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
+		print('best so far:', population[0].fitness, population[0].genotype)
+
 	return population[0]
