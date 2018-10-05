@@ -9,3 +9,4 @@
 [ ] paralelizar avaliações
 [X] implementar operadores prune e duplication
 [ ] adicionar mais customização do optimizer
+[ ] criar validações nos métodos (GE e demais)
