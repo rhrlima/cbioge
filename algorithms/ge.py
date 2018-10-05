@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+DEBUG = False
+
 rand = np.random
 
 SEED = None
@@ -42,6 +44,8 @@ def create_solution(min_, max_=None):
 	if not max_:
 		max_ = min_
 		min_ = 0
+	if min_ >= max_:
+		raise ValueError('[create solution] min >= max')
 	genes = rand.randint(0, 255, rand.randint(min_, max_))
 	return Solution(genes)
 
@@ -55,7 +59,14 @@ def create_population(size):
 
 def evaluate_solution(solution):
 	if not solution.evaluated:
-		solution.fitness = problem.evaluate(solution, 1)
+		if problem is None:
+			if DEBUG:
+				print('[evaluation] Problem is None, bypassing')
+				solution.fitness = -1
+			else:
+				raise ValueError('Problem is None')
+		else:
+			solution.fitness = problem.evaluate(solution, 1)
 		solution.evaluated = True
 
 
@@ -65,6 +76,8 @@ def evaluate_population(population):
 
 
 def selection(population):
+	if len(population) < 2:
+		raise ValueError('[selection] population size is less than minimum (2)')
 	p1 = None
 	p2 = None
 	p1 = random.choice(population)
@@ -96,14 +109,21 @@ def mutate(offspring, prob):
 def prune(offspring, prob):
 	if rand.rand() < prob:
 		for off in offspring:
-			cut = rand.randint(0, len(off.genotype))
+			if len(off.genotype) <= 1:
+				if DEBUG: print('[prune] one gene, not applying:', off.genotype)
+				continue
+			cut = rand.randint(1, len(off.genotype))
 			off.genotype = off.genotype[:cut]
 
 
 def duplicate(offspring, prob):
 	if rand.rand() < prob:
 		for off in offspring:
-			cut = rand.randint(0, len(off.genotype))
+			if len(off.genotype) > 1:
+				cut = rand.randint(0, len(off.genotype))
+			else:
+				if DEBUG: print('[duplication] one gene, setting cut to 1:', off)
+				cut = 1
 			genes = off.genotype
 			off.genotype = np.concatenate((genes, genes[:cut]))
 
@@ -111,8 +131,8 @@ def duplicate(offspring, prob):
 def replace(population, offspring):
 	population += offspring
 	population.sort(key=lambda x: x.fitness, reverse=not MINIMIZE)
-	population.pop()
-	population.pop()
+	for _ in range(len(offspring)):
+		population.pop()
 
 
 def execute():
@@ -128,7 +148,7 @@ def execute():
 
 	while evals < MAX_EVALS:
 		
-		print('evals: {:4}/{:4}'.format(evals, MAX_EVALS))
+		#print('evals: {:4}/{:4}'.format(evals, MAX_EVALS))
 
 		parents = selection(population)
 
@@ -146,6 +166,7 @@ def execute():
 
 		evals += len(offspring)
 
-		print('best so far:', population[0].fitness, population[0].genotype)
+		#print('best so far:', population[0].fitness, population[0].genotype)
 
 	return population[0]
+
