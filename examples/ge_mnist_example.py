@@ -19,8 +19,8 @@ ge.problem = mnist_problem
 
 # changing GE default parameters
 ge.SEED = 42
-ge.POP_SIZE = 50
-ge.MAX_EVALS = 2000
+ge.POP_SIZE = 2
+ge.MAX_EVALS = 5
 
 print('--config--')
 print('SEED', ge.SEED)
@@ -31,14 +31,13 @@ print('MUT', ge.MUT_RATE)
 print('PRUN', ge.PRUN_RATE)
 print('DUPL', ge.DUPL_RATE)
 
-print('--running ge--')
-best = ge.execute()
+print('--running--')
+best = ge.execute(True)
 
 print('--best solution--')
-print(best)
+print(best, best.data['loss'], best.data['acc'])
 best.phenotype.summary()
 
 print('--testing--')
-best.phenotype.compile
-score = best.phenotype.evaluate(mnist_problem.x_test, mnist_problem.y_test, 1)
-print('Score -> loss: {}\taccuracy: {}'.format(score[0], score[1]))
+score = best.phenotype.evaluate(mnist_problem.x_test, mnist_problem.y_test, verbose=0)
+print('loss: {}\taccuracy: {}'.format(score[0], score[1]))

@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import time
 
 DEBUG = False
 
@@ -28,7 +29,11 @@ class Solution:
 	genotype = None
 	phenotype = None
 	fitness = None
+	
 	evaluated = False
+
+	data = {}
+
 
 	def __init__(self, genes):
 		self.genotype = genes
@@ -66,7 +71,10 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution, 1)
+			fitness, score = problem.evaluate(solution)
+			solution.fitness = fitness
+			solution.data['acc']= score[0]
+			solution.data['loss'] = score[1]
 		solution.evaluated = True
 
 
@@ -135,7 +143,7 @@ def replace(population, offspring):
 		population.pop()
 
 
-def execute():
+def execute(verbose=False):
 	
 	np.random.seed(SEED)
 
@@ -146,9 +154,14 @@ def execute():
 
 	evals = len(population)
 
+	if verbose: print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+			time.strftime('%x %X'), 
+			evals, MAX_EVALS, 
+			population[0].genotype, 
+			population[0].fitness)
+		)
+
 	while evals < MAX_EVALS:
-		
-		#print('evals: {:4}/{:4}'.format(evals, MAX_EVALS))
 
 		parents = selection(population)
 
@@ -166,7 +179,12 @@ def execute():
 
 		evals += len(offspring)
 
-		#print('best so far:', population[0].fitness, population[0].genotype)
+		if verbose: print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+			time.strftime('%x %X'), 
+			evals, MAX_EVALS, 
+			population[0].genotype, 
+			population[0].fitness)
+		)
 
 	return population[0]
 
