@@ -163,8 +163,11 @@ class CnnProblem(BaseProblem):
 
 		score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 		
-		print('Score -> loss: {}\taccuracy: {}'.format(score[0], score[1]))
-		return score[1]
+		# max the accuracy (score[1]) min the loss (score[0])
+		fitness = score[1] - score[0]
+
+		if verbose == 1: print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
+		return fitness, score
 
 
 if __name__ == '__main__':
