@@ -148,26 +148,37 @@ class CnnProblem(BaseProblem):
 
 		solution.phenotype = model
 		
-		model.compile(
-			loss='categorical_crossentropy', 
-			optimizer='adam', 
-			metrics=['accuracy']
-		)
-		model.fit(
-			self.x_train, 
-			self.y_train, 
-			batch_size=128, 
-			epochs=1, 
-			verbose=verbose
-		)
+		try:
+			model.compile(
+				loss='categorical_crossentropy', 
+				optimizer='adam', 
+				metrics=['accuracy']
+			)
+			model.fit(
+				self.x_train, 
+				self.y_train, 
+				batch_size=128, 
+				epochs=1, 
+				verbose=verbose
+			)
 
-		score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+		
+		except RuntimeError:
+			if DEBUG:print('[problem] invalid model from solution: {}'.format(
+				solution.genotype))
+			return -1
 		
 		# max the accuracy (score[1]) min the loss (score[0])
 		fitness = score[1] - score[0]
+		
+		solution.data['loss'] = score[0]
+		solution.data['acc']= score[1]
 
-		if verbose == 1: print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
-		return fitness, score
+		if verbose == 1: print('loss: {}\taccuracy: {}'.format(
+			score[0], 
+			score[1]))
+		return fitness
 
 
 if __name__ == '__main__':

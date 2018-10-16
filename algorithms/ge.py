@@ -71,10 +71,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			fitness, score = problem.evaluate(solution)
-			solution.fitness = fitness
-			solution.data['acc']= score[0]
-			solution.data['loss'] = score[1]
+			solution.fitness = problem.evaluate(solution)
 		solution.evaluated = True
 
 
