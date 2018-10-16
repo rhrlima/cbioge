@@ -39,5 +39,8 @@ print(best, best.data['loss'], best.data['acc'])
 best.phenotype.summary()
 
 print('--testing--')
-score = best.phenotype.evaluate(mnist_problem.x_test, mnist_problem.y_test, verbose=0)
+score = best.phenotype.evaluate(
+	mnist_problem.x_test, 
+	mnist_problem.y_test, 
+	verbose=0)
 print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
