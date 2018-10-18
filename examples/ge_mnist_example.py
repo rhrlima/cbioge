@@ -17,6 +17,10 @@ mnist_problem = problem.CnnProblem()
 mnist_problem.load_dataset_from_pickle(pickle_file) 
 ge.problem = mnist_problem
 
+# problem parameters
+mnist_problem.batch_size = 128
+mnist_problem.epochs = 1
+
 # changing GE default parameters
 ge.SEED = 42
 ge.POP_SIZE = 2
