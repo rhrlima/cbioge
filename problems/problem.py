@@ -1,4 +1,8 @@
+import sys
+sys.path.append('..')
+
 from grammars import grammar as parser
+from algorithms import ge
 import json
 import numpy as np
 import pickle
@@ -36,6 +40,10 @@ class CnnProblem(BaseProblem):
 
 	input_shape = None
 	num_classes = None
+
+	batch_size = 128
+	epochs = 1
+
 
 	def load_dataset_from_pickle(self, pickle_file):
 		with open(pickle_file, 'rb') as f:
@@ -137,7 +145,14 @@ class CnnProblem(BaseProblem):
 			if DEBUG: print(n)
 			model['config'].append(n)
 
-		return model_from_json(json.dumps(model))
+		try:
+			model = model_from_json(json.dumps(model))
+		except Exception:
+			if DEBUG: print('[mapping] invalid model from solution: {}'.format(
+				solution.genotype))
+			return None
+
+		return model
 
 
 	def evaluate(self, solution, verbose=0):
@@ -148,26 +163,20 @@ class CnnProblem(BaseProblem):
 
 		solution.phenotype = model
 		
-		try:
-			model.compile(
-				loss='categorical_crossentropy', 
-				optimizer='adam', 
-				metrics=['accuracy']
-			)
-			model.fit(
-				self.x_train, 
-				self.y_train, 
-				batch_size=128, 
-				epochs=1, 
-				verbose=verbose
-			)
+		model.compile(
+			loss='categorical_crossentropy', 
+			optimizer='adam', 
+			metrics=['accuracy']
+		)
+		# model.fit(
+		# 	self.x_train, 
+		# 	self.y_train, 
+		# 	batch_size=self.batch_size, 
+		# 	epochs=self.epochs, 
+		# 	verbose=verbose
+		# )
 
-			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
-		
-		except RuntimeError:
-			if DEBUG:print('[problem] invalid model from solution: {}'.format(
-				solution.genotype))
-			return -1
+		score = [0, 1]#model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 		
 		# max the accuracy (score[1]) min the loss (score[0])
 		fitness = score[1] - score[0]
@@ -183,22 +192,26 @@ class CnnProblem(BaseProblem):
 
 if __name__ == '__main__':
 
+	DEBUG = False
 	print('testing mode')
 
 	import numpy as np
 
-	parser.load_grammar('cnn2.bnf')
+	parser.load_grammar('../grammars/cnn.bnf')
 
 	p = CnnProblem()
-	p.input_shape = (1, 28, 28)
-	p.num_classes = 10
+	p.load_dataset_from_pickle('../datasets/mnist/mnist.pickle')
 
-	genes = np.random.randint(0, 255, np.random.randint(1, 10))
+	while True:
+		genes = np.random.randint(0, 255, np.random.randint(1, 10))
+		solution = ge.Solution(genes)
 
-	print(genes)
-	model = p.map_genotype_to_phenotype(genes)
+		print(genes)
+		model = p.map_genotype_to_phenotype(genes)
+		solution.phenotype = model
 
-	if model:
-		model.summary()
-	else:
-		print('None')
+		if model:
+			#model.summary()
+			p.evaluate(solution, 1)
+		#else:
+		#	print('None')
