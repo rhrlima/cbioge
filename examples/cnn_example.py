@@ -6,7 +6,7 @@ from keras.layers import *
 from keras.models import Sequential, model_from_json
 from keras.utils import np_utils
 
-file = '../datasets/cifar-10/cifar-10.pickle'
+file = '../datasets/cifar-100/cifar-100.pickle'
 
 with open(file, 'rb') as f:
 	data = pickle.load(f)
@@ -19,13 +19,6 @@ y_test  = data['test_labels']
 input_shape = data['input_shape']
 num_classes = data['num_classes']
 del data
-
-print(input_shape)
-print(x_train.shape)
-#x_train = x_train.reshape((-1,)+input_shape)
-#x_valid = x_valid.reshape((-1,)+input_shape)
-#x_test = x_test.reshape((-1,)+input_shape)
-#print(x_train.shape)
 
 y_train = np_utils.to_categorical(y_train, num_classes)
 y_valid = np_utils.to_categorical(y_valid, num_classes)
@@ -43,7 +36,7 @@ model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(num_classes, activation='softmax'))
 
 model.summary()
 

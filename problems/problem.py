@@ -14,7 +14,7 @@ from keras.utils import np_utils
 
 #label first
 from keras import backend as K
-K.set_image_dim_ordering('th')
+#K.set_image_dim_ordering('th')
 
 
 DEBUG = False
@@ -63,12 +63,9 @@ class CnnProblem(BaseProblem):
 
 			del temp
 
-		self.x_train = self.x_train.reshape(
-			(self.x_train.shape[0],)+self.input_shape)
-		self.x_valid = self.x_valid.reshape(
-			(self.x_valid.shape[0],)+self.input_shape)
-		self.x_test = self.x_test.reshape(
-			(self.x_test.shape[0],)+self.input_shape)
+		self.x_train = self.x_train.reshape((-1,)+self.input_shape)
+		self.x_valid = self.x_valid.reshape((-1,)+self.input_shape)
+		self.x_test = self.x_test.reshape((-1,)+self.input_shape)
 
 		self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
 		self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
@@ -168,15 +165,15 @@ class CnnProblem(BaseProblem):
 			optimizer='adam', 
 			metrics=['accuracy']
 		)
-		# model.fit(
-		# 	self.x_train, 
-		# 	self.y_train, 
-		# 	batch_size=self.batch_size, 
-		# 	epochs=self.epochs, 
-		# 	verbose=verbose
-		# )
+		model.fit(
+			self.x_train, 
+			self.y_train, 
+			batch_size=self.batch_size, 
+			epochs=self.epochs, 
+			verbose=verbose
+		)
 
-		score = [0, 1]#model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+		score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 		
 		# max the accuracy (score[1]) min the loss (score[0])
 		fitness = score[1] - score[0]
