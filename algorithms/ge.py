@@ -71,7 +71,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution)
+			solution.fitness = problem.evaluate(solution, DEBUG)
 		solution.evaluated = True
 
 

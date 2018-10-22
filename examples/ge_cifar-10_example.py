@@ -6,7 +6,7 @@ from grammars import grammar
 from problems import problem
 
 # dataset and grammar
-pickle_file = '../datasets/mnist/mnist.pickle'
+pickle_file = '../datasets/cifar-10/cifar-10.pickle'
 grammar_file = '../grammars/cnn.bnf'
 
 # read grammar and setup parser
