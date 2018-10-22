@@ -2,3 +2,5 @@
 documento/
 *.pickle
 *.zip
+*tar.gz
+*.csv
