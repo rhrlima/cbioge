@@ -4,11 +4,13 @@ import os
 import pickle
 import zipfile
 
-root_folder = 'datasets/fashion-mnist/'
+root_folder = ''
 train_file = 'fashion-mnist_train'
 test_file  = 'fashion-mnist_test'
 pickle_file = 'fashion-mnist.pickle'
 
+image_size = 28
+num_classes = 10
 
 def maybe_extract(zip_file):
 	zip_file = zip_file + '.csv.zip'
@@ -38,7 +40,7 @@ def load_dataset_from_csv(file, min_images=None, force=False):
 
 		dataset = np.asarray(dataset, dtype=np.float32)
 		labels = np.asarray(labels, dtype=np.int32)
-		dataset = dataset.reshape(-1, 28, 28)
+		dataset = dataset.reshape(-1, image_size, image_size)
 		print('dataset ', dataset.shape)
 		print('labels ', labels.shape)
 		print('mean ', np.mean(dataset))
@@ -86,6 +88,8 @@ with open(pickle_file, 'wb') as f:
 		'valid_labels': valid_labels, 
 		'test_dataset': test_dataset, 
 		'test_labels': test_labels, 
+		'input_shape': (image_size, image_size, 1), 
+		'num_classes': num_classes, 
 	}
 	pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
 stat_info = os.stat(pickle_file)

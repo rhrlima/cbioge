@@ -6,6 +6,10 @@ from keras.layers import *
 from keras.models import Sequential, model_from_json
 from keras.utils import np_utils
 
+#file = '../datasets/mnist/mnist.pickle'
+#file = '../datasets/notmnist/notMNIST.pickle'
+#file = '../datasets/fashion-mnist/fashion-mnist.pickle'
+#file = '../datasets/cifar-10/cifar-10.pickle'
 file = '../datasets/cifar-100/cifar-100.pickle'
 
 with open(file, 'rb') as f:
@@ -19,6 +23,10 @@ y_test  = data['test_labels']
 input_shape = data['input_shape']
 num_classes = data['num_classes']
 del data
+
+x_train = x_train.reshape((-1,)+input_shape)
+x_valid = x_valid.reshape((-1,)+input_shape)
+x_test = x_test.reshape((-1,)+input_shape)
 
 y_train = np_utils.to_categorical(y_train, num_classes)
 y_valid = np_utils.to_categorical(y_valid, num_classes)

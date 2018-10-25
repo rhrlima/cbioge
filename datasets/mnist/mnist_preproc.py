@@ -4,7 +4,7 @@ import os
 import pickle
 import zipfile
 
-root_folder = 'datasets/mnist/'
+root_folder = ''
 
 train_file = 'mnist_train'
 test_file  = 'mnist_test'
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 			'valid_labels': valid_labels, 
 			'test_dataset': test_dataset, 
 			'test_labels': test_labels, 
-			'input_shape': (1, 28, 28), 
+			'input_shape': (28, 28, 1), 
 			'num_classes': 10
 		}
 		pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)

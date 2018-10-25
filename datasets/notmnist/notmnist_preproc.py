@@ -6,7 +6,7 @@ import pickle
 
 num_classes = 10
 image_size = 28
-root = 'dataset'
+root = ''
 train_folder = 'notMNIST_large'
 test_folder = 'notMNIST_small'
 
@@ -162,6 +162,8 @@ try:
 		'valid_labels': valid_labels,
 		'test_dataset': test_dataset,
 		'test_labels': test_labels,
+		'input_shape': (image_size, image_size, 1),
+		'num_classes': num_classes,
 	}
 	pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
 	f.close()

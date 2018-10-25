@@ -12,12 +12,11 @@ from keras import layers
 from keras.models import Sequential, model_from_json
 from keras.utils import np_utils
 
-#label first
-from keras import backend as K
+# MNIST label first
+#from keras import backend as K
 #K.set_image_dim_ordering('th')
 
-
-DEBUG = False
+DEBUG = True
 
 
 class BaseProblem:
@@ -44,6 +43,9 @@ class CnnProblem(BaseProblem):
 	batch_size = 128
 	epochs = 1
 
+	loss = 'categorical_crossentropy' # add to grammar
+	optimizer = 'adam' # add to grammar
+	metrics = ['accuracy']
 
 	def load_dataset_from_pickle(self, pickle_file):
 		with open(pickle_file, 'rb') as f:
@@ -144,9 +146,11 @@ class CnnProblem(BaseProblem):
 
 		try:
 			model = model_from_json(json.dumps(model))
-		except Exception:
-			if DEBUG: print('[mapping] invalid model from solution: {}'.format(
-				solution.genotype))
+		except (Exception, ValueError) as e:
+			if DEBUG:
+				print(e)
+				print('[mapping] invalid model from solution: {}'.format(
+				genotype))
 			return None
 
 		return model
@@ -160,23 +164,29 @@ class CnnProblem(BaseProblem):
 
 		solution.phenotype = model
 		
-		model.compile(
-			loss='categorical_crossentropy', 
-			optimizer='adam', 
-			metrics=['accuracy']
-		)
-		model.fit(
-			self.x_train, 
-			self.y_train, 
-			batch_size=self.batch_size, 
-			epochs=self.epochs, 
-			verbose=verbose
-		)
+		try:
+			model.compile(
+				loss=self.loss, 
+				optimizer=self.optimizer, 
+				metrics=self.metrics
+			)
+			model.fit(
+				self.x_train, 
+				self.y_train, 
+				batch_size=self.batch_size, 
+				epochs=self.epochs, 
+				verbose=verbose
+			)
 
-		score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+		except Exception as e:
+			if DEBUG:
+				print(e)
+				print('[evaluation] invalid model from solution: {}'.format(
+					solution.genotype))
+			return -1
 		
-		# max the accuracy (score[1]) min the loss (score[0])
-		fitness = score[1] - score[0]
+		fitness = score[1]
 		
 		solution.data['loss'] = score[0]
 		solution.data['acc']= score[1]
@@ -184,12 +194,13 @@ class CnnProblem(BaseProblem):
 		if verbose == 1: print('loss: {}\taccuracy: {}'.format(
 			score[0], 
 			score[1]))
+
 		return fitness
 
 
 if __name__ == '__main__':
 
-	DEBUG = False
+	DEBUG = True
 	print('testing mode')
 
 	import numpy as np
@@ -199,16 +210,17 @@ if __name__ == '__main__':
 	p = CnnProblem()
 	p.load_dataset_from_pickle('../datasets/mnist/mnist.pickle')
 
-	while True:
-		genes = np.random.randint(0, 255, np.random.randint(1, 10))
-		solution = ge.Solution(genes)
+	#while True:
+	genes = [179,  92,  14, 106,  71, 188,  20]
+	#np.random.randint(0, 255, np.random.randint(1, 10))
+	solution = ge.Solution(genes)
 
-		print(genes)
-		model = p.map_genotype_to_phenotype(genes)
-		solution.phenotype = model
+	print(genes)
+	model = p.map_genotype_to_phenotype(genes)
+	solution.phenotype = model
 
-		if model:
-			#model.summary()
-			p.evaluate(solution, 1)
-		#else:
-		#	print('None')
+	if model:
+		#model.summary()
+		p.evaluate(solution, 1)
+	#else:
+	#	print('None')
