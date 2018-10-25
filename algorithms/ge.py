@@ -7,6 +7,7 @@ DEBUG = False
 rand = np.random
 
 SEED = None
+VERBOSE = False
 
 POP_SIZE = 5
 MIN_GENES = 1
@@ -33,7 +34,6 @@ class Solution:
 	evaluated = False
 
 	data = {}
-
 
 	def __init__(self, genes):
 		self.genotype = genes
@@ -71,7 +71,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution, DEBUG)
+			solution.fitness = problem.evaluate(solution, VERBOSE)
 		solution.evaluated = True
 
 
@@ -136,11 +136,14 @@ def duplicate(offspring, prob):
 def replace(population, offspring):
 	population += offspring
 	population.sort(key=lambda x: x.fitness, reverse=not MINIMIZE)
+	if DEBUG:
+		for p in population:
+			print(p.fitness, p.phenotype)
 	for _ in range(len(offspring)):
 		population.pop()
 
 
-def execute(verbose=False):
+def execute():
 	
 	np.random.seed(SEED)
 
@@ -151,12 +154,12 @@ def execute(verbose=False):
 
 	evals = len(population)
 
-	if verbose: print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-			time.strftime('%x %X'), 
-			evals, MAX_EVALS, 
-			population[0].genotype, 
-			population[0].fitness)
-		)
+	print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+		time.strftime('%x %X'), 
+		evals, MAX_EVALS, 
+		population[0].genotype, 
+		population[0].fitness)
+	)
 
 	while evals < MAX_EVALS:
 
@@ -176,7 +179,7 @@ def execute(verbose=False):
 
 		evals += len(offspring)
 
-		if verbose: print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 			time.strftime('%x %X'), 
 			evals, MAX_EVALS, 
 			population[0].genotype, 
