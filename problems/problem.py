@@ -7,6 +7,7 @@ import json
 import numpy as np
 import pickle
 import re
+import copy
 
 from keras import layers
 from keras.models import Sequential, model_from_json
@@ -182,11 +183,12 @@ class CnnProblem(BaseProblem):
 			if verbose: print('[validation]')
 			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 
-			fitness = score[1]
+			fitness = copy.deepcopy(score[1])
 		
-			#solution.data['loss'] = score[0]
-			#solution.data['acc']  = score[1]
-			#solution.fitness 	  = score[1]
+			solution.data['loss'] = copy.deepcopy(score[0])
+			solution.data['acc']  = copy.deepcopy(score[1])
+			
+			#solution.fitness 	  = score[1] # ?
 
 			#print('EVAL', fitness, solution.data['acc'])
 

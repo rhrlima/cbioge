@@ -30,6 +30,8 @@ class Solution:
 	phenotype = None
 	fitness = None
 	
+	data = {}
+
 	evaluated = False
 
 	def __init__(self, genes):

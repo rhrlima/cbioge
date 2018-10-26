@@ -1,6 +1,15 @@
 */__pycache__/
-documento/
 *.pickle
 *.zip
 *tar.gz
 *.csv
+*.aux
+*.bbl
+*.blg
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc

@@ -4,6 +4,7 @@ import pickle
 from keras.datasets import mnist
 from keras.layers import *
 from keras.models import Sequential, model_from_json
+#from keras.callbacks import History
 from keras.utils import np_utils
 
 #file = '../datasets/mnist/mnist.pickle'
@@ -50,7 +51,10 @@ model.summary()
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1)
+#hist = History()
+hist = model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1)
+
+print('train', hist.history['acc'])
 
 score = model.evaluate(x_valid, y_valid, verbose=1)
 print('validation\nloss: {}\taccuracy: {}'.format(score[0], score[1]))
