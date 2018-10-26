@@ -7,11 +7,11 @@
 [X] adicionar input shape e num classes no .pickle
 [X] implementar operadores prune e duplication
 [ ] otimizar gramatica (substituir regras com 1 produção)
-[-] paralelizar avaliações
+[ ] paralelizar avaliações
 [ ] adicionar optimizer na gramatica
 [ ] adicionar loss na gramatica
-[ ] adicionar epochs na gramatica
+[?] adicionar epochs na gramatica
 [ ] criar validações nos métodos (GE e demais)
 [ ] implementar gp cartesiana
 [X] adicionar timestamp
-[ ] remover loss do fitness
+[X] remover loss do fitness
