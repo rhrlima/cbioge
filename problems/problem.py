@@ -159,10 +159,9 @@ class CnnProblem(BaseProblem):
 	def evaluate(self, solution, verbose=0):
 
 		model = self.map_genotype_to_phenotype(solution.genotype)
+		solution.phenotype = model
 
 		if not model: return -1
-
-		solution.phenotype = model
 		
 		try:
 			model.compile(
@@ -170,6 +169,8 @@ class CnnProblem(BaseProblem):
 				optimizer=self.optimizer, 
 				metrics=self.metrics
 			)
+			# train
+			if verbose: print('[training]')
 			model.fit(
 				self.x_train, 
 				self.y_train, 
@@ -177,25 +178,30 @@ class CnnProblem(BaseProblem):
 				epochs=self.epochs, 
 				verbose=verbose
 			)
-
+			# valid
+			if verbose: print('[validation]')
 			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
+
+			fitness = score[1]
+		
+			#solution.data['loss'] = score[0]
+			#solution.data['acc']  = score[1]
+			#solution.fitness 	  = score[1]
+
+			#print('EVAL', fitness, solution.data['acc'])
+
+			if verbose: print('loss: {}\taccuracy: {}'.format(
+				score[0], 
+				score[1]))
+
+			return fitness
+
 		except Exception as e:
 			if DEBUG:
 				print(e)
 				print('[evaluation] invalid model from solution: {}'.format(
 					solution.genotype))
 			return -1
-		
-		fitness = score[1]
-		
-		solution.data['loss'] = score[0]
-		solution.data['acc']= score[1]
-
-		if verbose == 1: print('loss: {}\taccuracy: {}'.format(
-			score[0], 
-			score[1]))
-
-		return fitness
 
 
 if __name__ == '__main__':

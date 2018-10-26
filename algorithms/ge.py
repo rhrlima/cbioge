@@ -7,7 +7,6 @@ DEBUG = False
 rand = np.random
 
 SEED = None
-VERBOSE = False
 
 POP_SIZE = 5
 MIN_GENES = 1
@@ -33,12 +32,10 @@ class Solution:
 	
 	evaluated = False
 
-	data = {}
-
 	def __init__(self, genes):
 		self.genotype = genes
 
-	def copy(self):
+	def copy(self): #shallow
 		return Solution(self.genotype[:])
 
 	def __str__(self):
@@ -71,7 +68,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution, VERBOSE)
+			solution.fitness = problem.evaluate(solution)
 		solution.evaluated = True
 
 
@@ -92,6 +89,7 @@ def selection(population):
 
 
 def crossover(parents, prob):
+	# testing, returing one child
 	off1 = parents[0].copy()
 	off2 = parents[1].copy()
 	if rand.rand() < prob:
@@ -100,8 +98,8 @@ def crossover(parents, prob):
 		min_ = min(len(p1), len(p2))
 		cut = rand.randint(0, min_)
 		off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
-		off2.genotype = np.concatenate((p2[:cut], p1[cut:]))
-	return [off1, off2]
+		#off2.genotype = np.concatenate((p2[:cut], p1[cut:]))
+	return [off1]#, off2]
 
 
 def mutate(offspring, prob):
@@ -134,11 +132,10 @@ def duplicate(offspring, prob):
 
 
 def replace(population, offspring):
+	
 	population += offspring
 	population.sort(key=lambda x: x.fitness, reverse=not MINIMIZE)
-	if DEBUG:
-		for p in population:
-			print(p.fitness, p.phenotype)
+
 	for _ in range(len(offspring)):
 		population.pop()
 
@@ -153,6 +150,10 @@ def execute():
 	population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
 
 	evals = len(population)
+
+	if DEBUG:
+		for i, p in enumerate(population):
+			print(i, p.fitness, p)
 
 	print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 		time.strftime('%x %X'), 
@@ -175,9 +176,13 @@ def execute():
 
 		evaluate_population(offspring)
 
-		replace(offspring, population)
+		replace(population, offspring)
 
 		evals += len(offspring)
+
+		if DEBUG:
+			for i, p in enumerate(population):
+				print(i, p.fitness, p)
 
 		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 			time.strftime('%x %X'), 
@@ -186,5 +191,6 @@ def execute():
 			population[0].fitness)
 		)
 
+	#population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
 	return population[0]
 

@@ -5,7 +5,6 @@ from algorithms import ge
 from grammars import grammar
 from problems import problem
 
-DEBUG = False
 problem.DEBUG = False
 ge.DEBUG = False
 
@@ -23,11 +22,10 @@ ge.problem = my_problem
 
 # problem parameters
 my_problem.batch_size = 128
-my_problem.epochs = 1
+my_problem.epochs = 5
 
 # changing GE default parameters
 #ge.SEED = 42
-ge.VERBOSE = True
 ge.POP_SIZE = 20
 ge.MAX_EVALS = 400
 
@@ -47,12 +45,12 @@ print('--running--')
 best = ge.execute()
 
 print('--best solution--')
-print(best, best.data['loss'], best.data['acc'])
+print(best.fitness, best)
 best.phenotype.summary()
 
 print('--testing--')
 score = best.phenotype.evaluate(
 	my_problem.x_test, 
 	my_problem.y_test, 
-	verbose=1)
+	verbose=0)
 print('loss: {}\taccuracy: {}'.format(score[0], score[1]))

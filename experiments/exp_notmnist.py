@@ -5,12 +5,11 @@ from algorithms import ge
 from grammars import grammar
 from problems import problem
 
-DEBUG = False
 problem.DEBUG = False
 ge.DEBUG = False
 
 # dataset and grammar
-pickle_file = '../datasets/notmnist/notMNIST.pickle'
+pickle_file = '../datasets/notmnist/notmnist.pickle'
 grammar_file = '../grammars/cnn.bnf'
 
 # read grammar and setup parser
@@ -23,11 +22,10 @@ ge.problem = my_problem
 
 # problem parameters
 my_problem.batch_size = 128
-my_problem.epochs = 1
+my_problem.epochs = 5
 
 # changing GE default parameters
 #ge.SEED = 42
-ge.VERBOSE = True
 ge.POP_SIZE = 20
 ge.MAX_EVALS = 400
 
@@ -46,20 +44,13 @@ print('DUPL', ge.DUPL_RATE)
 print('--running--')
 best = ge.execute()
 
-print(best.genotype)
-print(best.phenotype)
-print(best.fitness)
-if not best.phenotype:
-	print('invalid solution')
-	exit()
-
 print('--best solution--')
-print(best, best.data['loss'], best.data['acc'])
+print(best.fitness, best)
 best.phenotype.summary()
 
 print('--testing--')
 score = best.phenotype.evaluate(
 	my_problem.x_test, 
 	my_problem.y_test, 
-	verbose=1)
+	verbose=0)
 print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
