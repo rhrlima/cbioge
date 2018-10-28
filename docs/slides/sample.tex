@@ -35,7 +35,7 @@
 
 \title{Genetic Programming Approach to Deep Neuroevolution}
 
-\author{Ricardo H. R. de Lima \\ Aurora Pozo}
+\author{Ricardo H. R. de Lima\\ Aurora Pozo}
 
 \date{\today}
 
@@ -314,10 +314,15 @@
 			The MNIST dataset has 50000 for training and 10000 for validation and test. The images are 28x28 greyscale, 10 classes.
 			
 			\begin{table}
-				\begin{tabular}{c|c|c|c|c|c|c|c}
+				\begin{tabular}{c|c|c|c|c}
 					\hline
-					   -    & Run 1 & Run 2 & Run 3 & Run 4 & Run 5 & Mean & Test\\ \hline
-					Fitness &   0   &   0   &   0   &   0   &   0   &  0   & 0\\ \hline
+					Run  &     Solution      & Params & Validation & Test  \\ \hline
+					 1   & [114  22 204 177] & 506,058 &   0,989    & 0,990 \\
+					 2   &    [ 4 99 69]     & 181,194 &   0,991    & 0,993 \\
+					 3   &      too big      & 87,281  &   0,990    & 0,990 \\
+					 4   &   [213 121 215]   & 401,226 &   0,990    & 0,992 \\
+					 5   &   [ 37 141 108]   & 31,841  &   0,992    & 0,993 \\
+					Mean &         -         & 241,520 &   0,990    & 0,992 \\ \hline
 				\end{tabular}
 			\end{table}
 
@@ -329,10 +334,15 @@
 			The MNIST dataset has 50000 for training and 10000 for validation and test. The images are 28x28 greyscale, 10 classes.
 			
 			\begin{table}
-				\begin{tabular}{c|c|c|c}
+				\begin{tabular}{c|c|c|c|c}
 					\hline
-					Run & Solution & Num Params & Test \\ \hline
-					Mean & - & 0 & 0 \\ \hline
+					Run  &         Solution          & Params  & Validation & Test   \\ \hline
+					 1   &       [217  21 150]       & 318,41  &   0,901    & 0,951  \\
+					 2   &         [ 51 193]         & 360,138 &   0,899    & 0,951  \\
+					 3   &          [63 85]          & 360,138 &   0,895    & 0,950  \\
+					 4   &          too big          & 360,138 &   0,897    & 0,948  \\
+					 5   & [225 123 209 253  84 205] & 360,138 &   0,897    & 0,949  \\
+					Mean &             -             & 351,792 &   0,898    & 0,950  \\ \hline
 				\end{tabular}
 			\end{table}
 		
@@ -342,6 +352,19 @@
 			\frametitle{Experiments: fashion MNIST}
 			
 			The MNIST dataset has 50000 for training and 10000 for validation and test. The images are 28x28 greyscale, 10 classes.
+			
+			\begin{table}
+				\begin{tabular}{c|c|c|c|c}
+					\hline
+					Run  &   Solution    &  Params  & Validation & Test  \\ \hline
+					 1   &   [135  34]   & 406,218  &   0,918    & 0,917 \\
+					 2   & [  6 127  17] & 1731,786 &   0,914    & 0,915 \\
+					 3   &    too big    & 361,354  &   0,917    & 0,920 \\
+					 4   &   [204  28]   & 599,754  &   0,915    & 0,914 \\
+					 5   &   [189 220]   & 406,218  &   0,917    & 0,918 \\
+					Mean &       -       & 701,066  &   0,916    & 0,917 \\ \hline
+				\end{tabular}
+			\end{table}
 		
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
@@ -349,6 +372,19 @@
 			\frametitle{Experiments: CIFAR 10}
 			
 			The MNIST dataset has 40000 for training and 10000 for validation and test. The images are 32x32 RGB, 10 classes.
+			
+			\begin{table}
+				\begin{tabular}{c|c|c|c|c}
+					\hline
+					Run  &         Solution          & Params  & Validation & Test  \\ \hline
+					 1   &   [235 220 235  13 210]   & 206,282 &   0,649    & 0,636 \\
+					 2   & [ 63 209 120 138 130 117] & 439,946 &   0,714    & 0,708 \\
+					 3   &         [166 165]         & 426,506 &   0,696    & 0,690 \\
+					 4   &         [ 94 117]         & 426,506 &   0,693    & 0,692 \\
+					 5   &         [ 34 171]         & 426,506 &   0,694    & 0,690 \\
+					Mean &             -             & 385,149 &   0,689    & 0,683 \\ \hline
+				\end{tabular}
+			\end{table}
 		
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
@@ -356,6 +392,19 @@
 			\frametitle{Experiments: CIFAR 100}
 			
 			The MNIST dataset has 50000 for training and 10000 for validation and test. The images are 32x32 RGB, 100 classes.
+		
+			\begin{table}
+				\begin{tabular}{c|c|c|c|c}
+					\hline
+					Run  &                 Solution                  &  Params  & Validation & Test  \\ \hline
+					 1   & [ 92  43 136 151 204  85 193  47 185 221] & 159,332  &   0,322    & 0,329 \\
+					 2   &     [ 59   8 227  77 117  91 178 173]     & 318,564  &   0,350    & 0,350 \\
+					 3   &             [219 118 138  67]             & 5037,092 &   0,340    & 0,336 \\
+					 4   &                  too big                  & 1441,892 &   0,334    & 0,325 \\
+					 5   &                  [13 37]                  & 318,564  &   0,325    & 0,318 \\
+					Mean &                     -                     & 1455,089 &   0,334    & 0,332 \\ \hline
+				\end{tabular}
+			\end{table}
 		
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
