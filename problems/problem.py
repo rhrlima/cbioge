@@ -13,11 +13,8 @@ from keras import layers
 from keras.models import Sequential, model_from_json
 from keras.utils import np_utils
 
-# MNIST label first
-#from keras import backend as K
-#K.set_image_dim_ordering('th')
 
-DEBUG = True
+DEBUG = False
 
 
 class BaseProblem:
@@ -172,7 +169,7 @@ class CnnProblem(BaseProblem):
 			)
 			# train
 			if verbose: print('[training]')
-			model.fit(
+			hist = model.fit(
 				self.x_train, 
 				self.y_train, 
 				batch_size=self.batch_size, 
@@ -183,11 +180,13 @@ class CnnProblem(BaseProblem):
 			if verbose: print('[validation]')
 			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 
-			fitness = copy.deepcopy(score[1])
+			fitness = score[1]#copy.deepcopy(score[1])
 		
-			solution.data['loss'] = copy.deepcopy(score[0])
-			solution.data['acc']  = copy.deepcopy(score[1])
-			
+			#solution.data['t_loss'] = copy.deepcopy(hist.history['loss'])
+			#solution.data['t_acc']  = copy.deepcopy(hist.history['acc'])
+			#solution.data['loss'] = copy.deepcopy(score[0])
+			#solution.data['acc']  = copy.deepcopy(score[1])
+			#solution.fitness = fitness
 			#solution.fitness 	  = score[1] # ?
 
 			#print('EVAL', fitness, solution.data['acc'])

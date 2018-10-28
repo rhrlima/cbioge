@@ -1,0 +1,429 @@
+
+########################################################################
+#      Date:           Fri Oct 26 13:23:08 PDT 2018
+#    Job ID:           189258.c009
+#      User:           u15089
+# Resources:           neednodes=1:ppn=2,nodes=1:ppn=2,vmem=92gb,walltime=23:00:00
+########################################################################
+
+--config--
+DATASET ../datasets/cifar-10/cifar-10.pickle
+GRAMMAR ../grammars/cnn.bnf
+SEED None
+POP 20
+EVALS 400
+CROSS 0.8
+MUT 0.1
+PRUN 0.1
+DUPL 0.1
+--running--
+<10/26/18 13:42:23> evals: 20/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:43:01> evals: 21/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:43:58> evals: 22/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:44:57> evals: 23/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:46:10> evals: 24/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:47:16> evals: 25/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:48:28> evals: 26/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:49:10> evals: 27/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:49:10> evals: 28/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:50:09> evals: 29/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:50:55> evals: 30/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:52:21> evals: 31/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:53:51> evals: 32/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:54:27> evals: 33/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:55:59> evals: 34/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:55:59> evals: 35/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:56:41> evals: 36/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:58:12> evals: 37/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 13:59:26> evals: 38/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:00:17> evals: 39/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:01:10> evals: 40/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:02:41> evals: 41/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:04:06> evals: 42/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:05:38> evals: 43/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:06:23> evals: 44/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:07:55> evals: 45/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:09:02> evals: 46/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:10:34> evals: 47/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:12:19> evals: 48/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:13:33> evals: 49/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:15:30> evals: 50/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:17:03> evals: 51/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:17:03> evals: 52/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:18:32> evals: 53/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:20:05> evals: 54/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:21:39> evals: 55/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:22:56> evals: 56/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:23:51> evals: 57/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:25:26> evals: 58/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:27:01> evals: 59/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:28:15> evals: 60/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:28:15> evals: 61/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:29:32> evals: 62/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:30:04> evals: 63/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:31:22> evals: 64/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:32:57> evals: 65/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:34:33> evals: 66/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:36:08> evals: 67/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:37:42> evals: 68/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:38:54> evals: 69/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:40:09> evals: 70/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:41:44> evals: 71/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:42:57> evals: 72/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:44:33> evals: 73/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:45:49> evals: 74/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:47:25> evals: 75/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:49:01> evals: 76/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:50:35> evals: 77/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:51:55> evals: 78/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:53:29> evals: 79/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:55:08> evals: 80/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:56:44> evals: 81/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 14:58:30> evals: 82/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:00:12> evals: 83/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:00:46> evals: 84/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:02:01> evals: 85/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:03:14> evals: 86/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:05:01> evals: 87/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:06:06> evals: 88/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:07:42> evals: 89/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:09:21> evals: 90/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:10:42> evals: 91/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:11:16> evals: 92/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:12:53> evals: 93/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:14:40> evals: 94/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:15:12> evals: 95/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:16:47> evals: 96/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:16:47> evals: 97/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:18:36> evals: 98/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:20:16> evals: 99/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:22:06> evals: 100/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:23:30> evals: 101/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:25:09> evals: 102/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:25:09> evals: 103/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:26:53> evals: 104/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:28:44> evals: 105/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:29:29> evals: 106/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.666
+<10/26/18 15:31:21> evals: 107/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:33:11> evals: 108/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:35:03> evals: 109/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:36:49> evals: 110/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:38:39> evals: 111/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:40:28> evals: 112/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:42:18> evals: 113/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:43:59> evals: 114/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:46:47> evals: 115/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:48:34> evals: 116/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:50:28> evals: 117/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:52:19> evals: 118/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:54:04> evals: 119/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:55:56> evals: 120/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:57:49> evals: 121/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 15:59:55> evals: 122/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:01:51> evals: 123/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:03:48> evals: 124/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:05:44> evals: 125/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:07:06> evals: 126/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:09:00> evals: 127/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:10:48> evals: 128/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:12:34> evals: 129/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:14:29> evals: 130/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:15:59> evals: 131/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:17:58> evals: 132/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:19:56> evals: 133/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:22:49> evals: 134/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:24:38> evals: 135/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6697
+<10/26/18 16:26:35> evals: 136/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:28:32> evals: 137/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:30:30> evals: 138/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:32:22> evals: 139/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:34:18> evals: 140/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:36:37> evals: 141/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:38:34> evals: 142/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:40:00> evals: 143/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:41:57> evals: 144/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:43:58> evals: 145/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:45:55> evals: 146/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:47:56> evals: 147/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:50:49> evals: 148/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:52:39> evals: 149/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:54:36> evals: 150/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:56:35> evals: 151/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 16:58:25> evals: 152/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 17:00:21> evals: 153/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 17:02:20> evals: 154/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 17:04:29> evals: 155/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6703
+<10/26/18 17:06:25> evals: 156/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:08:22> evals: 157/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:10:28> evals: 158/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:12:27> evals: 159/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:14:26> evals: 160/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:16:27> evals: 161/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:18:19> evals: 162/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:20:17> evals: 163/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:21:54> evals: 164/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6756
+<10/26/18 17:23:51> evals: 165/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:25:48> evals: 166/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:27:42> evals: 167/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:29:48> evals: 168/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:31:47> evals: 169/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:33:41> evals: 170/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:35:26> evals: 171/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:36:54> evals: 172/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:38:52> evals: 173/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:40:54> evals: 174/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:43:03> evals: 175/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:45:05> evals: 176/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:47:07> evals: 177/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:49:08> evals: 178/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:51:06> evals: 179/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:53:09> evals: 180/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:55:13> evals: 181/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:57:04> evals: 182/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:59:07> evals: 183/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 17:59:53> evals: 184/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 18:01:58> evals: 185/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 18:03:51> evals: 186/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 18:05:53> evals: 187/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6782
+<10/26/18 18:07:58> evals: 188/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:10:04> evals: 189/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:12:08> evals: 190/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:14:16> evals: 191/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:16:27> evals: 192/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:18:23> evals: 193/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:20:25> evals: 194/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:22:34> evals: 195/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:24:41> evals: 196/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:26:12> evals: 197/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:28:27> evals: 198/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:30:35> evals: 199/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:32:37> evals: 200/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:34:45> evals: 201/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:36:57> evals: 202/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:38:58> evals: 203/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:40:56> evals: 204/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:42:21> evals: 205/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:44:29> evals: 206/400 	best so far: [ 94 117 143 148 100   0]	fitness: 0.6792
+<10/26/18 18:46:53> evals: 207/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:49:02> evals: 208/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:49:02> evals: 209/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:51:11> evals: 210/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:53:12> evals: 211/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:55:18> evals: 212/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:57:43> evals: 213/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 18:59:54> evals: 214/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:02:15> evals: 215/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:04:25> evals: 216/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:06:10> evals: 217/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:08:39> evals: 218/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:10:52> evals: 219/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:12:57> evals: 220/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:15:05> evals: 221/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:17:19> evals: 222/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:19:45> evals: 223/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:21:58> evals: 224/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:24:02> evals: 225/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:26:06> evals: 226/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:28:03> evals: 227/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:30:06> evals: 228/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:32:21> evals: 229/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:34:32> evals: 230/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:36:58> evals: 231/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:39:11> evals: 232/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:41:25> evals: 233/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:43:35> evals: 234/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:45:49> evals: 235/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:47:53> evals: 236/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:50:17> evals: 237/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:52:30> evals: 238/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:54:55> evals: 239/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:56:36> evals: 240/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 19:58:43> evals: 241/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:00:57> evals: 242/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:03:08> evals: 243/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:05:24> evals: 244/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:07:36> evals: 245/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:09:41> evals: 246/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:12:10> evals: 247/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:14:23> evals: 248/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:16:30> evals: 249/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:18:46> evals: 250/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:21:02> evals: 251/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:22:54> evals: 252/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:25:09> evals: 253/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:27:22> evals: 254/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:29:40> evals: 255/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:32:08> evals: 256/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:34:27> evals: 257/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:36:34> evals: 258/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:38:51> evals: 259/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:41:13> evals: 260/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:43:17> evals: 261/400 	best so far: [ 94 117]	fitness: 0.6805
+<10/26/18 20:45:48> evals: 262/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:48:11> evals: 263/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:50:44> evals: 264/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:53:01> evals: 265/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:55:08> evals: 266/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:57:22> evals: 267/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 20:59:15> evals: 268/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:01:19> evals: 269/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:03:28> evals: 270/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:05:57> evals: 271/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:08:17> evals: 272/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:10:38> evals: 273/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:12:50> evals: 274/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:15:18> evals: 275/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:17:41> evals: 276/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:20:25> evals: 277/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:22:56> evals: 278/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:25:12> evals: 279/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:27:40> evals: 280/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:29:58> evals: 281/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:31:52> evals: 282/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:34:27> evals: 283/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:37:02> evals: 284/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:39:24> evals: 285/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:41:23> evals: 286/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:43:34> evals: 287/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:45:48> evals: 288/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:47:59> evals: 289/400 	best so far: [ 94 117]	fitness: 0.6849
+<10/26/18 21:50:32> evals: 290/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 21:52:43> evals: 291/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 21:55:21> evals: 292/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 21:57:43> evals: 293/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:00:20> evals: 294/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:02:42> evals: 295/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:05:24> evals: 296/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:08:01> evals: 297/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:10:03> evals: 298/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:12:45> evals: 299/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:15:09> evals: 300/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:17:12> evals: 301/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:19:51> evals: 302/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:20:52> evals: 303/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:23:27> evals: 304/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:26:03> evals: 305/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:28:18> evals: 306/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:30:42> evals: 307/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:33:22> evals: 308/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:34:25> evals: 309/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:36:56> evals: 310/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:39:24> evals: 311/400 	best so far: [ 94 117]	fitness: 0.6856
+<10/26/18 22:41:56> evals: 312/400 	best so far: [ 94 117]	fitness: 0.6877
+<10/26/18 22:44:09> evals: 313/400 	best so far: [ 94 117]	fitness: 0.6877
+<10/26/18 22:46:40> evals: 314/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 22:48:44> evals: 315/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 22:51:18> evals: 316/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 22:53:23> evals: 317/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 22:55:39> evals: 318/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 22:57:43> evals: 319/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:00:00> evals: 320/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:02:17> evals: 321/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:04:20> evals: 322/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:06:59> evals: 323/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:09:40> evals: 324/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:12:17> evals: 325/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:14:57> evals: 326/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:17:39> evals: 327/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:20:13> evals: 328/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:22:30> evals: 329/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:24:35> evals: 330/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:28:11> evals: 331/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:30:45> evals: 332/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:33:20> evals: 333/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:35:52> evals: 334/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:36:57> evals: 335/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:39:31> evals: 336/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:41:26> evals: 337/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:42:33> evals: 338/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:44:37> evals: 339/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:47:10> evals: 340/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:49:46> evals: 341/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:52:20> evals: 342/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:54:25> evals: 343/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:57:11> evals: 344/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/26/18 23:59:59> evals: 345/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:02:44> evals: 346/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:05:28> evals: 347/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:06:40> evals: 348/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:09:10> evals: 349/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:11:15> evals: 350/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:14:01> evals: 351/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:16:35> evals: 352/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:19:18> evals: 353/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:22:04> evals: 354/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:24:52> evals: 355/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:27:27> evals: 356/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:30:08> evals: 357/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:32:55> evals: 358/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:35:40> evals: 359/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:37:46> evals: 360/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:40:22> evals: 361/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:43:02> evals: 362/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:45:51> evals: 363/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:48:39> evals: 364/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:51:11> evals: 365/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:53:53> evals: 366/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:55:44> evals: 367/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 00:57:54> evals: 368/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:00:26> evals: 369/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:02:44> evals: 370/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:05:30> evals: 371/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:08:18> evals: 372/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:11:07> evals: 373/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:13:48> evals: 374/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:16:33> evals: 375/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:19:19> evals: 376/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:22:09> evals: 377/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:24:19> evals: 378/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:26:30> evals: 379/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:29:21> evals: 380/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:31:33> evals: 381/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:34:09> evals: 382/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:35:25> evals: 383/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:38:16> evals: 384/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:40:26> evals: 385/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:43:18> evals: 386/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:46:04> evals: 387/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:48:46> evals: 388/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:51:32> evals: 389/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:53:43> evals: 390/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:55:47> evals: 391/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 01:57:10> evals: 392/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 02:00:00> evals: 393/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 02:02:50> evals: 394/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 02:05:42> evals: 395/400 	best so far: [ 94 117]	fitness: 0.6917
+<10/27/18 02:08:36> evals: 396/400 	best so far: [ 94 117]	fitness: 0.6928
+<10/27/18 02:11:22> evals: 397/400 	best so far: [ 94 117]	fitness: 0.6928
+<10/27/18 02:13:34> evals: 398/400 	best so far: [ 94 117]	fitness: 0.6928
+<10/27/18 02:15:48> evals: 399/400 	best so far: [ 94 117]	fitness: 0.6928
+<10/27/18 02:18:02> evals: 400/400 	best so far: [ 94 117]	fitness: 0.6928
+--best solution--
+0.6928 [ 94 117]
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+conv2d_892 (Conv2D)          (None, 28, 28, 32)        2432      
+_________________________________________________________________
+conv2d_893 (Conv2D)          (None, 26, 26, 64)        18496     
+_________________________________________________________________
+conv2d_894 (Conv2D)          (None, 24, 24, 64)        36928     
+_________________________________________________________________
+dropout_316 (Dropout)        (None, 24, 24, 64)        0         
+_________________________________________________________________
+flatten_387 (Flatten)        (None, 36864)             0         
+_________________________________________________________________
+dense_478 (Dense)            (None, 10)                368650    
+=================================================================
+Total params: 426,506
+Trainable params: 426,506
+Non-trainable params: 0
+_________________________________________________________________
+--testing--
+loss: 0.9024232500076294	accuracy: 0.6921
+
+########################################################################
+# End of output for job 189258.c009
+# Date: Sat Oct 27 02:18:15 PDT 2018
+########################################################################
+
