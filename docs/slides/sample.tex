@@ -278,24 +278,6 @@
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
 		\begin{frame}
-			\frametitle{Approach: GE Parameters}
-			
-			\begin{table}
-				\begin{tabular}{l|c|c}
-					\textbf{Parameter} & \textbf{Method} & \textbf{Value} \\ \hline
-					Population         &        -        &       20       \\ \hline
-					Evaluations        &        -        &      400       \\ \hline
-					Selection          &     Random      &       2        \\ \hline
-					Crossover          &    One point    &      0.8       \\ \hline
-					Mutation           &      Point      &      0.1       \\ \hline
-					Prune              &        -        &      0.1       \\ \hline
-					Duplication        &        -        &      0.1       \\ \hline
-				\end{tabular}
-			\end{table}
-		
-		\end{frame}
-%---------------------------------------------------------------------------------------------------
-		\begin{frame}
 			\frametitle{Tools}
 			\begin{itemize}
 				\item Tensorflow/Theano\\
@@ -307,6 +289,25 @@
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
 	\section{Experiments}
+%---------------------------------------------------------------------------------------------------
+		\begin{frame}
+			\frametitle{Experiments: GE Parameters}
+			
+			\begin{table}
+				\begin{tabular}{l|c|c}
+					\textbf{Parameter} & \textbf{Method} & \textbf{Value} \\ \hline
+					Population         &        -        &       20       \\
+					Evaluations        &        -        &      400       \\
+					Selection          &     Random      &       2        \\
+					Crossover          &    One point    &      0.8       \\
+					Mutation           &      Point      &      0.1       \\
+					Prune              &        -        &      0.1       \\
+					Duplication        &        -        &      0.1       \\
+					Epochs             &        -        &       5        \\ \hline
+				\end{tabular}
+			\end{table}
+		
+		\end{frame}
 %---------------------------------------------------------------------------------------------------
 		\begin{frame}
 			\frametitle{Experiments: MNIST}
@@ -430,21 +431,45 @@
 	\section{Conclusions}
 %---------------------------------------------------------------------------------------------------
 		\begin{frame}
-			\frametitle{Next steps}
+			\frametitle{About the experiments}
 			
 			\begin{itemize}
-				\item Optimize the Grammar
-
-				\item Add other GP algorithms\\
-					\textcolor{ExecusharesGrey}{\small\hspace{1em}Similar work done using Cartesian GP}
-
-				\item Experiments\\
-					\textcolor{ExecusharesGrey}{\small\hspace{1em}Verify efficiency of approach}
-
-				\item Compare with similar approaches\\
-					\textcolor{ExecusharesGrey}{\small\hspace{1em}CIFAR 10-100/MNIST and other well known datasets}
-
+				\item Due to time limitations to execute experiments, each model was run for 5 epochs. Even though, the results for the MNIST datasets were all above 90\% accuracy.
+				
+				\item The CIFAR 100 faced a serious case of overfitting, showing a high accuracy for the training, but a poor performance over the validation and test.
+				
+				\item All experiments could be improved if more time is given.
 			\end{itemize}
+		
+		\end{frame}
+%---------------------------------------------------------------------------------------------------
+		\begin{frame}
+			\frametitle{Next steps: Grammar}
+			
+			Optimize de grammar:
+			\begin{itemize}
+				\item filters
+				\item units
+				\item kernel size
+				\item pool size
+				\item activation
+				\item optimizer
+				\item loss
+			\end{itemize}
+		
+		\end{frame}
+%---------------------------------------------------------------------------------------------------
+		\begin{frame}
+			\frametitle{Next steps: Algorithm}
+			
+			The main issue with GE is dealing with fine tunning. Small changes on the genotype could produce major changes on the phenotype. A similar work of Suganuma 2017. Proposes the use of Cartesian GP to address the design of CNN architectures.
+
+			\begin{itemize}
+				\item Does not face the tunning issue
+				\item simple representation
+				\item flexible
+			\end{itemize}
+		
 		\end{frame}
 %---------------------------------------------------------------------------------------------------
 		\frame{\acknowledgmentpage}

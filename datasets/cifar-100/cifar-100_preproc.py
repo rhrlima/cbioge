@@ -1,11 +1,10 @@
 #https://www.cs.toronto.edu/~kriz/cifar.html
 
-import numpy as np
-import pickle
-
 import matplotlib.pyplot as plt
-
+import numpy as np
 import os
+import pickle
+import zipfile
 
 pickle_file = 'cifar-100.pickle'
 
@@ -32,7 +31,7 @@ def load_dataset_from_file(file, min_images=None, force=False):
 	labels = np.asarray(data[b'fine_labels'], dtype=np.int32)
 
 	del data
-	
+
 	print('dataset ', dataset.shape)
 	print('labels ', labels.shape)
 	print('mean ', np.mean(dataset))
@@ -58,10 +57,10 @@ def rgb2grey(dataset):
 
 if __name__ == '__main__':
 
-	dataset, labels = load_dataset_from_file('train')
+	dataset, labels = load_dataset_from_file('train.pickle')
 
-	test_dataset, test_labels = load_dataset_from_file('test')
-
+	test_dataset, test_labels = load_dataset_from_file('test.pickle')
+	
 	train_dataset, train_labels, valid_dataset, valid_labels = split_dataset(
 		dataset, labels, 10000)
 
