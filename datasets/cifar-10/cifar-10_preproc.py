@@ -1,11 +1,11 @@
 #https://www.cs.toronto.edu/~kriz/cifar.html
 
-import numpy as np
+import os
+
 import pickle
+import numpy as np
 
 import matplotlib.pyplot as plt
-
-import os
 
 pickle_file = 'cifar-10.pickle'
 
