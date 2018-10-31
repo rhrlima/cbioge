@@ -2,7 +2,9 @@
 
 \usepackage{sbc-template}
 
-\usepackage{graphicx,url}
+\usepackage{listings} %code
+\usepackage{syntax} %grammar
+\usepackage{graphicx,url} %figures
 \usepackage{lscape}
 
 \usepackage[utf8]{inputenc}
@@ -26,51 +28,154 @@
 
 \maketitle
 
-\section{Aprendizagem de Máquina}
+\section{Convolutional Neural Networks}
+
+\section{Deep Neuroevolution}
+
+\section{Approach}
+
+This section will present the details about the proposed approach, describing the tools used, the design of the grammar, how the mapping process creates the CNNs and how the search engine works to improve the solutions.
+
+\subsection{Tools}
+
+Here we present the tools that were used in order to better understand the decisions made in further steps of the approach. The technologies used are listed below:
+
+\begin{itemize}
+	\item \textbf{Python v3.6}: The use of the Python\footnote{https://www.python.org} language is supported by the well known frameworks that are used in machine learning projects, as well as offering a simple syntax to improve productivity. 
+	
+	\item \textbf{Tensorflow}: The Tensorflow\footnote{https://www.tensorflow.org} framework is a powerful open-source library for high performance numerical computation. Its flexible architecture allows easy deployment of computation across a variety of platforms.
+	
+	\item \textbf{Keras}: A Python Deep Learning library. Keras \footnote{https://keras.io/} is a high-level neural networks API, written in Python and capable of running on top of Tensorflow, CNTK\footnote{https://github.com/Microsoft/cntk} or Theano\footnote{https://github.com/Theano/Theano}. Designed to enable fast experimentation.
+\end{itemize}
 
 
-Existem tarefas que são difíceis de serem executadas por seres humanos e simples para computadores, pois podem ser facilmente descritas através de um conjunto de regras bem definidas, como por exemplo, um programa de computador que joga xadrez. Porém, os verdadeiros desafios enfrentados pelos computadores estão relacionadas às tarefas que são facilmente executadas por seres humanos, mas são difíceis de serem descritas formalmente, como por exemplo o reconhecimento da fala ou a identificação de faces em imagens \cite{goodfellow2016deep}.
+\subsection{Grammar}
 
 
-Aprendizagem de Máquina (\textit{Machine Learning} - ML) é uma sub-área da Inteligência Artificial (IA) que estuda técnicas que dá aos computadores a habilidade de aprender sem serem explicitamente programas \cite{simon2013big}. Com relação ao aprendizado, Tom M. Mitchell \cite{mitchell1997machine} fornece uma definição: "Diz-se que um programa de computador aprende pela experiência \textit{E}, com respeito a algum tipo de tarefa \textit{T} e desempenho \textit{P}, se seu desempenho \textit{P} nas tarefas em \textit{T}, na forma medida por \textit{P}, melhoram com a experiência \textit{E}".
+The GE Grammar has the task of defining a generic structure that allows the creation of different variations of a program according to the problem. The rules and productions are usually used to describe ``blocks'' of routines and parameters that the program has, and also how these blocks connect to each other.
 
 
-As tarefas de aprendizagem de máquina são classificados em três categorias de acordo com a informação (\textit{feedback}) obtido do sistema. São elas: aprendizado supervisionado, aprendizado não supervisionado e aprendizado por reforço.
+To design the CNNs we selected some of the most common layers implemented in the Keras framework, as well as some of the available parameters that comes with them. The options are listed below:
 
 
-\subsection{Aprendizado supervisionado}
+\begin{itemize}
+	\item Convolution Layer: Filters, Kernel size, Activation function
+	
+	\item Max/ Average Pooling: Pooling size, Padding
+	
+	\item Dense: Units, Activation function
+	
+	\item Dropout: Drop rate
+	
+	\item Filters: 32, 64
+	
+	\item Kernel size: (3, 3), (5, 5)
+	
+	\item Activation function: Relu, Tahnm, Linear
+	
+	\item Pooling size: (2, 2), (4, 4)
+	
+	\item Padding: Valid, Same
+	
+	\item Number of Units: 32, 64
+	
+	\item Drop rate: rand[0, 1]
+\end{itemize}
 
 
-Na aprendizagem supervisionada os dados utilizados possuem exemplos de entradas e saídas desejadas, e a partir destes exemplos as técnicas aplicadas tem como objetivo aprender a regra geral que mapeia as entradas para as saídas.
+A first version of a grammar using the CNN components can be seen in Figure \ref{fig:cnn-grammar}. The rules and productions were designed to ensure the creation of valid CNN models, as well as giving the opportunity to grow in size and complexity.
 
 
-\subsection{Aprendizado não supervisionado}
+\begin{figure}[!htb]
+	\begin{grammar}
+		<cnn> ::= <conv> <c\_layer> <d\_layer> <dense>
+		
+		<c\_layer> ::= <c\_layer> <c\_layer> | <c\_node> | '\&'
+		
+		<d\_layer> ::= <d\_node> <d\_node> | <d\_node> | '\&'
+		
+		<c\_node> ::= <conv> | <maxpool> | <avgpool>
+		
+		<d\_node> ::= <dense> | <dropout>
+		
+		<conv> ::= `Conv2D' <filters> <k\_size> <activation>
+		
+		<dense> ::= `Dense' <units>
+		
+		<dropout> ::= `Dropout' <rate>
+		
+		<maxpool> ::= `MaxPooling2D' <p\_size> <padding>
+		
+		<avgpool> ::= `AveragePooling2D' <p\_size> <padding>
+		
+		<activation> ::= `relu' | `tanh' | `linear'
+		
+		<padding> ::= `valid' | `same'
+		
+		<filters> ::= `32' | `64'
+		
+		<k\_size> ::= `(3, 3)' | `(5, 5)'
+		
+		<p\_size> ::= `(2, 2)' | `(4, 4)'
+		
+		<units> ::= `32' | `64'
+		
+		<rate> ::= `[0.0, 1.0]'
+		
+	\end{grammar}
+	\caption{Proposed grammar to generate CNNs.}
+	\label{fig:cnn-grammar}
+\end{figure}
 
 
-Diferente da aprendizagem supervisionada, os dados utilizados não possuem uma etiqueta, sendo necessário que os algoritmos utilizados encontrem ou criem uma estrutura que relaciona dados semelhantes com o objetivo de identificar padrões.
+\subsection{Mapping}
 
 
-\subsection{Aprendizado por reforço}
+The mapping is responsible to translate the genotype of a solution into the correspondent phenotype through the grammar. Generating CNNs with this approach is very simple, because we just have to define which layers will be used, in which sequence and also define the values of the parameters of each of these layers.
 
 
-Utilizado em ambientes dinâmicos, onde o objetivo é desempenhar uma determinada tarefa. Enquanto desempenha a tarefa, o algoritmo utilizado recebe recompensas e punições, e utilizando essas informações vai ajustando seu comportamento.
+The proposed grammar was designed to allow the creation of both a small CNN with just one \textit{convolution} layer and one \textit{dense} layer, as well as CNNs as big as we want, using many \textit{convolution}, \textit{pooling}, \textit{dense} and \textit{dropout} layers. Because of this flexibility in generating the CNNs, some rules were defined to ensure that most valid models would be created considering how Keras works. The rules are as follows:
 
 
-\section{Aprendizagem Profunda}
+\begin{enumerate}
+	\item All models start with a \textit{convolution} layer
+	
+	\item All models end with a \textit{dense} layer
+	
+	\item The last layer must have the output shape as a 1D array and length as the number of classes
+	
+	\item The last layer must have the activation function set to \textit{softmax}
+	
+	\item The first \textit{dense} layer is preceded by a \textit{fatten} layer
+\end{enumerate}
 
 
-O desempenho de algoritmos de ML dependem fortemente da representação dos dados que são fornecidos. Por exemplo, um sistema que auxilie na identificação de uma determinada doença, não avalia o paciente diretamente. As informações mais relevantes são fornecidas por um especialista para o sistema, como a presença ou não de febre no paciente. Tais informações são chamadas de \textbf{características} (features). Sem o auxílio do especialista, não seria possível realizar predições úteis utilizando os dados brutos de um exame \cite{goodfellow2016deep}.
+Even with these rules, invalid models are still possible, in those cases we can apply a poor fitness to the solution, so it will be replaced during the search. Figure \ref{fig:cnn-map-scheme} illustrates how a CNN is built by connecting the layers, noting that fully connected layers (\textit{dense}, \textit{dropout}, etc) will only be available to be added after at least one \textit{convolution} is added to the architecture, and after that, no more \textit{convolution} layer can be added.
 
 
-Um novo problema surge quando também se torna necessário descobrir quais características devem ser extraídas para um determinado problema. Uma solução para este problema é utilizar AM não apenas o mapeamento entre a representação e a saída, mas também a representação em si. Essa abordagem é chamada de Aprendizado por Representação (\textit{Representation Learning} - RL), e seu objetivo é encontrar um conjunto de características que melhor descreva a relação entre os dados e a saída. 
+\begin{figure}[!htb]
+	\includegraphics[width=\linewidth]{images/mapping-example.pdf}
+	\caption{Example of mapping expansion of a CNN model.}
+	\label{fig:cnn-map-scheme}
+\end{figure}
 
 
-A Aprendizagem profunda (\textit{Deep Learning} - DL) surgiu para solucionar o principal problema enfrentado em RL, cuja complexidade cresce quando considerados problemas do muno real, onde há grande variação na influência que os dados observados tem. RL introduz representações que são expressas por meio de outras representações mais simples \cite{goodfellow2016deep}.
+The way Keras can be used to build CNN models is very simple. We can create a \textit{Sequential} model, that is a linear stack of layers, and add the desired components. Figure \ref{fig:cnn-model} shows an example of a simple CNN. It is also possible to save a model to a \textit{json} format, as well as load a model, but not the weights, from a \textit{json} file.
 
 
-\subsection{Redes Neurais Profundas}
+\begin{figure}[!htb]
+	\includegraphics[width=\linewidth]{images/cnn-model-example.png}
+	\caption{Simple CNN using Python and Keras.}
+	\label{fig:cnn-model}
+\end{figure}
 
-\section{Neuro-evolução}
+
+\begin{figure}
+	\includegraphics[]{images/expansion_example.png}
+\end{figure}
+
+
+\subsection{Search}
 
 \bibliographystyle{plain}
 \bibliography{referencias}

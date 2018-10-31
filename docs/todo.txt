@@ -1,0 +1,25 @@
+texto
+[ ] escrever revisão bibliográfica
+[ ] 
+
+slides
+[X] adicionar gramatica aos slides
+[ ] adicionar experimentos mnist aos slides
+[ ] adicionar experimentos cifar aos slides
+[ ] descrever o problema
+[ ] formas de avaliação
+[ ] adicionar imagem sobre a derivação das cnns
+[ ] 
+
+experimentos
+
+20 pop 400 evals 1 epoch
+[ ] mnist
+[ ] notmnist
+[ ] fashion mnist
+[ ] cifar 10
+[ ] cifar 100
+
+
+loki
+numpy
