@@ -22,3 +22,4 @@
 [ ] ver early stop
 [ ] paralelizar avaliações
 [ ] criar checkpoint
+[ ] testar abordagem x random
