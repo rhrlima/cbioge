@@ -160,18 +160,54 @@ Even with these rules, invalid models are still possible, in those cases we can 
 \end{figure}
 
 
-The way Keras can be used to build CNN models is very simple. We can create a \textit{Sequential} model, that is a linear stack of layers, and add the desired components. Figure \ref{fig:cnn-model} shows an example of a simple CNN. It is also possible to save a model to a \textit{json} format, as well as load a model, but not the weights, from a \textit{json} file.
+%The way Keras can be used to build CNN models is very simple. We can create a \textit{Sequential} model, that is a linear stack of layers, and add the desired components. 
+
+%Figure \ref{fig:cnn-model} shows an example of a simple CNN. It is also possible to save a model to a \textit{json} format, as well as load a model, but not the weights, from a \textit{json} file.
+
+In the Grammatical Evolution, a solution is a list of integer values, and the mapping function will translate the solution into a CNN model using the components and parameters defined in the BNF grammar. The translation occurs by replacing non-terminal rules, following the left-most replacement rule, until all non-terminal are replaced by terminal rules. The way that productions are selected to replace a given non-terminal is by applying the mathematical \textit{mod} operator as:
+
+\begin{equation}\label{eq:replace-eq}
+	GR = sv~MOD~np
+\end{equation}
+
+
+where $GR$ is the chosen grammar rule resulted from the $MOD$ operation between solution value ($sv$) and the number of possible productions for that rule ($np$). Table \ref{tab:exp-example} shows an example of the mapping process of the solution [0, 13, 4, 20, 3, 5, 5, 9, 2] into a CNN. The `\&' symbol represents ``empty''.
+
+
+\begin{table}[!htb]
+	\small
+	\caption{Grammar expansion example}
+	\begin{tabular}{c|c|c|c|l}
+		\hline
+		step & value &   input   &   mod    & output                                                \\ \hline
+		 1   &   0   &   <cnn>   & 0 mod 1  & <conv><c\_lay><d\_lay><dense>                         \\
+		 2   &  13   &  <conv>   & 13 mod 1 & `Conv'<filters><k\_size><actv><c\_lay><d\_lay><dense> \\
+		 3   &   4   & <filters> & 4 mod 2  & `Conv'`32'<k\_size><actv><c\_lay><d\_lay><dense>      \\
+		 4   &  20   & <k\_size> & 20 mod 2 & `Conv'`32'`(3, 3)'<actv><c\_lay><d\_lay><dense>       \\
+		 5   &   3   &  <actv>   & 3 mod 3  & `Conv'`32'`(3, 3)'`relu'<c\_lay><d\_lay><dense>       \\
+		 6   &   5   & <c\_lay>  & 5 mod 3  & `Conv'`32'`(3, 3)'`relu'`\&'<d\_lay><dense>           \\
+		 7   &   5   & <d\_lay>  & 5 mod 3  & `Conv'`32'`(3, 3)'`relu'`\&'`\&'<dense>               \\
+		 8   &   9   &  <dense>  & 9 mod 1  & `Conv'`32'`(3, 3)'`relu'`\&'`\&'`Dense'<units>        \\
+		 9   &   2   &  <units>  & 2 mod 2  & `Conv'`32'`(3, 3)'`relu'`\&'`\&'`Dense'`32'           \\ \hline
+	\end{tabular}
+	\label{tab:exp-example}
+\end{table}
+
+
+After the mapping, we have a list of strings that defines which components the CNN will have. From this list we can built a \textit{json} structure that will later be used to built the model in Keras. The \textit{json} structure will look like the example in Figure \ref{fig:json-example}. As mentioned before, some rules are applied to ensure that valid models will be built more often. In this example, the \textit{Convolution} node gained an extra parameter called ``input shape'' related to the problem, that were images 28x28 grayscale, then a \textit{Flatten} layer is added just before the first \textit{Dense} layer, as well as the number of units in the last layer was changed to the number of classes of the problem (10), and also an activation function was added with the \textit{Softmax} function. Finally, the CNN model is built by passing the \textit{json} to a Keras function called \textit{model\_from\_json} which output is a \textit{model} Sequential object with the components defined by the mapping performed before. The correspondent model can be seen in Figure \ref{fig:model-example} if it was built using the Keras syntax.
 
 
 \begin{figure}[!htb]
-	\includegraphics[width=\linewidth]{images/cnn-model-example.png}
-	\caption{Simple CNN using Python and Keras.}
-	\label{fig:cnn-model}
+	\includegraphics[width=\linewidth]{images/json-example.png}
+	\caption{Example of JSON structure that represents the result of the mapping.}
+	\label{fig:json-example}
 \end{figure}
 
 
-\begin{figure}
-	\includegraphics[]{images/expansion_example.png}
+\begin{figure}[!htb]
+	\includegraphics[width=\linewidth]{images/model-example.png}
+	\caption{Example of CNN model built using Keras.}
+	\label{fig:model-example}
 \end{figure}
 
 
