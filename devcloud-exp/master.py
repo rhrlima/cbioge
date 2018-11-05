@@ -1,20 +1,19 @@
-import os
-import subprocess
+from multiprocessing import Pool
 from time import sleep
+
+def f(num):
+	print('num', num)
+	sleep(2)
 
 print('master script running')
 
-for i in range(5):
+pool = Pool(processes=5)
 
-	query = ['qsub', 'slave-job', 
-		'-N', 'slave-{0}'.format(i), 
-		'-o', 'slave-{0}.out'.format(i), 
-		'-F', '\'slave.py {}\''.format(i)]
+for i in range(50):
 
-	#query = ['python', 'slave.py', str(i)] #test
-	#query = ' '.join(query)
+	pool.apply_async(func=f, args=(i,))
 
-	print('command: ', query)
-	subprocess.run(query)
+pool.close()
+pool.join()
 
 print('master script done')
