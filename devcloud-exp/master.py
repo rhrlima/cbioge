@@ -9,17 +9,12 @@ for i in range(5):
 	query = ['qsub', 'slave-job', 
 		'-N', 'slave-{0}'.format(i), 
 		'-o', 'slave-{0}.out'.format(i), 
-		'-F', '\'slave.py\'', str(i)]
+		'-F', '\'slave.py {}\''.format(i)]
 
 	#query = ['python', 'slave.py', str(i)] #test
-	query = ' '.join(query)
+	#query = ' '.join(query)
 
 	print('command: ', query)
-	p = subprocess.Popen(query, 
-		stdout=subprocess.PIPE, 
-		shell=True)
-
-	output, err = p.communicate()
-	print('slave {} script output:\n'.format(i), output)
+	subprocess.run(query)
 
 print('master script done')
