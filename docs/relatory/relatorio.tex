@@ -194,7 +194,7 @@ where $GR$ is the chosen grammar rule resulted from the $MOD$ operation between 
 \end{table}
 
 
-After the mapping, we have a list of strings that defines which components the CNN will have. From this list we can built a \textit{json} structure that will later be used to built the model in Keras. The \textit{json} structure will look like the example in Figure \ref{fig:json-example}. As mentioned before, some rules are applied to ensure that valid models will be built more often. In this example, the \textit{Convolution} node gained an extra parameter called ``input shape'' related to the problem, that were images 28x28 grayscale, then a \textit{Flatten} layer is added just before the first \textit{Dense} layer, as well as the number of units in the last layer was changed to the number of classes of the problem (10), and also an activation function was added with the \textit{Softmax} function. Finally, the CNN model is built by passing the \textit{json} to a Keras function called \textit{model\_from\_json} which output is a \textit{model} Sequential object with the components defined by the mapping performed before. The correspondent model can be seen in Figure \ref{fig:model-example} if it was built using the Keras syntax.
+After the mapping, we get a list of strings that defines which components the CNN will have. From this list we can built a \textit{json} structure that will later be used to built the model in Keras. The \textit{json} structure will look like the example in Figure \ref{fig:json-example}. As mentioned before, some rules are applied to ensure that valid models will be built more often. In this example, the \textit{Convolution} node gained an extra parameter called ``input shape'' related to the problem, that were images 28x28 grayscale, then a \textit{Flatten} layer is added just before the first \textit{Dense} layer, as well as the number of units in the last layer was changed to the number of classes of the problem (10), and also an activation function was added with the \textit{Softmax} function.
 
 
 \begin{figure}[!htb]
@@ -202,6 +202,9 @@ After the mapping, we have a list of strings that defines which components the C
 	\caption{Example of JSON structure that represents the result of the mapping.}
 	\label{fig:json-example}
 \end{figure}
+
+
+Finally, the CNN model is built by passing the \textit{json} to a Keras function called \textit{model\_from\_json} which output is a \textit{model} Sequential object with the components defined by the mapping performed before. The correspondent model can be seen in Figure \ref{fig:model-example} if it was built using the Keras syntax.
 
 
 \begin{figure}[!htb]
@@ -212,6 +215,10 @@ After the mapping, we have a list of strings that defines which components the C
 
 
 \subsection{Search}
+
+
+The search engine is responsible to create, modify and evaluate solutions in order to increase the chances of finding a good solution that performs well on a given problem. The most common search algorithm used in GE is the Genetic Algorithm (GA). The GA is an algorithm designed based on the studies on the evolution of species, having genetic operators like selection, crossover and mutation as tools to combine and modify solutions.
+
 
 \bibliographystyle{plain}
 \bibliography{referencias}
