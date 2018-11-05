@@ -1,13 +1,13 @@
 import sys, os
 sys.path.append('..')
 
-from algorithms import ppge
+from algorithms import pge
 from grammars import grammar
 from problems import problem
 
 DEBUG = False
 problem.DEBUG = False
-ppge.DEBUG = True
+pge.DEBUG = True
 
 # dataset and grammar
 pickle_file = '../datasets/mnist/mnist.pickle'
@@ -20,10 +20,10 @@ grammar.load_grammar(grammar_file)
 my_problem = problem.CnnProblem()
 my_problem.load_dataset_from_pickle(pickle_file)
 pge.problem = my_problem
-pge.MAX_PROCESSES = 10
+pge.MAX_PROCESSES = 2
 
 # problem parameters
-my_problem.batch_size = 512
+my_problem.batch_size = 128
 my_problem.epochs = 1
 
 # changing pge default parameters

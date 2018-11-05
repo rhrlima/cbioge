@@ -67,6 +67,9 @@ def create_population(size):
 
 
 def evaluate_solution(solution):
+	if DEBUG: print('<{}> [evaluate] started evaluation of solution: {}'.format(
+		time.strftime('%x %X'), 
+		solution))
 	if not solution.evaluated:
 		if problem is None:
 			if DEBUG:
@@ -77,6 +80,9 @@ def evaluate_solution(solution):
 		else:
 			solution.fitness = problem.evaluate(solution)
 		solution.evaluated = True
+	if DEBUG: print('<{}> [evaluate] ended evaluation of solution: {}'.format(
+		time.strftime('%x %X'), 
+		solution))
 
 
 def evaluate_population(population):
