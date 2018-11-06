@@ -156,6 +156,8 @@ class CnnProblem(BaseProblem):
 
 	def evaluate(self, solution, verbose=0):
 
+		print('PROBLEM', solution.genotype)
+
 		model = self.map_genotype_to_phenotype(solution.genotype)
 		solution.phenotype = model
 
