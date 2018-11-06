@@ -1,6 +1,6 @@
 #parallel GE modified to use qsub in evaluation
 
-from multiprocessing import Pool
+from multiprocessing import Pool, Manager
 
 import numpy as np
 import random
@@ -28,12 +28,13 @@ MINIMIZE = False
 problem = None
 grammar = None
 
+eval_pop = []
 
 class Solution:
 
 	genotype = None
 	phenotype = None
-	fitness = None
+	fitness = -1#None
 	
 	data = {}
 
@@ -67,9 +68,9 @@ def create_population(size):
 
 
 def evaluate_solution(solution):
-	if DEBUG: print('<{}> [evaluate] started evaluation of solution: {}'.format(
-		time.strftime('%x %X'), 
-		solution))
+	#if DEBUG: print('<{}> [evaluate] started evaluation of solution: {}'.format(
+		#time.strftime('%x %X'), solution))
+
 	if not solution.evaluated:
 		if problem is None:
 			if DEBUG:
@@ -78,25 +79,43 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution)
-		solution.evaluated = True
-	if DEBUG: print('<{}> [evaluate] ended evaluation of solution: {}'.format(
-		time.strftime('%x %X'), 
-		solution))
+			#solution.fitness = problem.evaluate(solution)
+			fitness = problem.evaluate(solution)
+		#solution.evaluated = True
+
+	#print('inside', solution.fitness)
+	
+	#if DEBUG: print('<{}> [evaluate] ended evaluation of solution: {}'.format(
+		#time.strftime('%x %X'), solution))
+	return fitness
+
+
+def michaelback(aux):
+	#print(type(aux))
+	print('###################', aux)
+	eval_pop.append(aux)
+
 
 
 def evaluate_population(population):
 
+	#print('before', population[0].fitness)
+
 	pool = Pool(processes=MAX_PROCESSES)
 
 	for i, solution in enumerate(population):
-		if DEBUG: print('[evaluate] started worker {}'.format(i))
-		pool.apply_async(func=evaluate_solution, args=(solution,))
+		pool.apply_async(func=evaluate_solution, args=(solution,), callback=michaelback)
 		#evaluate_solution(solution)
-
+	#res = pool.map_async(evaluate_solution, population)
+	
 	pool.close()
 	pool.join()
+
+	#print('after', population[0].fitness)
+
 	if DEBUG: print('[evaluate] all workers finished')
+	for s in eval_pop:
+		print(s.evaluated, s.fitness)
 
 
 def selection(population):

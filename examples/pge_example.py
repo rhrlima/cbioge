@@ -28,8 +28,8 @@ my_problem.epochs = 1
 
 # changing pge default parameters
 #pge.SEED = 42
-pge.POP_SIZE = 10
-pge.MAX_EVALS = 20
+pge.POP_SIZE = 2
+pge.MAX_EVALS = 4
 
 print('--config--')
 print('DATASET', pickle_file)
