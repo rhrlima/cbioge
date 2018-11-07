@@ -68,8 +68,8 @@ def create_population(size):
 
 
 def evaluate_solution(solution):
-	#if DEBUG: print('<{}> [evaluate] started evaluation of solution: {}'.format(
-		#time.strftime('%x %X'), solution))
+	if DEBUG: print('<{}> [evaluate] started: {}'.format(
+		time.strftime('%x %X'), solution))
 
 	if not solution.evaluated:
 		if problem is None:
@@ -80,14 +80,14 @@ def evaluate_solution(solution):
 				raise ValueError('Problem is None')
 		else:
 			#solution.fitness = problem.evaluate(solution)
-			fitness = problem.evaluate(solution)
+			fitness, model = problem.evaluate(solution)
 		#solution.evaluated = True
-
-	#print('inside', solution.fitness)
+	#fitness = problem.evaluate(solution)
 	
-	#if DEBUG: print('<{}> [evaluate] ended evaluation of solution: {}'.format(
-		#time.strftime('%x %X'), solution))
-	return fitness
+	if DEBUG: print('<{}> [evaluate] ended: {}'.format(
+		time.strftime('%x %X'), solution))
+	
+	return fitness, model
 
 
 def michaelback(aux):
@@ -99,23 +99,25 @@ def michaelback(aux):
 
 def evaluate_population(population):
 
-	#print('before', population[0].fitness)
-
 	pool = Pool(processes=MAX_PROCESSES)
 
-	for i, solution in enumerate(population):
-		pool.apply_async(func=evaluate_solution, args=(solution,), callback=michaelback)
+	#for i, solution in enumerate(population):
+	#	pool.apply_async(func=evaluate_solution, args=(i, solution), callback=michaelback)
+		#pool.apply_async(func=problem.evaluate, args=(solution,), callback=michaelback)
 		#evaluate_solution(solution)
-	#res = pool.map_async(evaluate_solution, population)
+	result = pool.map_async(evaluate_solution, population)
 	
 	pool.close()
 	pool.join()
 
-	#print('after', population[0].fitness)
+	print(type(result))
+	print(type(result.get()))
 
-	if DEBUG: print('[evaluate] all workers finished')
-	for s in eval_pop:
-		print(s.evaluated, s.fitness)
+	for sol, res in zip(population, result.get()):
+		fit, model = res
+		sol.fitness = fit
+		sol.phenotype = model
+		print(fit, type(model))
 
 
 def selection(population):
