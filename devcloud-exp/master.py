@@ -1,10 +1,13 @@
 from multiprocessing import Pool
-from time import sleep
+import time
+import random
 
 def foo(num):
-	print('num', num)
-	sleep(2)
-	return num
+	wait = random.randint(0, 5)
+	print('foo', num, wait)
+	time.sleep(wait)
+	return num*2
+
 
 def after(num):
 	print('after', num)
@@ -12,13 +15,15 @@ def after(num):
 
 print('master script running')
 
-pool = Pool(processes=5)
+pool = Pool(processes=2)
 
-for i in range(10):
-	pool.apply_async(func=foo, args=(i,), callback=after)
-#pool.map_async(foo, range(10), callback=after)
+#for i in range(15):
+#	pool.apply_async(func=foo, args=(i,))
+res = pool.map_async(foo, range(20))
 
 pool.close()
 pool.join()
+
+print(res.get())
 
 print('master script done')

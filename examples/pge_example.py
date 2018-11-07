@@ -5,9 +5,13 @@ from algorithms import pge
 from grammars import grammar
 from problems import problem
 
+import json
+import keras
+import numpy as np
+
 DEBUG = False
 problem.DEBUG = False
-pge.DEBUG = True
+pge.DEBUG = False
 
 # dataset and grammar
 pickle_file = '../datasets/mnist/mnist.pickle'
@@ -48,11 +52,18 @@ best = pge.execute()
 
 print('--best solution--')
 print(best, best.fitness)
-best.phenotype.summary()
+model = keras.models.model_from_json(best.phenotype)
+model.summary()
+
+model.compile(loss='categorical_crossentropy', 
+	optimizer='adam', metrics=['accuracy'])
+
+print('--training--')
+hist = model.fit(my_problem.x_train, my_problem.y_train, batch_size=128, 
+	epochs=1, verbose=0)
+print('loss: {}\taccuracy: {}'.format(
+	np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
 
 print('--testing--')
-score = best.phenotype.evaluate(
-	my_problem.x_test, 
-	my_problem.y_test, 
-	verbose=0)
+score = model.evaluate(my_problem.x_test, my_problem.y_test, verbose=0)
 print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
