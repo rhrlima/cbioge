@@ -142,16 +142,8 @@ class CnnProblem(BaseProblem):
 			if DEBUG: print(n)
 			model['config'].append(n)
 
-		try:
-			model = model_from_json(json.dumps(model))
-		except (Exception, ValueError) as e:
-			if DEBUG:
-				print(e)
-				print('[mapping] invalid model from solution: {}'.format(
-				genotype))
-			return None
-
-		return model
+		#returns the model as string
+		return json.dumps(model)
 
 
 	def evaluate(self, solution, verbose=0):
@@ -159,21 +151,20 @@ class CnnProblem(BaseProblem):
 			maps the solution to generate the model,
 			then executes the model to get the fitness (accuracy)
 
-			this function returns the fitness (float) and model (json str)
+			this function returns the fitness (float) and model (json string)
 		'''
 
-		model = self.map_genotype_to_phenotype(solution.genotype)
-		#solution.phenotype = model.to_json()
-		
-		if not model: return -1, None
-		
 		try:
+			model = self.map_genotype_to_phenotype(solution.genotype)
+			model = model_from_json(model)
+
 			model.compile(
 				loss=self.loss, 
 				optimizer=self.optimizer, 
 				metrics=self.metrics
 			)
 			# train
+			if verbose: print('[trainin]')
 			hist = model.fit(
 				self.x_train, 
 				self.y_train, 
@@ -185,19 +176,10 @@ class CnnProblem(BaseProblem):
 			if verbose: print('[validation]')
 			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
 
-			fitness = score[1]#copy.deepcopy(score[1])
-		
-			#solution.data['t_loss'] = copy.deepcopy(hist.history['loss'])
-			#solution.data['t_acc']  = copy.deepcopy(hist.history['acc'])
-			#solution.data['loss'] = copy.deepcopy(score[0])
-			#solution.data['acc']  = copy.deepcopy(score[1])
-			#solution.fitness = fitness
-			#solution.fitness 	  = score[1] # ?
-
 			if verbose: print('loss: {}\taccuracy: {}'.format(
 				score[0], score[1]))
 
-			return fitness, model.to_json()
+			return score[1], model.to_json()
 
 		except Exception as e:
 			if DEBUG:

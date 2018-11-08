@@ -79,10 +79,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			#solution.fitness = problem.evaluate(solution)
 			fitness, model = problem.evaluate(solution)
-		#solution.evaluated = True
-	#fitness = problem.evaluate(solution)
 	
 	if DEBUG: print('<{}> [evaluate] ended: {}'.format(
 		time.strftime('%x %X'), solution))
@@ -90,34 +87,29 @@ def evaluate_solution(solution):
 	return fitness, model
 
 
-def michaelback(aux):
-	#print(type(aux))
-	print('###################', aux)
-	eval_pop.append(aux)
-
-
-
 def evaluate_population(population):
+	'''evaluate_population
 
+		evaluates a population (list) of Solution objects using the 
+		multiprocessing module
+
+		it creates a pool of workers, each worker will evaluate one model
+		and return the correspondent fitness (float and model (json string)
+
+		at the end, the solution objet is updaded with the new information 
+	'''
 	pool = Pool(processes=MAX_PROCESSES)
 
-	#for i, solution in enumerate(population):
-	#	pool.apply_async(func=evaluate_solution, args=(i, solution), callback=michaelback)
-		#pool.apply_async(func=problem.evaluate, args=(solution,), callback=michaelback)
-		#evaluate_solution(solution)
 	result = pool.map_async(evaluate_solution, population)
 	
 	pool.close()
 	pool.join()
 
-	print(type(result))
-	print(type(result.get()))
-
 	for sol, res in zip(population, result.get()):
 		fit, model = res
 		sol.fitness = fit
 		sol.phenotype = model
-		print(fit, type(model))
+		sol.evaluated = True
 
 
 def selection(population):
