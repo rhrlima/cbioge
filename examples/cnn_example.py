@@ -59,7 +59,7 @@ opt = keras.optimizers.Adam(
 	lr=0.01, 
 	beta_1=0.9, 
 	beta_2=0.999, 
-	epsilon=None, 
+	epsilon=1.0 * 10**-8, 
 	decay=0.001, 
 	amsgrad=False)
 

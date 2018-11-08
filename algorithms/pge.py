@@ -79,7 +79,7 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			fitness, model = problem.evaluate(solution)
+			fitness, model = -1, None#problem.evaluate(solution)
 	
 	if DEBUG: print('<{}> [evaluate] ended: {}'.format(
 		time.strftime('%x %X'), solution))
@@ -215,6 +215,8 @@ def execute():
 			duplicate(offspring, DUPL_RATE)
 
 			offspring_pop += offspring
+
+			print(len(offspring_pop))
 
 		evaluate_population(offspring_pop)
 

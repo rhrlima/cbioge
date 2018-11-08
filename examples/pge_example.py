@@ -34,13 +34,13 @@ pge.problem = my_problem
 pge.MAX_PROCESSES = 10
 
 # problem parameters
-my_problem.batch_size = 256
-my_problem.epochs = 10
+my_problem.batch_size = 128
+my_problem.epochs = 50
 
 # changing pge default parameters
 #pge.SEED = 42
-pge.POP_SIZE = 10
-pge.MAX_EVALS = 100
+pge.POP_SIZE = 20
+pge.MAX_EVALS = 500
 
 print('--config--')
 print('DATASET', pickle_file)
@@ -65,8 +65,15 @@ print(best, best.fitness)
 model = keras.models.model_from_json(best.phenotype)
 model.summary()
 
-model.compile(loss='categorical_crossentropy', 
-	optimizer='adam', metrics=['accuracy'])
+opt = keras.optimizers.Adam(
+	lr=0.01, 
+	beta_1=0.9, 
+	beta_2=0.999, 
+	epsilon=1.0 * 10**-8, 
+	decay=0.001, 
+	amsgrad=False)
+
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 print('--training--')
 hist = model.fit(my_problem.x_train, my_problem.y_train, batch_size=128, 
