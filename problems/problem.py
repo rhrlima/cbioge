@@ -42,7 +42,6 @@ class CnnProblem(BaseProblem):
 	epochs = 1
 
 	loss = 'categorical_crossentropy' # add to grammar
-	optimizer = 'adam' # add to grammar
 	metrics = ['accuracy']
 
 	def load_dataset_from_pickle(self, pickle_file):
@@ -158,11 +157,19 @@ class CnnProblem(BaseProblem):
 			model = self.map_genotype_to_phenotype(solution.genotype)
 			model = model_from_json(model)
 
+			opt = keras.optimizers.Adam(
+				lr=0.01, 
+				beta_1=0.9, 
+				beta_2=0.999, 
+				epsilon=1.0 * 10**-8, 
+				decay=0.001, 
+				amsgrad=False)
+
 			model.compile(
 				loss=self.loss, 
-				optimizer=self.optimizer, 
-				metrics=self.metrics
-			)
+				optimizer=opt, 
+				metrics=self.metrics)
+
 			# train
 			if verbose: print('[trainin]')
 			hist = model.fit(
@@ -170,8 +177,8 @@ class CnnProblem(BaseProblem):
 				self.y_train, 
 				batch_size=self.batch_size, 
 				epochs=self.epochs, 
-				verbose=verbose
-			)
+				verbose=verbose)
+
 			# valid
 			if verbose: print('[validation]')
 			score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
