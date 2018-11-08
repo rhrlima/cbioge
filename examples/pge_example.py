@@ -62,25 +62,27 @@ best = pge.execute()
 
 print('--best solution--')
 print(best, best.fitness)
-model = keras.models.model_from_json(best.phenotype)
-model.summary()
 
-opt = keras.optimizers.Adam(
-	lr=0.01, 
-	beta_1=0.9, 
-	beta_2=0.999, 
-	epsilon=1.0 * 10**-8, 
-	decay=0.001, 
-	amsgrad=False)
+if best.phenotype:
+	model = keras.models.model_from_json(best.phenotype)
+	model.summary()
 
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+	opt = keras.optimizers.Adam(
+		lr=0.01, 
+		beta_1=0.9, 
+		beta_2=0.999, 
+		epsilon=1.0 * 10**-8, 
+		decay=0.001, 
+		amsgrad=False)
 
-print('--training--')
-hist = model.fit(my_problem.x_train, my_problem.y_train, batch_size=128, 
-	epochs=1, verbose=0)
-print('loss: {}\taccuracy: {}'.format(
-	np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
+	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-print('--testing--')
-score = model.evaluate(my_problem.x_test, my_problem.y_test, verbose=0)
-print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
+	print('--training--')
+	hist = model.fit(my_problem.x_train, my_problem.y_train, batch_size=128, 
+		epochs=1, verbose=0)
+	print('loss: {}\taccuracy: {}'.format(
+		np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
+
+	print('--testing--')
+	score = model.evaluate(my_problem.x_test, my_problem.y_test, verbose=0)
+	print('loss: {}\taccuracy: {}'.format(score[0], score[1]))

@@ -11,6 +11,7 @@ import copy
 
 from keras import layers
 from keras.models import Sequential, model_from_json
+from keras.optimizers import Adam
 from keras.utils import np_utils
 
 
@@ -157,7 +158,9 @@ class CnnProblem(BaseProblem):
 			model = self.map_genotype_to_phenotype(solution.genotype)
 			model = model_from_json(model)
 
-			opt = keras.optimizers.Adam(
+			if not model: return -1, None
+
+			opt = Adam(
 				lr=0.01, 
 				beta_1=0.9, 
 				beta_2=0.999, 
