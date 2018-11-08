@@ -176,7 +176,8 @@ def replace(population, offspring):
 
 
 def execute():
-	
+	'''
+	'''
 	np.random.seed(SEED)
 
 	population = create_population(POP_SIZE)
@@ -201,19 +202,25 @@ def execute():
 
 		parents = selection(population)
 
-		offspring = crossover(parents, CROSS_RATE)
-		
-		mutate(offspring, MUT_RATE)
+		offspring_pop = []
 
-		prune(offspring, PRUN_RATE)
+		for _ in population:
 
-		duplicate(offspring, DUPL_RATE)
+			offspring = crossover(parents, CROSS_RATE)
+			
+			mutate(offspring, MUT_RATE)
 
-		evaluate_population(offspring)
+			prune(offspring, PRUN_RATE)
 
-		replace(population, offspring)
+			duplicate(offspring, DUPL_RATE)
 
-		evals += len(offspring)
+			offspring_pop += offspring
+
+		evaluate_population(offspring_pop)
+
+		replace(population, offspring_pop)
+
+		evals += len(offspring_pop)
 
 		if DEBUG:
 			for i, p in enumerate(population):
