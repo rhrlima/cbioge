@@ -70,7 +70,9 @@ def evaluate_solution(solution):
 			else:
 				raise ValueError('Problem is None')
 		else:
-			solution.fitness = problem.evaluate(solution)
+			fit, model = problem.evaluate(solution)
+			solution.fitness = fit
+			solution.phenotype = model
 		solution.evaluated = True
 
 

@@ -1,6 +1,13 @@
 import sys, os
 sys.path.append('..')
 
+#disable warning on gpu enable systems
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+#import tensorflow as tf
+#tf.logging.set_verbosity(tf.logging.ERROR)
+
 from algorithms import pge
 from grammars import grammar
 from problems import problem
@@ -24,20 +31,23 @@ grammar.load_grammar(grammar_file)
 my_problem = problem.CnnProblem()
 my_problem.load_dataset_from_pickle(pickle_file)
 pge.problem = my_problem
-pge.MAX_PROCESSES = 2
+pge.MAX_PROCESSES = 10
 
 # problem parameters
-my_problem.batch_size = 128
-my_problem.epochs = 1
+my_problem.batch_size = 256
+my_problem.epochs = 10
 
 # changing pge default parameters
 #pge.SEED = 42
-pge.POP_SIZE = 2
-pge.MAX_EVALS = 4
+pge.POP_SIZE = 10
+pge.MAX_EVALS = 100
 
 print('--config--')
 print('DATASET', pickle_file)
 print('GRAMMAR', grammar_file)
+
+print('BSIZE', my_problem.batch_size)
+print('EPOCHS', my_problem.epochs)
 
 print('SEED', pge.SEED)
 print('POP', pge.POP_SIZE)
