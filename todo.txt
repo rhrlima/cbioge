@@ -23,3 +23,20 @@
 [ ] paralelizar avaliações
 [ ] criar checkpoint
 [ ] testar abordagem x random
+
+
+---
+experimentos com a CGP
+
+learning decay na 30 fator de 10
+weights initialization HE's method
+weight decay 1.0 * 10^⁻4 e data augmentation
+batch 128
+loss softmax cross entropy
+
+50 epocas
+adam optimizer 
+	b1 = 0.9 
+	b2 = 0.999 
+	e=1.0 * 10^-8 
+	lr = 0.01
