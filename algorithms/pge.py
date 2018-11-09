@@ -1,34 +1,19 @@
 #parallel GE modified to use qsub in evaluation
+import os, sys
+os.path.append('..')
 
 from multiprocessing import Pool, Manager
+from utils import checkpoint
 
 import numpy as np
 import random
 import time
 
-DEBUG = False
 
 rand = np.random
 
+DEBUG = False
 SEED = None
-MAX_PROCESSES = 2
-
-POP_SIZE = 5
-MIN_GENES = 1
-MAX_GENES = 10
-MAX_EVALS = 2000
-
-CROSS_RATE = 0.8
-MUT_RATE = 0.1
-PRUN_RATE = 0.1
-DUPL_RATE = 0.1
-
-MINIMIZE = False
-
-problem = None
-grammar = None
-
-eval_pop = []
 
 class Solution:
 
@@ -50,6 +35,24 @@ class Solution:
 		return str(self.genotype)
 
 
+MAX_PROCESSES = 2
+
+POP_SIZE = 5
+MIN_GENES = 1
+MAX_GENES = 10
+MAX_EVALS = 100
+
+CROSS_RATE = 0.8
+MUT_RATE = 0.1
+PRUN_RATE = 0.1
+DUPL_RATE = 0.1
+
+MINIMIZE = False
+
+problem = None
+grammar = None
+
+
 def create_solution(min_, max_=None):
 	if not max_:
 		max_ = min_
@@ -63,7 +66,7 @@ def create_solution(min_, max_=None):
 def create_population(size):
 	population = []
 	for _ in range(size):
-		population.append(create_solution(MIN_GENES, MAX_GENES))
+		population.append(create_solution())
 	return population
 
 
@@ -175,10 +178,9 @@ def replace(population, offspring):
 		population.pop()
 
 
-def execute():
+def execute(self):
 	'''
 	'''
-	np.random.seed(SEED)
 
 	population = create_population(POP_SIZE)
 	evaluate_population(population)
@@ -197,6 +199,8 @@ def execute():
 		population[0].genotype, 
 		population[0].fitness)
 	)
+
+	save_state(evals, population)
 
 	while evals < MAX_EVALS:
 
@@ -232,7 +236,42 @@ def execute():
 			population[0].genotype, 
 			population[0].fitness)
 		)
+		
+		save_state(evals, population)
 
-	#population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
 	return population[0]
 
+
+def save_state(evals, population):
+
+	args = {
+		'POP_SIZE': POP_SIZE, 
+		'MIN_GENES': MIN_GENES, 
+		'MAX_GENES': MAX_GENES, 
+		'MAX_EVALS': MAX_EVALS, 
+
+		'MAX_PROCESSES': MAX_PROCESSES, 
+
+		'CROSS_RATE': CROSS_RATE, 
+		'MUT_RATE': MUT_RATE, 
+		'PRUN_RATE': PRUN_RATE, 
+		'DUPL_RATE': DUPL_RATE, 
+
+		'MINIMIZE': MINIMIZE, 
+
+		'evals': evals
+	}
+
+	# files = ['pop.ckpt', 'args.ckpt']
+	# for file in files:
+	# 	if os.path.exists(file):
+	# 		print('renaming "{0}" to "{0}.old"'.format(file))
+	# 		os.rename(file, file+'.old')
+
+	checkpoint.save_args(args, 'args_{}.ckpt'.format(evals))
+	checkpoint.save_population(population, 'pop_{}.ckpt'.format(evals))
+
+	# for file in files:
+	# 	if os.path.exists(file):
+	# 		print('removing "{0}.old" file'.format(file))
+	# 		os.remove(file+'.old')

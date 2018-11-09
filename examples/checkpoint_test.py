@@ -35,3 +35,10 @@ if other_solution:
 	print(other_solution.phenotype)
 
 print(solution == other_solution)
+
+pop = [pge.Solution([i, i, i, i]) for i in range(10)]
+
+checkpoint.save_population(pop)
+checkpoint.load_population()
+
+checkpoint.save_args(['a', 1, pop[0]])
