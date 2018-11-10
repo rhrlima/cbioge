@@ -31,16 +31,16 @@ grammar.load_grammar(grammar_file)
 my_problem = problem.CnnProblem()
 my_problem.load_dataset_from_pickle(pickle_file)
 pge.problem = my_problem
-pge.MAX_PROCESSES = 10
+pge.MAX_PROCESSES = 2
 
 # problem parameters
 my_problem.batch_size = 128
-my_problem.epochs = 50
+my_problem.epochs = 1
 
 # changing pge default parameters
 #pge.SEED = 42
-pge.POP_SIZE = 20
-pge.MAX_EVALS = 500
+pge.POP_SIZE = 2
+pge.MAX_EVALS = 10
 
 print('--config--')
 print('DATASET', pickle_file)

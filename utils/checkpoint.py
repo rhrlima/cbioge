@@ -41,6 +41,6 @@ def load_population(filename='pop.ckpt'):
 
 def save_args(args, filename='args.ckpt'):
 
-	with (filename, 'wb') as f:
+	with open(filename, 'wb') as f:
 		pickle.dump(args, f)
 	print('args saved to file "{}"'.format(filename))

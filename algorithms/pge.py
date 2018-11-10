@@ -1,6 +1,6 @@
 #parallel GE modified to use qsub in evaluation
 import os, sys
-os.path.append('..')
+sys.path.append('..')
 
 from multiprocessing import Pool, Manager
 from utils import checkpoint
@@ -66,7 +66,7 @@ def create_solution(min_, max_=None):
 def create_population(size):
 	population = []
 	for _ in range(size):
-		population.append(create_solution())
+		population.append(create_solution(MIN_GENES, MAX_GENES))
 	return population
 
 
@@ -178,7 +178,7 @@ def replace(population, offspring):
 		population.pop()
 
 
-def execute(self):
+def execute():
 	'''
 	'''
 
@@ -268,8 +268,10 @@ def save_state(evals, population):
 	# 		print('renaming "{0}" to "{0}.old"'.format(file))
 	# 		os.rename(file, file+'.old')
 
-	checkpoint.save_args(args, 'args_{}.ckpt'.format(evals))
-	checkpoint.save_population(population, 'pop_{}.ckpt'.format(evals))
+	folder = 'checkpoints/'
+	if not os.path.exists(folder): os.mkdir(folder)
+	checkpoint.save_args(args, folder+'args_{}.ckpt'.format(evals))
+	checkpoint.save_population(population, folder+'pop_{}.ckpt'.format(evals))
 
 	# for file in files:
 	# 	if os.path.exists(file):
