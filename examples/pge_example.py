@@ -58,7 +58,7 @@ print('PRUN', pge.PRUN_RATE)
 print('DUPL', pge.DUPL_RATE)
 
 print('--running--')
-best = pge.execute()
+best = pge.execute(checkpoint=True)
 
 print('--best solution--')
 print(best, best.fitness)
