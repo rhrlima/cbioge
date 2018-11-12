@@ -5,6 +5,7 @@ sys.path.append('..')
 from multiprocessing import Pool, Manager
 from utils import checkpoint
 
+import glob
 import numpy as np
 import random
 import time
@@ -178,29 +179,30 @@ def replace(population, offspring):
 		population.pop()
 
 
-def execute():
+def execute(checkpoint=False):
 	'''
 	'''
+	if checkpoint:
+		population, evals = load_state()
+	else:
+		population = create_population(POP_SIZE)
+		evaluate_population(population)
+		population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
 
-	population = create_population(POP_SIZE)
-	evaluate_population(population)
+		evals = len(population)
 
-	population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
+		if DEBUG:
+			for i, p in enumerate(population):
+				print(i, p.fitness, p)
 
-	evals = len(population)
+		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+			time.strftime('%x %X'), 
+			evals, MAX_EVALS, 
+			population[0].genotype, 
+			population[0].fitness)
+		)
 
-	if DEBUG:
-		for i, p in enumerate(population):
-			print(i, p.fitness, p)
-
-	print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-		time.strftime('%x %X'), 
-		evals, MAX_EVALS, 
-		population[0].genotype, 
-		population[0].fitness)
-	)
-
-	save_state(evals, population)
+		save_state(evals, population)
 
 	while evals < MAX_EVALS:
 
@@ -277,3 +279,60 @@ def save_state(evals, population):
 	# 	if os.path.exists(file):
 	# 		print('removing "{0}.old" file'.format(file))
 	# 		os.remove(file+'.old')
+
+
+def load_state(args_file=None, pop_file=None):
+	''' loads the state stored in both args file and pop file
+		if one is None, the default behavior is to try to load the 
+		most recent one
+	'''
+	global MAX_EVALS, CROSS_RATE, MUT_RATE, PRUN_RATE, DUPL_RATE, MINIMIZE
+
+	folder = 'checkpoints/'
+	pop_files = glob.glob(folder+'pop_*')
+	arg_files = glob.glob(folder+'args_*')
+
+	if len(pop_files) > 0:
+		pop_files.sort(reverse=True)
+		print(pop_files)
+		pop_file = pop_files[0]
+		population = checkpoint.load_population(pop_file)
+
+	if len(arg_files) > 0:
+		arg_files.sort(reverse=True)
+		args_file = arg_files[0]
+		args = checkpoint.load_args(args_file)
+
+		#POP_SIZE = args['POP_SIZE'] 
+		#args['MIN_GENES']
+		#args['MAX_GENES']
+		
+		#args['MAX_PROCESSES']
+		
+		print('CROSS_RATE set to', CROSS_RATE)
+		CROSS_RATE = args['CROSS_RATE']
+		
+		print('MUT_RATE set to', MUT_RATE)
+		MUT_RATE = args['MUT_RATE']
+
+		print('PRUN_RATE set to', PRUN_RATE)
+		PRUN_RATE = args['PRUN_RATE'] 
+
+		print('DUPL_RATE set to', DUPL_RATE)
+		DUPL_RATE = args['DUPL_RATE']
+
+		print('MINIZE set to', MINIMIZE)
+		MINIMIZE = args['MINIMIZE']
+
+		evals = args['evals']
+		print('evals set to', evals)
+
+		MAX_EVALS = args['MAX_EVALS'] * 2
+		print('MAX_EVALS set to', MAX_EVALS)
+
+	return population, evals
+
+
+	print('last checkpoint\npop:{}\nargs:{}'.format(pop_files[0], arg_files[0]))
+
+	return population
