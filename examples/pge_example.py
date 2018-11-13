@@ -11,6 +11,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from algorithms import pge
 from grammars import grammar
 from problems import problem
+from utils import checkpoint
 
 import json
 import keras
@@ -24,6 +25,8 @@ pge.DEBUG = False
 pickle_file = '../datasets/mnist/mnist.pickle'
 grammar_file = '../grammars/cnn.bnf'
 
+checkpoint.ckpt_folder = 'pge_ckpt'
+
 # read grammar and setup parser
 grammar.load_grammar(grammar_file)
 
@@ -31,20 +34,21 @@ grammar.load_grammar(grammar_file)
 my_problem = problem.CnnProblem()
 my_problem.load_dataset_from_pickle(pickle_file)
 pge.problem = my_problem
-pge.MAX_PROCESSES = 2
+pge.MAX_PROCESSES = 10
 
 # problem parameters
 my_problem.batch_size = 128
-my_problem.epochs = 1
+my_problem.epochs = 50
 
 # changing pge default parameters
 #pge.SEED = 42
-pge.POP_SIZE = 2
-pge.MAX_EVALS = 10
+pge.POP_SIZE = 20
+pge.MAX_EVALS = 300 #15 gen
 
 print('--config--')
 print('DATASET', pickle_file)
 print('GRAMMAR', grammar_file)
+print('CKPT', checkpoint.ckpt_folder)
 
 print('BSIZE', my_problem.batch_size)
 print('EPOCHS', my_problem.epochs)
@@ -58,7 +62,7 @@ print('PRUN', pge.PRUN_RATE)
 print('DUPL', pge.DUPL_RATE)
 
 print('--running--')
-best = pge.execute(checkpoint=True)
+best = pge.execute(checkpoint=False)
 
 print('--best solution--')
 print(best, best.fitness)

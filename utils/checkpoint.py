@@ -1,5 +1,6 @@
 import pickle
 
+ckpt_folder = 'checkpoints'
 
 def save_solution(solution):
 	try:
@@ -22,7 +23,6 @@ def load_solution(pickle_data):
 def save_population(population, filename='pop.ckpt'):
 	
 	pickle_population = [save_solution(s) for s in population]
-
 	with open(filename, 'wb') as f:
 		pickle.dump(pickle_population, f)
 	print('population saved to file "{}"'.format(filename))
@@ -37,7 +37,6 @@ def load_population(filename='pop.ckpt'):
 	for s in temp:
 		solution = load_solution(s)
 		population.append(solution)
-		print(solution)
 	print('population loaded from file "{}"'.format(filename))
 	return population
 
@@ -53,5 +52,5 @@ def load_args(filename):
 
 	with open(filename, 'rb') as f:
 		args = pickle.load(f)
-
+	print('args loaded from file "{}"'.format(filename))
 	return args
