@@ -2,12 +2,12 @@ import sys, os
 sys.path.append('..')
 
 from algorithms import pge
-from grammars import grammar
-from problems import problem
+from grammars import BNFGrammar
+from problems import CnnProblem
 from utils import checkpoint
 
-problem.DEBUG = False
-pge.DEBUG = False
+#problem.DEBUG = False
+#pge.DEBUG = False
 
 # dataset and grammar
 pickle_file = None
@@ -23,31 +23,31 @@ if __name__ == '__main__':
 		print('expected: <grammar> <dataset> [checkp folder [from checkp]]')
 		exit()
 
-	print(sys.argv)
 	grammar_file = sys.argv[1] 
 	pickle_file = sys.argv[2]
 	if len(sys.argv) > 3: folder = sys.argv[3]
 	if len(sys.argv) > 4: checkp = sys.argv[4]
 
 	# read grammar and setup parser
-	grammar.load_grammar(grammar_file)
+	#grammar.load_grammar(grammar_file)
+	parser = BNFGrammar(grammar_file)
 
 	# reading dataset
-	my_problem = problem.CnnProblem()
-	my_problem.load_dataset_from_pickle(pickle_file)
-	pge.problem = my_problem
+	problem = CnnProblem(parser, pickle_file)
+	#my_problem.load_dataset_from_pickle(pickle_file)
+	pge.problem = problem
 
 	# problem parameters
-	my_problem.batch_size = 128
-	my_problem.epochs = 50
+	problem.batch_size = 128
+	problem.epochs = 1
 
 	# checkpoint folder
 	checkpoint.ckpt_folder = folder if folder else 'checkpoints/'
 
 	# changing pge default parameters
 	#pge.SEED = 42
-	pge.POP_SIZE = 20
-	pge.MAX_EVALS = 6000 # 300 gen
+	pge.POP_SIZE = 2
+	pge.MAX_EVALS = 10 # 300 gen
 
 	print('--config--')
 	print('DATASET', pickle_file)
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
 	print('--testing--')
 	score = best.phenotype.evaluate(
-		my_problem.x_test, 
-		my_problem.y_test, 
+		problem.x_test, 
+		problem.y_test, 
 		verbose=0)
 	print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
