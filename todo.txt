@@ -40,5 +40,12 @@ adam optimizer
 	b2 = 0.999 
 	e=1.0 * 10^-8 
 	lr = 0.01
- 500 gen para ConvSet (6000 evals/20 pop)
- 300 gen para ResSet (10000 evals/20 pop)
+ 500 gen para ConvSet (10000 evals/20 pop)
+ 300 gen para ResSet (6000 evals/20 pop)
+
+download datasets (dropbox)
+[X] wget https://www.dropbox.com/s/pzkxpuydh9zusjh/cifar-10.pickle
+[X] wget https://www.dropbox.com/s/t8upzwdxf9b4wbr/cifar-100.pickle
+[X] wget https://www.dropbox.com/s/cqdl0rolo5wr9xs/fmnist.pickle
+[X] wget https://www.dropbox.com/s/arx2whk5btkb2qh/mnist.pickle
+[X] wget https://www.dropbox.com/s/5ytds18osox2aao/notMNIST.pickle
