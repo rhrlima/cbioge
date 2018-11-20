@@ -134,7 +134,7 @@ train_datasets = load_dataset(train_folder)
 test_datasets = load_dataset(test_folder)
 
 
-train_size = 200000
+train_size = 50000#200000
 valid_size = 10000
 test_size = 10000
 
