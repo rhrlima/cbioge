@@ -90,8 +90,8 @@ if __name__ == '__main__':
 			metrics=['accuracy'])
 
 		print('--training--')
-		hist = model.fit(problem.x_train, problem.y_train, batch_size=128, 
-			epochs=50, verbose=0)
+		hist = model.fit(problem.x_train, problem.y_train, 
+			batch_size=128, epochs=50, verbose=0)
 		print('loss: {}\taccuracy: {}'.format(
 			np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
 
