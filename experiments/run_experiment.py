@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	# problem dataset and parameters
 	problem = CnnProblem(parser, pickle_file)	
 	problem.batch_size = 128
-	problem.epochs = 1
+	problem.epochs = 50
 
 	# checkpoint folder
 	folder = 'checkpoints/' if not folder else folder
@@ -50,9 +50,9 @@ if __name__ == '__main__':
 
 	# changing pge default parameters
 	pge.problem = problem
-	pge.POP_SIZE = 2
-	pge.MAX_EVALS = 10 # 300 gen
-	pge.MAX_PROCESSES = 2
+	pge.POP_SIZE = 20
+	pge.MAX_EVALS = 6000 # 300 gen
+	pge.MAX_PROCESSES = 8
 
 	print('--config--')
 	print('DATASET', pickle_file)
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
 		print('--training--')
 		hist = model.fit(problem.x_train, problem.y_train, batch_size=128, 
-			epochs=1, verbose=0)
+			epochs=50, verbose=0)
 		print('loss: {}\taccuracy: {}'.format(
 			np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
 
