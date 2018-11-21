@@ -3,6 +3,8 @@
 *.zip
 *tar.gz
 *.csv
+
+#tex
 *.aux
 *.bbl
 *.blg
@@ -13,3 +15,9 @@
 *.snm
 *.synctex.gz
 *.toc
+*.pdf
+
+#specific
+
+datasets/notmnist/notMNIST_large/
+datasets/notmnist/notMNIST_small/
