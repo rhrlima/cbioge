@@ -163,8 +163,8 @@ class CnnProblem(BaseProblem):
 		'''
 
 		try:
-			model = self.map_genotype_to_phenotype(solution.genotype)
-			model = model_from_json(model)
+			json_model = self.map_genotype_to_phenotype(solution.genotype)
+			model = model_from_json(json_model)
 
 			if not model: return -1, None
 
@@ -197,7 +197,7 @@ class CnnProblem(BaseProblem):
 			if verbose: print('loss: {}\taccuracy: {}'.format(
 				score[0], score[1]))
 
-			return score[1], model.to_json()
+			return score[1], json_model
 
 		except Exception as e:
 			if DEBUG:
