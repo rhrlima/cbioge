@@ -1,10 +1,18 @@
 import sys, os
 sys.path.append('..')
 
+#disable warning on gpu enable systems
+os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+import keras
+import numpy as np
+
 from algorithms import pge
 from grammars import BNFGrammar
 from problems import CnnProblem
 from utils import checkpoint
+from keras.models import model_from_json
 
 #problem.DEBUG = False
 #pge.DEBUG = False
@@ -29,25 +37,22 @@ if __name__ == '__main__':
 	if len(sys.argv) > 4: checkp = sys.argv[4]
 
 	# read grammar and setup parser
-	#grammar.load_grammar(grammar_file)
 	parser = BNFGrammar(grammar_file)
 
-	# reading dataset
-	problem = CnnProblem(parser, pickle_file)
-	#my_problem.load_dataset_from_pickle(pickle_file)
-	pge.problem = problem
-
-	# problem parameters
+	# problem dataset and parameters
+	problem = CnnProblem(parser, pickle_file)	
 	problem.batch_size = 128
 	problem.epochs = 1
 
 	# checkpoint folder
-	checkpoint.ckpt_folder = folder if folder else 'checkpoints/'
+	folder = 'checkpoints/' if not folder else folder
+	checkpoint.ckpt_folder = folder 
 
 	# changing pge default parameters
-	#pge.SEED = 42
+	pge.problem = problem
 	pge.POP_SIZE = 2
 	pge.MAX_EVALS = 10 # 300 gen
+	pge.MAX_PROCESSES = 2
 
 	print('--config--')
 	print('DATASET', pickle_file)
@@ -67,11 +72,29 @@ if __name__ == '__main__':
 
 	print('--best solution--')
 	print(best.fitness, best)
-	best.phenotype.summary()
 
-	print('--testing--')
-	score = best.phenotype.evaluate(
-		problem.x_test, 
-		problem.y_test, 
-		verbose=0)
-	print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
+	if best.phenotype:
+		model = keras.models.model_from_json(best.phenotype)
+		model.summary()
+
+		opt = keras.optimizers.Adam(
+			lr=0.01, 
+			beta_1=0.9, 
+			beta_2=0.999, 
+			epsilon=1.0 * 10**-8, 
+			decay=0.001, 
+			amsgrad=False)
+
+		model.compile(loss='categorical_crossentropy', 
+			optimizer='adam', 
+			metrics=['accuracy'])
+
+		print('--training--')
+		hist = model.fit(problem.x_train, problem.y_train, batch_size=128, 
+			epochs=1, verbose=0)
+		print('loss: {}\taccuracy: {}'.format(
+			np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
+
+		print('--testing--')
+		score = model.evaluate(problem.x_test, problem.y_test, verbose=0)
+		print('loss: {}\taccuracy: {}'.format(score[0], score[1]))

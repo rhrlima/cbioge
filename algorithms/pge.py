@@ -302,8 +302,6 @@ def load_state(args_file=None, pop_file=None):
 	args_file = arg_files[0]['file']
 	args = checkpoint.load_args(args_file)
 
-	print('[last checkpoint]\npop: {}\nargs: {}'.format(pop_file, args_file))
-
 	#POP_SIZE = args['POP_SIZE'] 
 	#args['MIN_GENES']
 	#args['MAX_GENES']
