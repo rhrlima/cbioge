@@ -269,7 +269,7 @@ def save_state(evals, population):
 
 	folder = checkpoint.ckpt_folder
 	if not os.path.exists(folder): os.mkdir(folder)
-	checkpoint.save_args(args, folder+'args_{}.ckpt'.format(evals))
+	checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
 	checkpoint.save_population(population, folder+'pop_{}.ckpt'.format(evals))
 
 
@@ -282,13 +282,13 @@ def load_state(args_file=None, pop_file=None):
 
 	folder = checkpoint.ckpt_folder
 
-	pop_files = glob.glob(folder+'pop_*')
+	pop_files = glob.glob(os.path.join(folder, 'pop_*'))
 	for i, file in enumerate(pop_files):
 		m = re.match('\\S+_([\\d]+).ckpt', file)
 		id = int(m.group(1)) if m else 0
 		pop_files[i] = {'id': id, 'file': file}
 
-	arg_files = glob.glob(folder+'args_*')
+	arg_files = glob.glob(os.path.join(folder, 'args_*'))
 	for i, file in enumerate(arg_files):
 		m = re.match('\\S+_([\\d]+).ckpt', file)
 		id = int(m.group(1)) if m else 0
