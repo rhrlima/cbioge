@@ -51,7 +51,7 @@ if __name__ == '__main__':
 	# changing pge default parameters
 	pge.problem = problem
 	pge.POP_SIZE = 20
-	pge.MAX_EVALS = 6000 # 300 gen
+	pge.MAX_EVALS = 600
 	pge.MAX_PROCESSES = 8
 
 	print('--config--')
