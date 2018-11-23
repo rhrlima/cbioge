@@ -17,6 +17,7 @@ rand = np.random
 DEBUG = False
 SEED = None
 
+
 class Solution:
 
 	genotype = None
