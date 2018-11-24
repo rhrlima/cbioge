@@ -20,14 +20,15 @@ checkp = False
 if __name__ == '__main__':
 
 	if len(sys.argv) < 3:
-		print('expected: <grammar> <dataset> [checkp folder [from checkp]]')
+		print('expected: <grammar> <dataset> <evals> [checkp folder [from checkp]]')
 		exit()
 
 	print(sys.argv)
 	grammar_file = sys.argv[1] 
 	pickle_file = sys.argv[2]
-	if len(sys.argv) > 3: folder = sys.argv[3]
-	if len(sys.argv) > 4: checkp = sys.argv[4]
+	evals = sys.argv[3]
+	if len(sys.argv) > 4: folder = sys.argv[4]
+	if len(sys.argv) > 5: checkp = bool(int(sys.argv[5]))
 
 	# read grammar and setup parser
 	grammar.load_grammar(grammar_file)
@@ -47,7 +48,7 @@ if __name__ == '__main__':
 	# changing pge default parameters
 	#pge.SEED = 42
 	pge.POP_SIZE = 20
-	pge.MAX_EVALS = 6000 # 300 gen
+	pge.MAX_EVALS = evals
 
 	print('--config--')
 	print('DATASET', pickle_file)
