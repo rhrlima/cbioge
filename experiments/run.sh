@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 4 ]; then
-	echo "Parameters: dataset evals from_ckpt num_exp"
+	echo "Parameters: grammar dataset evals from_ckpt num_exp"
 	exit 1
 fi
 
