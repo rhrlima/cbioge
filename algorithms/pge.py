@@ -17,6 +17,7 @@ rand = np.random
 DEBUG = False
 SEED = None
 
+
 class Solution:
 
 	genotype = None
@@ -270,7 +271,7 @@ def save_state(evals, population):
 	folder = checkpoint.ckpt_folder
 	if not os.path.exists(folder): os.mkdir(folder)
 	checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
-	checkpoint.save_population(population, folder+'pop_{}.ckpt'.format(evals))
+	checkpoint.save_population(population, os.path.join(folder, 'pop_{}.ckpt'.format(evals)))
 
 
 def load_state(args_file=None, pop_file=None):
@@ -301,8 +302,6 @@ def load_state(args_file=None, pop_file=None):
 	arg_files.sort(key=lambda x: x['id'], reverse=True)
 	args_file = arg_files[0]['file']
 	args = checkpoint.load_args(args_file)
-
-	print('[last checkpoint]\npop: {}\nargs: {}'.format(pop_file, args_file))
 
 	#POP_SIZE = args['POP_SIZE'] 
 	#args['MIN_GENES']
