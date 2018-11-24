@@ -271,7 +271,7 @@ def save_state(evals, population):
 	folder = checkpoint.ckpt_folder
 	if not os.path.exists(folder): os.mkdir(folder)
 	checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
-	checkpoint.save_population(population, folder+'pop_{}.ckpt'.format(evals))
+	checkpoint.save_population(population, os.path.join(folder, 'pop_{}.ckpt'.format(evals)))
 
 
 def load_state(args_file=None, pop_file=None):
