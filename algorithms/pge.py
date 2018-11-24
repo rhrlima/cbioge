@@ -326,7 +326,7 @@ def load_state(args_file=None, pop_file=None):
 	evals = args['evals']
 	print('evals set to', evals)
 
-	MAX_EVALS = args['MAX_EVALS']
+	MAX_EVALS = int(args['MAX_EVALS']) #temp
 	print('MAX_EVALS set to', MAX_EVALS)
 
 	return population, evals
