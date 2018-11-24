@@ -77,7 +77,7 @@ if __name__ == '__main__':
 	# changing pge default parameters
 	pge.problem = problem
 	pge.POP_SIZE = 20
-	pge.MAX_EVALS = args.evals
+	pge.MAX_EVALS = int(args.evals)
 	pge.MAX_PROCESSES = 8
 
 	print('--config--')
@@ -92,9 +92,6 @@ if __name__ == '__main__':
 	print('MUT', pge.MUT_RATE)
 	print('PRUN', pge.PRUN_RATE)
 	print('DUPL', pge.DUPL_RATE)
-
-	#
-	exit()
 
 	print('--running--')
 	best = pge.execute(checkpoint=args.checkpoint)
