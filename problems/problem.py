@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 
-from grammars import grammar as parser
+#from grammars import grammar as parser
 from algorithms import ge
 import json
 import numpy as np
@@ -9,6 +9,7 @@ import pickle
 import re
 import copy
 
+# keras
 from keras import layers
 from keras.models import Sequential, model_from_json
 from keras.optimizers import Adam
@@ -19,7 +20,7 @@ DEBUG = False
 
 
 class BaseProblem:
-
+		
 	def map_genotype_to_phenotype(self, solution):
 		raise NotImplementedError('Not implemented yet.')
 
@@ -28,6 +29,8 @@ class BaseProblem:
 
 
 class CnnProblem(BaseProblem):
+
+	parser = None
 
 	x_train= None
 	y_train= None
@@ -42,8 +45,13 @@ class CnnProblem(BaseProblem):
 	batch_size = 128
 	epochs = 1
 
-	loss = 'categorical_crossentropy' # add to grammar
+	loss = 'categorical_crossentropy'
 	metrics = ['accuracy']
+
+	def __init__(self, parser_, dataset=None):
+		self.parser = parser_
+		if dataset: self.load_dataset_from_pickle(dataset)
+
 
 	def load_dataset_from_pickle(self, pickle_file):
 		with open(pickle_file, 'rb') as f:
@@ -77,7 +85,7 @@ class CnnProblem(BaseProblem):
 		add_flatten = True
 		add_output_shape = True
 		
-		deriv = parser.parse(genotype)
+		deriv = self.parser.parse(genotype)
 
 		if not deriv: return None
 
@@ -155,8 +163,8 @@ class CnnProblem(BaseProblem):
 		'''
 
 		try:
-			model = self.map_genotype_to_phenotype(solution.genotype)
-			model = model_from_json(model)
+			json_model = self.map_genotype_to_phenotype(solution.genotype)
+			model = model_from_json(json_model)
 
 			if not model: return -1, None
 
@@ -189,7 +197,7 @@ class CnnProblem(BaseProblem):
 			if verbose: print('loss: {}\taccuracy: {}'.format(
 				score[0], score[1]))
 
-			return score[1], model.to_json()
+			return score[1], json_model
 
 		except Exception as e:
 			if DEBUG:
