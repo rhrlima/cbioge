@@ -5,6 +5,7 @@ sys.path.append('..')
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+import argparse
 import keras
 import numpy as np
 
@@ -14,50 +15,75 @@ from problems import CnnProblem
 from utils import checkpoint
 from keras.models import model_from_json
 
-#problem.DEBUG = False
-#pge.DEBUG = False
+def get_arg_parsersed():
 
-# dataset and grammar
-pickle_file = None
-grammar_file = None
+	parser = argparse.ArgumentParser(
+		prog='script.py', 
+		description='run experiment')
 
-# checkpoint folder and flag
-folder = None
-checkp = False
+	parser.add_argument('grammar', 
+		#dest='grammar_file', 
+		type=str, 
+		help='grammar file in bnf format')
+
+	parser.add_argument('dataset', 
+		#dest='dataset', 
+		type=str, 
+		help='dataset file in pickle format')
+
+	parser.add_argument('-e', '--evals', 
+		#dest='evals', 
+		default=20, 
+		type=int, 
+		help='number of max evaluations')
+
+	parser.add_argument('-f', '--folder', 
+		dest='folder', 
+		default='checkpoints', 
+		help='folder where checkpoints will be saved')
+
+	parser.add_argument('-c', '--checkpoint', 
+		#dest='checkpoint', 
+		default=False, 
+		type=str2bool, 
+		help='indication whether the experiment should continue from checkpoint')
+
+	return parser.parse_args()
+
+def str2bool(value):
+	if value.lower() in ('true', 't', '1'):
+		return True
+	elif value.lower() in ('false', 'f', '0'):
+		return False
+	else:
+		raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
 
-	if len(sys.argv) < 3:
-		print('expected: <grammar> <dataset> [checkp folder [from checkp]]')
-		exit()
-
-	grammar_file = sys.argv[1] 
-	pickle_file = sys.argv[2]
-	if len(sys.argv) > 3: folder = sys.argv[3]
-	if len(sys.argv) > 4: checkp = sys.argv[4]
+	# parses the arguments
+	args = get_arg_parsersed()
 
 	# read grammar and setup parser
-	parser = BNFGrammar(grammar_file)
+	parser = BNFGrammar(args.grammar)
 
 	# problem dataset and parameters
-	problem = CnnProblem(parser, pickle_file)	
+	problem = CnnProblem(parser, args.dataset)	
 	problem.batch_size = 128
 	problem.epochs = 50
 
 	# checkpoint folder
-	folder = 'checkpoints/' if not folder else folder
-	checkpoint.ckpt_folder = folder 
+	checkpoint.ckpt_folder = args.folder
 
 	# changing pge default parameters
 	pge.problem = problem
 	pge.POP_SIZE = 20
-	pge.MAX_EVALS = 600
+	pge.MAX_EVALS = args.evals
 	pge.MAX_PROCESSES = 8
 
 	print('--config--')
-	print('DATASET', pickle_file)
-	print('GRAMMAR', grammar_file)
-	print('CKPT', folder, checkp)
+	print('DATASET', args.dataset)
+	print('GRAMMAR', args.grammar)
+	print('CKPT', args.folder, args.checkpoint)
 
 	print('SEED', pge.SEED)
 	print('POP', pge.POP_SIZE)
@@ -67,8 +93,11 @@ if __name__ == '__main__':
 	print('PRUN', pge.PRUN_RATE)
 	print('DUPL', pge.DUPL_RATE)
 
+	#
+	exit()
+
 	print('--running--')
-	best = pge.execute(checkpoint=checkp)
+	best = pge.execute(checkpoint=args.checkpoint)
 
 	print('--best solution--')
 	print(best.fitness, best)
