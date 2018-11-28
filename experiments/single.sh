@@ -20,4 +20,3 @@ echo -e ${PBS}
 echo -e ${PBS} | qsub
 echo "done"
 
-qstat
