@@ -184,10 +184,14 @@ def replace(population, offspring):
 def execute(checkpoint=False):
 	'''
 	'''
+
+	population = None
+	evals = None
 	if checkpoint:
 		print('starting from checkpoint')
 		population, evals = load_state()
-	else:
+	
+	if not population and not evals:
 		print('starting from zero')
 		population = create_population(POP_SIZE)
 		evaluate_population(population)
@@ -294,6 +298,9 @@ def load_state(args_file=None, pop_file=None):
 		m = re.match('\\S+_([\\d]+).ckpt', file)
 		id = int(m.group(1)) if m else 0
 		arg_files[i] = {'id': id, 'file': file}
+
+	if pop_files == [] or arg_files == []:
+		return None, None
 
 	pop_files.sort(key=lambda x: x['id'], reverse=True)
 	pop_file = pop_files[0]['file']
