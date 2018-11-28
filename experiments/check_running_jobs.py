@@ -1,6 +1,9 @@
 import re
 import subprocess
+import sys
 import os
+
+flag = bool(int(sys.argv[1])) or 0
 
 data = subprocess.check_output(['qstat']).decode('utf-8')
 data = data.split('\n')
@@ -21,5 +24,7 @@ for d in datasets:
     for r in range(runs):
       c = f'{d}-{e}-{r+1}'
       if c not in running:
-        #print(c, 'NOT running')
-        os.system(f'./single.sh {d} {e} 1 {r+1}')
+        if not flag: print(c, 'NOT running')
+        else: os.system(f'./single.sh {d} {e} 1 {r+1}')
+
+os.system('qstat')
