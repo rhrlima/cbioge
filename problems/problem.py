@@ -46,6 +46,7 @@ class CnnProblem(BaseProblem):
 	epochs = 1
 
 	loss = 'categorical_crossentropy'
+	opt = 'adam'
 	metrics = ['accuracy']
 
 	def __init__(self, parser_, dataset=None):
@@ -168,17 +169,9 @@ class CnnProblem(BaseProblem):
 
 			if not model: return -1, None
 
-			opt = Adam(
-				lr=0.01, 
-				beta_1=0.9, 
-				beta_2=0.999, 
-				epsilon=1.0 * 10**-8, 
-				decay=0.001, 
-				amsgrad=False)
-
 			model.compile(
 				loss=self.loss, 
-				optimizer=opt, 
+				optimizer=self.opt, 
 				metrics=self.metrics)
 
 			# train
@@ -205,31 +198,3 @@ class CnnProblem(BaseProblem):
 				print('[evaluation] invalid model from solution: {}'.format(
 					solution.genotype))
 			return -1, None
-
-
-if __name__ == '__main__':
-
-	DEBUG = True
-	print('testing mode')
-
-	import numpy as np
-
-	parser.load_grammar('../grammars/cnn.bnf')
-
-	p = CnnProblem()
-	p.load_dataset_from_pickle('../datasets/mnist/mnist.pickle')
-
-	#while True:
-	genes = [179,  92,  14, 106,  71, 188,  20]
-	#np.random.randint(0, 255, np.random.randint(1, 10))
-	solution = ge.Solution(genes)
-
-	print(genes)
-	model = p.map_genotype_to_phenotype(genes)
-	solution.phenotype = model
-
-	if model:
-		#model.summary()
-		p.evaluate(solution, 1)
-	#else:
-	#	print('None')

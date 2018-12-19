@@ -79,6 +79,8 @@ if __name__ == '__main__':
 	pge.POP_SIZE = 20
 	pge.MAX_EVALS = int(args.evals)
 	pge.MAX_PROCESSES = 8
+	pge.MIN_GENES = 6
+	pge.MAX_GENES = 12
 
 	print('--config--')
 	print('DATASET', args.dataset)
@@ -98,22 +100,13 @@ if __name__ == '__main__':
 
 	print('--best solution--')
 	print(best.fitness, best)
-
+	
 	if best.phenotype:
 		model = keras.models.model_from_json(best.phenotype)
 		model.summary()
 
-		opt = keras.optimizers.Adam(
-			lr=0.01, 
-			beta_1=0.9, 
-			beta_2=0.999, 
-			epsilon=1.0 * 10**-8, 
-			decay=0.001, 
-			amsgrad=False)
-
 		model.compile(loss='categorical_crossentropy', 
-			optimizer='adam', 
-			metrics=['accuracy'])
+			optimizer='adam', metrics=['accuracy'])
 
 		print('--training--')
 		hist = model.fit(problem.x_train, problem.y_train, 
