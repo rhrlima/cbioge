@@ -1,4 +1,4 @@
-
+#not used
 class Solution:
 
 	genotype = None

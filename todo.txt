@@ -1,4 +1,4 @@
-[X] criar modelo a partir da gramatica
+﻿ criar modelo a partir da gramatica
 [X] criar modelo a partir do json
 [X] problema receber arquivo pickle
 [X] expandir a gramatica (adicionar demais possibilidades)
@@ -8,9 +8,6 @@
 [X] implementar operadores prune e duplication
 [ ] otimizar gramatica (substituir regras com 1 produção)
 
-[ ] adicionar optimizer na gramatica
-[ ] adicionar loss na gramatica
-[?] adicionar epochs na gramatica
 [ ] criar validações nos métodos (GE e demais)
 [ ] implementar gp cartesiana
 [X] adicionar timestamp
@@ -18,10 +15,10 @@
 
 
 [ ] escrever relatório
-[ ] verificar base cifar 100
+[X] verificar base cifar 100
 [X] ver early stop
 [X] paralelizar avaliações
-[ ] criar checkpoint
+[X] criar checkpoint
 [ ] testar abordagem x random
 
 
@@ -40,8 +37,8 @@ adam optimizer
 	b2 = 0.999 
 	e=1.0 * 10^-8 
 	lr = 0.01
- 500 (1000 evals) gen para ConvSet (10000 evals/20 pop)
- 300 (600 evals) gen para ResSet (6000 evals/20 pop)
+ 500 (1000 evals) gen para ConvSet
+ 300 (600 evals) gen para ResSet
 
 
 download datasets (dropbox)
