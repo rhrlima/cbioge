@@ -1,4 +1,4 @@
-#parallel GE modified to use qsub in evaluation
+#parallel GE modified to use a thread pool in evaluation
 import os, sys
 sys.path.append('..')
 
@@ -79,6 +79,7 @@ def evaluate_solution(solution):
 
 	if not solution.evaluated:
 		if problem is None:
+			print('PROBLEM', problem)
 			if DEBUG:
 				print('[evaluation] Problem is None, bypassing')
 				solution.fitness = -1

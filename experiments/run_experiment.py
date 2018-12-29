@@ -44,7 +44,7 @@ def get_arg_parsersed():
 
 	parser.add_argument('-c', '--checkpoint', 
 		#dest='checkpoint', 
-		default=False, 
+		default=True, 
 		type=str2bool, 
 		help='indication whether the experiment should continue from checkpoint')
 
@@ -67,9 +67,11 @@ if __name__ == '__main__':
 	parser = BNFGrammar(args.grammar)
 
 	# problem dataset and parameters
-	problem = CnnProblem(parser, args.dataset)	
+	problem = CnnProblem(parser, args.dataset)
 	problem.batch_size = 128
 	problem.epochs = 50
+
+	print('teste', problem)
 
 	# checkpoint folder
 	checkpoint.ckpt_folder = args.folder
@@ -78,7 +80,7 @@ if __name__ == '__main__':
 	pge.problem = problem
 	pge.POP_SIZE = 20
 	pge.MAX_EVALS = int(args.evals)
-	pge.MAX_PROCESSES = 8
+	pge.MAX_PROCESSES = 10
 	pge.MIN_GENES = 6
 	pge.MAX_GENES = 12
 
