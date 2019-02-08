@@ -1,12 +1,22 @@
-#not used
-class Solution:
+class BaseSolution:
+
+	genes = None
+	fitness = None
+
+	def __init__(self, genes, fitness=None):
+		self.genes = genes
+		self.fitness = fitness
+
+	def __str__(self):
+		return str(self.genes)
+
+
+class GeneticSolution:
 
 	genotype = None
 	phenotype = None
-	fitness = -1#None
-	
+	fitness = None
 	data = {}
-
 	evaluated = False
 
 	def __init__(self, genes, phen=None):
