@@ -1,4 +1,3 @@
-#not used
 from solutions import Solution
 
 class BaseEvolutionaryAlgorithm:
@@ -6,19 +5,19 @@ class BaseEvolutionaryAlgorithm:
 	MAX_PROCESSES = 1
 
 	def create_solution(self):
-		pass
+		raise NotImplementedError('Not implemented yet.')
 
 	def evaluate_solution(self):
-		pass
+		raise NotImplementedError('Not implemented yet.')
 
 	def selection(self, num_selections):
-		pass
+		raise NotImplementedError('Not implemented yet.')
 
 	def pertubation(self, solution):
-		pass
+		raise NotImplementedError('Not implemented yet.')
 
 	def execute(self):
-		pass
+		raise NotImplementedError('Not implemented yet.')
 
 
 class RandomSearch(BaseEvolutionaryAlgorithm):
@@ -31,16 +30,16 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 	MIN_SIZE = 1
 	MAX_SIZE = 10
 
-	POP_SIZE = 10
-
 	MAX_EVALS = 100
-
 	MAXIMIZE = True
 
 	def create_solution(self, min_size, max_size=None, min_value=0, max_value=1):
 
 		values = rand.randint(min_value, max_value, rand.randint(min_size, max_size))
 		return Solution(values)
+
+
+	def 
 
 
 	def execute(self):
@@ -50,13 +49,13 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 		while evals < self.MAX_EVALS:
 
 			population = []
-			for _ in range(self.POP_SIZE):
+			for _ in range(self.MAX_PROCESSES):
 				solution = self.create_solution(
 					self.MIN_SIZE, self.MAX_SIZE, 
 					self.MIN_VALUE, self.MAX_VALUE)
 				population.append(solution)
 
-			pool = Pool(processes=MAX_PROCESSES)
+			pool = Pool(processes=self.MAX_PROCESSES)
 
 			result = pool.map_async(self.evaluate_solution, population)
 
@@ -73,3 +72,4 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 			population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
 			best = population[0].copy(deep=True)
+			print('best', best.fitness)
