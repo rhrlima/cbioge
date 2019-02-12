@@ -1,4 +1,9 @@
-from solutions import Solution
+from .solutions import GESolution
+from multiprocessing import Pool, Manager
+
+import numpy as np
+import time
+
 
 class BaseEvolutionaryAlgorithm:
 
@@ -23,7 +28,6 @@ class BaseEvolutionaryAlgorithm:
 class RandomSearch(BaseEvolutionaryAlgorithm):
 
 	problem = None
-	best = None
 
 	MIN_VALUE = 0
 	MAX_VALUE = 1
@@ -33,17 +37,29 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 	MAX_EVALS = 100
 	MAXIMIZE = True
 
+
+	def __init__(self, problem):
+
+		self.problem = problem
+
+	
 	def create_solution(self, min_size, max_size=None, min_value=0, max_value=1):
 
-		values = rand.randint(min_value, max_value, rand.randint(min_size, max_size))
-		return Solution(values)
+		values = np.random.randint(
+			min_value, max_value, 
+			np.random.randint(min_size, max_size))
+
+		return GESolution(values)
 
 
-	def 
+	def evaluate_solution(self, solution):
+
+		return self.problem.evaluate(solution, 1)
 
 
 	def execute(self):
 
+		best = None
 		evals = 0
 
 		while evals < self.MAX_EVALS:
@@ -62,14 +78,23 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 			pool.close()
 			pool.join()
 
-			for sol, res in zip(population, result.get()):
-				fit, model = res
-				sol.fitness = fit
-				sol.phenotype = model
-				sol.evaluated = True
+			for solution, result in zip(population, result.get()):
+				fit, model = result
+				solution.fitness = fit
+				solution.phenotype = model
+				solution.evaluated = True
 
-			if not best: population.append(best)
+			if best: population.append(best)
 			population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
 			best = population[0].copy(deep=True)
-			print('best', best.fitness)
+			evals += len(population)
+
+			print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+				time.strftime('%x %X'), 
+				evals, self.MAX_EVALS, 
+				best.genotype, 
+				best.fitness)
+			)
+
+		return best
