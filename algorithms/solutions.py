@@ -1,15 +1,12 @@
 class BaseSolution:
 
-	genes = None
+	genotype = None
 	fitness = None
 	data = {}
 	evaluated = False
 
-	def __init__(self, genes, fitness=None, data={}):
-		self.genes = genes
-		self.fitness = fitness
-		self.data = data
-		#self.evaluated = False
+	def __init__(self, genotype):
+		self.genotype = genotype
 
 	def copy(self, deep=False):
 		solution = BaseSolution(self.genes[:])
@@ -23,15 +20,15 @@ class BaseSolution:
 		return str(self.genes)
 
 
-class GESolution:
+class GESolution(BaseSolution):
 
-	genotype = None
+	#genotype = None
 	phenotype = None
-	fitness = -1
-	evaluated = False
+	#fitness = -1
+	#evaluated = False
 
-	def __init__(self, genotype):
-		self.genotype = genotype
+	#def __init__(self, genotype):
+	#	self.genotype = genotype
 
 	def copy(self, deep=False):
 		solution = GESolution(self.genotype[:])
@@ -41,5 +38,5 @@ class GESolution:
 			solution.evaluated = self.evaluated
 		return solution
 
-	def __str__(self):
-		return str(self.genotype)
+	#def __str__(self):
+	#	return str(self.genotype)
