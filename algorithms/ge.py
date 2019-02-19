@@ -24,7 +24,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 	POP_SIZE = 5
 	MIN_GENES = 1
 	MAX_GENES = 10
-	MAX_EVALS = 100
+	MIN_VALUE = 0
+	MAX_VALUE = 255
+	MAX_EVALS = 10
 	CROSS_RATE = 0.8
 	MUT_RATE = 0.1
 	PRUN_RATE = 0.1
@@ -32,15 +34,14 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 	MAXIMIZE = True
 
 	problem = None
-	grammar = None
+	#grammar = None
 
-	def __init__(self, problem, grammar):
+	def __init__(self, problem):
 		self.problem = problem
-		self.grammar = grammar
+		#self.grammar = grammar
 
 
-	def create_solution(self, min_size=self.MIN_GENES, max_size=self.MAX_GENES, 
-		min_value=0, max_value=255):
+	def create_solution(self, min_size, max_size, min_value, max_value):
 		if not max_size:
 			max_size = min_size
 			min_size = 0
@@ -49,146 +50,140 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			raise ValueError('[create solution] min >= max')
 
 		genes = self.RAND.randint(min_value, max_value, self.RAND.randint(
-			MIN_GENES, MAX_GENES))
+			min_size, max_size))
 
-		return Solution(genes)
-
-
-def create_population(size):
-	population = []
-	for _ in range(size):
-		population.append(create_solution(MIN_GENES, MAX_GENES))
-	return population
+		return GESolution(genes)
 
 
-def evaluate_solution(solution):
-	if DEBUG: print('<{}> [evaluate] started: {}'.format(
-		time.strftime('%x %X'), solution))
+	def create_population(self, size):
+		population = []
+		for _ in range(size):
+			solution = self.create_solution(self.MIN_GENES, self.MAX_GENES, 
+					self.MIN_VALUE, self.MAX_VALUE)
+			population.append(solution)
+		return population
 
-	if not solution.evaluated:
-		if problem is None:
-			print('PROBLEM', problem)
-			if DEBUG:
-				print('[evaluation] Problem is None, bypassing')
-				solution.fitness = -1
+
+	def evaluate_solution(self, solution):
+		print('oi')
+		if self.DEBUG: print('<{}> [evaluate] started: {}'.format(
+			time.strftime('%x %X'), solution))
+
+		if not solution.evaluated:
+			if self.problem is None:
+				if self.DEBUG:
+					print('[evaluation] Problem is None, bypassing')
+					solution.fitness = -1
+				else:
+					raise ValueError('Problem is None')
 			else:
-				raise ValueError('Problem is None')
-		else:
-			fitness, model = problem.evaluate(solution)
-	
-	if DEBUG: print('<{}> [evaluate] ended: {}'.format(
-		time.strftime('%x %X'), solution))
-	
-	return fitness, model
+				fitness, model = self.problem.evaluate(solution, 1)
+		
+		if self.DEBUG: print('<{}> [evaluate] ended: {}'.format(
+			time.strftime('%x %X'), solution))
+		
+		return fitness, model
 
 
-def evaluate_population(population):
-	'''evaluate_population
+	def evaluate_population(self, population):
 
-		evaluates a population (list) of Solution objects using the 
-		multiprocessing module
+		pool = Pool(processes=self.MAX_PROCESSES)
 
-		it creates a pool of workers, each worker will evaluate one model
-		and return the correspondent fitness (float and model (json string)
+		#result = pool.map_async(self.evaluate_solution, population)
+		result = pool.map_async(self.problem.evaluate, population)
+		
+		pool.close()
+		pool.join()
 
-		at the end, the solution objet is updaded with the new information 
-	'''
-	pool = Pool(processes=MAX_PROCESSES)
-
-	result = pool.map_async(evaluate_solution, population)
-	
-	pool.close()
-	pool.join()
-
-	for sol, res in zip(population, result.get()):
-		fit, model = res
-		sol.fitness = fit
-		sol.phenotype = model
-		sol.evaluated = True
+		for sol, res in zip(population, result.get()):
+			fit, model = res
+			sol.fitness = fit
+			sol.phenotype = model
+			sol.evaluated = True
 
 
-def selection(population):
-	if len(population) < 2:
-		raise ValueError('[selection] population size is less than minimum (2)')
-	p1 = None
-	p2 = None
-	p1 = random.choice(population)
-	while not p2 or p1 is p2:
-		p2 = random.choice(population)
-	return [p1, p2]
+	def selection(self, population):
+		if len(population) < 2:
+			raise ValueError('[selection] population size is less than minimum (2)')
+		
+		p1 = None
+		p2 = None
+		p1 = self.RAND.choice(population)
+		while not p2 or p1 is p2:
+			p2 = self.RAND.choice(population)
+		return [p1, p2]
 
 
-def crossover(parents, prob):
-	# testing, returing one child
-	off1 = parents[0].copy()
-	off2 = parents[1].copy()
-	if rand.rand() < prob:
-		p1 = off1.genotype[:]
-		p2 = off2.genotype[:]
-		min_ = min(len(p1), len(p2))
-		cut = rand.randint(0, min_)
-		off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
-		#off2.genotype = np.concatenate((p2[:cut], p1[cut:]))
-	return [off1]#, off2]
+	def crossover(self, parents, prob):
+		off1 = parents[0].copy()
+		off2 = parents[1].copy()
+
+		if self.RAND.rand() < prob:
+			p1 = off1.genotype[:]
+			p2 = off2.genotype[:]
+			min_ = min(len(p1), len(p2))
+			cut = self.RAND.randint(0, min_)
+			off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
+		return [off1]
 
 
-def mutate(offspring, prob):
-	if rand.rand() < prob:
-		for off in offspring:
-			index = rand.randint(0, len(off.genotype))
-			off.genotype[index] = rand.randint(0, 255)
+	def mutate(self, offspring, prob):
+		if self.RAND.rand() < prob:
+			for off in offspring:
+				index = self.RAND.randint(0, len(off.genotype))
+				off.genotype[index] = self.RAND.randint(0, 255)
 
 
-def prune(offspring, prob):
-	if rand.rand() < prob:
-		for off in offspring:
-			if len(off.genotype) <= 1:
-				if DEBUG: print('[prune] one gene, not applying:', off.genotype)
-				continue
-			cut = rand.randint(1, len(off.genotype))
-			off.genotype = off.genotype[:cut]
+	def prune(self, offspring, prob):
+		if self.RAND.rand() < prob:
+			for off in offspring:
+				if len(off.genotype) <= 1:
+					if self.DEBUG: print('[prune] one gene, not applying:', off.genotype)
+					continue
+				cut = self.RAND.randint(1, len(off.genotype))
+				off.genotype = off.genotype[:cut]
 
 
-def duplicate(offspring, prob):
-	if rand.rand() < prob:
-		for off in offspring:
-			if len(off.genotype) > 1:
-				cut = rand.randint(0, len(off.genotype))
-			else:
-				if DEBUG: print('[duplication] one gene, setting cut to 1:', off)
-				cut = 1
-			genes = off.genotype
-			off.genotype = np.concatenate((genes, genes[:cut]))
+	def duplicate(self, offspring, prob):
+		if self.RAND.rand() < prob:
+			for off in offspring:
+				if len(off.genotype) > 1:
+					cut = self.RAND.randint(0, len(off.genotype))
+				else:
+					if self.DEBUG: print('[duplication] one gene, setting cut to 1:', off)
+					cut = 1
+				genes = off.genotype
+				off.genotype = np.concatenate((genes, genes[:cut]))
 
 
-def replace(population, offspring):
-	
-	population += offspring
-	population.sort(key=lambda x: x.fitness, reverse=not MINIMIZE)
+	def replace(self, population, offspring):
+		
+		population += offspring
+		population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
-	for _ in range(len(offspring)):
-		population.pop()
+		for _ in range(len(offspring)):
+			population.pop()
 
 
-def execute(checkpoint=False):
-	'''
-	'''
+	def execute(self, checkpoint=False):
 
-	population = None
-	evals = None
-	if checkpoint:
-		print('starting from checkpoint')
-		population, evals = load_state()
-	
-	if not population and not evals:
-		print('starting from zero')
-		population = create_population(POP_SIZE)
-		evaluate_population(population)
-		population.sort(key=lambda x:x.fitness, reverse=not MINIMIZE)
+		population = None
+		evals = None
+		#if checkpoint:
+		#	print('starting from checkpoint')
+		#	population, evals = load_state()
+		
+		#if not population and not evals:
+		#	print('starting from zero')
+		print('pop')
+		population = self.create_population(self.POP_SIZE)
+		print('eval')
+		self.evaluate_population(population)
+		population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
 		evals = len(population)
 
-		if DEBUG:
+		if self.DEBUG:
 			for i, p in enumerate(population):
 				print(i, p.fitness, p)
 
@@ -199,46 +194,38 @@ def execute(checkpoint=False):
 			population[0].fitness)
 		)
 
-		save_state(evals, population)
+		#	save_state(evals, population)
 
-	while evals < MAX_EVALS:
+		while evals < self.MAX_EVALS:
+			parents = self.selection(population)
+			offspring_pop = []
 
-		parents = selection(population)
+			for _ in population:
+				offspring = self.crossover(parents, self.CROSS_RATE)
+				self.mutate(offspring, self.MUT_RATE)
+				self.prune(offspring, self.PRUN_RATE)
+				self.duplicate(offspring, self.DUPL_RATE)
+				offspring_pop += offspring
 
-		offspring_pop = []
+			self.evaluate_population(offspring_pop)
+			self.replace(population, offspring_pop)
 
-		for _ in population:
+			evals += len(offspring_pop)
 
-			offspring = crossover(parents, CROSS_RATE)
+			if self.DEBUG:
+				for i, p in enumerate(population):
+					print(i, p.fitness, p)
+
+			print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+				time.strftime('%x %X'), 
+				evals, self.MAX_EVALS, 
+				population[0].genotype, 
+				population[0].fitness)
+			)
 			
-			mutate(offspring, MUT_RATE)
+			#save_state(evals, population)
 
-			prune(offspring, PRUN_RATE)
-
-			duplicate(offspring, DUPL_RATE)
-
-			offspring_pop += offspring
-
-		evaluate_population(offspring_pop)
-
-		replace(population, offspring_pop)
-
-		evals += len(offspring_pop)
-
-		if DEBUG:
-			for i, p in enumerate(population):
-				print(i, p.fitness, p)
-
-		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-			time.strftime('%x %X'), 
-			evals, MAX_EVALS, 
-			population[0].genotype, 
-			population[0].fitness)
-		)
-		
-		save_state(evals, population)
-
-	return population[0]
+		return population[0]
 
 
 def save_state(evals, population):
