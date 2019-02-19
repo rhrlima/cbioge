@@ -77,7 +77,7 @@ if __name__ == '__main__':
 	#algorithm.MIN_SIZE = 2
 	#algorithm.MAX_SIZE = 20
 	#algorithm.MAX_EVALS = 10
-	#algorithm.MAX_PROCESSES = 2
+	algorithm.MAX_PROCESSES = 2
 
 	print('--config--')
 	print('DATASET', args.dataset)
