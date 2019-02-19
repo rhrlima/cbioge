@@ -52,6 +52,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		genes = self.RAND.randint(min_value, max_value, self.RAND.randint(
 			min_size, max_size))
 
+		print('### ', genes)
 		return GESolution(genes)
 
 
@@ -89,8 +90,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 		pool = Pool(processes=self.MAX_PROCESSES)
 
-		#result = pool.map_async(self.evaluate_solution, population)
-		result = pool.map_async(self.problem.evaluate, population)
+		result = pool.map_async(self.evaluate_solution, population)
+		#result = pool.map_async(self.problem.evaluate, population)
 		
 		pool.close()
 		pool.join()
@@ -175,9 +176,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		
 		#if not population and not evals:
 		#	print('starting from zero')
-		print('pop')
+		print('### pop')
 		population = self.create_population(self.POP_SIZE)
-		print('eval')
+
+		print('### eval')
 		self.evaluate_population(population)
 		population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
@@ -189,7 +191,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 			time.strftime('%x %X'), 
-			evals, MAX_EVALS, 
+			evals, self.MAX_EVALS, 
 			population[0].genotype, 
 			population[0].fitness)
 		)

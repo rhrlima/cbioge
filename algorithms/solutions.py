@@ -9,7 +9,7 @@ class BaseSolution:
 		self.genotype = genotype
 
 	def copy(self, deep=False):
-		solution = BaseSolution(self.genes[:])
+		solution = BaseSolution(self.genotype[:])
 		if deep:
 			solution.fitness = self.fitness
 			solution.data = self.data
@@ -17,7 +17,7 @@ class BaseSolution:
 		return solution
 
 	def __str__(self):
-		return str(self.genes)
+		return str(self.genotype)
 
 
 class GESolution(BaseSolution):
