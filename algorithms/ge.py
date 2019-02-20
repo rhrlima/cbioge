@@ -20,25 +20,26 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 	DEBUG = False
 
-	SEED = None
-	POP_SIZE = 5
-	MIN_GENES = 1
-	MAX_GENES = 10
-	MIN_VALUE = 0
-	MAX_VALUE = 255
-	MAX_EVALS = 10
-	CROSS_RATE = 0.8
-	MUT_RATE = 0.1
-	PRUN_RATE = 0.1
-	DUPL_RATE = 0.1
-	MAXIMIZE = True
-
-	problem = None
-	#grammar = None
-
 	def __init__(self, problem):
-		self.problem = problem
-		#self.grammar = grammar
+		super(GrammaticalEvolution, self).__init__(problem)
+
+		self.SEED = None
+		
+		self.POP_SIZE = 5
+		self.MAX_EVALS = 10
+
+		self.MIN_GENES = 1
+		self.MAX_GENES = 10
+		self.MIN_VALUE = 0
+		self.MAX_VALUE = 255
+
+		self.CROSS_RATE = 0.8
+		self.MUT_RATE = 0.1
+		self.PRUN_RATE = 0.1
+		self.DUPL_RATE = 0.1
+
+		self.population = None
+		self.evals = None
 
 
 	def create_solution(self, min_size, max_size, min_value, max_value):
@@ -52,7 +53,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		genes = self.RAND.randint(min_value, max_value, self.RAND.randint(
 			min_size, max_size))
 
-		print('### ', genes)
 		return GESolution(genes)
 
 
@@ -66,7 +66,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 
 	def evaluate_solution(self, solution):
-		print('oi')
 		if self.DEBUG: print('<{}> [evaluate] started: {}'.format(
 			time.strftime('%x %X'), solution))
 
@@ -91,7 +90,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		pool = Pool(processes=self.MAX_PROCESSES)
 
 		result = pool.map_async(self.evaluate_solution, population)
-		#result = pool.map_async(self.problem.evaluate, population)
 		
 		pool.close()
 		pool.join()
@@ -168,38 +166,35 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 	def execute(self, checkpoint=False):
 
-		population = None
-		evals = None
+		#population = None
+		#evals = None
 		#if checkpoint:
 		#	print('starting from checkpoint')
 		#	population, evals = load_state()
 		
 		#if not population and not evals:
 		#	print('starting from zero')
-		print('### pop')
-		population = self.create_population(self.POP_SIZE)
+		self.population = self.create_population(self.POP_SIZE)
+		self.evaluate_population(self.population)
+		self.population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
-		print('### eval')
-		self.evaluate_population(population)
-		population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
-
-		evals = len(population)
+		self.evals = len(self.population)
 
 		if self.DEBUG:
-			for i, p in enumerate(population):
+			for i, p in enumerate(self.population):
 				print(i, p.fitness, p)
 
 		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 			time.strftime('%x %X'), 
-			evals, self.MAX_EVALS, 
-			population[0].genotype, 
-			population[0].fitness)
+			self.evals, self.MAX_EVALS, 
+			self.population[0].genotype, 
+			self.population[0].fitness)
 		)
 
 		#	save_state(evals, population)
 
-		while evals < self.MAX_EVALS:
-			parents = self.selection(population)
+		while self.evals < self.MAX_EVALS:
+			parents = self.selection(self.population)
 			offspring_pop = []
 
 			for _ in population:
@@ -210,24 +205,24 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 				offspring_pop += offspring
 
 			self.evaluate_population(offspring_pop)
-			self.replace(population, offspring_pop)
+			self.replace(self.population, offspring_pop)
 
-			evals += len(offspring_pop)
+			self.evals += len(offspring_pop)
 
 			if self.DEBUG:
-				for i, p in enumerate(population):
+				for i, p in enumerate(self.population):
 					print(i, p.fitness, p)
 
 			print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 				time.strftime('%x %X'), 
-				evals, self.MAX_EVALS, 
-				population[0].genotype, 
-				population[0].fitness)
+				self.evals, self.MAX_EVALS, 
+				self.population[0].genotype, 
+				self.population[0].fitness)
 			)
 			
 			#save_state(evals, population)
 
-		return population[0]
+		return self.population[0]
 
 
 def save_state(evals, population):

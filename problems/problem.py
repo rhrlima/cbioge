@@ -175,7 +175,7 @@ class CnnProblem(BaseProblem):
 				metrics=self.metrics)
 
 			# train
-			if verbose: print('[trainin]')
+			if verbose: print('[training]')
 			hist = model.fit(
 				self.x_train, 
 				self.y_train, 
