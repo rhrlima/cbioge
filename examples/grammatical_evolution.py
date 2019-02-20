@@ -29,7 +29,7 @@ def get_arg_parsersed():
 	parser.add_argument('-sd', '--seed', default=None, type=int)
 
 	parser.add_argument('-ep', '--epochs', default=1, type=int)
-	parser.add_argument('-b', '--batch', default=128, type=int)
+	parser.add_argument('-b', '--batch', default=32, type=int)
 	parser.add_argument('-v', '--verbose', default=0, type=int)
 
 	parser.add_argument('-e', '--evals', default=20, type=int)
@@ -70,25 +70,24 @@ if __name__ == '__main__':
 
 	# changing ge default parameters
 	algorithm = GrammaticalEvolution(problem)
-
 	algorithm.DEBUG = True
-	#algorithm.MIN_VALUE = 0
-	#algorithm.MAX_VALUE = 255
-	#algorithm.MIN_SIZE = 2
-	#algorithm.MAX_SIZE = 20
-	#algorithm.MAX_EVALS = 10
 	algorithm.MAX_PROCESSES = 2
 
 	print('--config--')
 	print('DATASET', args.dataset)
 	print('GRAMMAR', args.grammar)
+	print('EPOCHS', args.epochs)
+	print('BATCH', args.batch)
 	#print('CKPT', args.folder, args.checkpoint)
+
+	print('dict')
+	print(algorithm.__dict__)
 
 	print('--running--')
 	best = algorithm.execute(args.checkpoint)
 
 	print('--best solution--')
-	print(best.fitness, best)
+	#print(best.fitness, best)
 	
 	# if best.phenotype:
 	# 	model = keras.models.model_from_json(best.phenotype)

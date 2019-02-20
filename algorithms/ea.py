@@ -1,6 +1,11 @@
 class BaseEvolutionaryAlgorithm:
 
-	MAX_PROCESSES = 1
+	def __init__(self, problem):
+
+		self.MAX_PROCESSES = 1
+		self.MAXIMIZE = True
+
+		self.problem = problem
 
 	def create_solution(self):
 		raise NotImplementedError('Not implemented yet.')
