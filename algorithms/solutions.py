@@ -22,13 +22,7 @@ class BaseSolution:
 
 class GESolution(BaseSolution):
 
-	#genotype = None
 	phenotype = None
-	#fitness = -1
-	#evaluated = False
-
-	#def __init__(self, genotype):
-	#	self.genotype = genotype
 
 	def copy(self, deep=False):
 		solution = GESolution(self.genotype[:])
@@ -37,6 +31,3 @@ class GESolution(BaseSolution):
 			solution.phenotype = self.phenotype
 			solution.evaluated = self.evaluated
 		return solution
-
-	#def __str__(self):
-	#	return str(self.genotype)

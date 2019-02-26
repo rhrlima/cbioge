@@ -38,6 +38,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		self.PRUN_RATE = 0.1
 		self.DUPL_RATE = 0.1
 
+		self.selection = None
+
 		self.population = None
 		self.evals = None
 
@@ -101,16 +103,16 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			sol.evaluated = True
 
 
-	def selection(self, population):
-		if len(population) < 2:
-			raise ValueError('[selection] population size is less than minimum (2)')
+	# def selection(self, population):
+	# 	if len(population) < 2:
+	# 		raise ValueError('[selection] population size is less than minimum (2)')
 		
-		p1 = None
-		p2 = None
-		p1 = self.RAND.choice(population)
-		while not p2 or p1 is p2:
-			p2 = self.RAND.choice(population)
-		return [p1, p2]
+	# 	p1 = None
+	# 	p2 = None
+	# 	p1 = self.RAND.choice(population)
+	# 	while not p2 or p1 is p2:
+	# 		p2 = self.RAND.choice(population)
+	# 	return [p1, p2]
 
 
 	def crossover(self, parents, prob):
@@ -194,10 +196,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		#	save_state(evals, population)
 
 		while self.evals < self.MAX_EVALS:
-			parents = self.selection(self.population)
+			parents = self.selection.execute(self.population)
 			offspring_pop = []
 
-			for _ in population:
+			for _ in self.population:
 				offspring = self.crossover(parents, self.CROSS_RATE)
 				self.mutate(offspring, self.MUT_RATE)
 				self.prune(offspring, self.PRUN_RATE)
