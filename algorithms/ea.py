@@ -21,3 +21,4 @@ class BaseEvolutionaryAlgorithm:
 
 	def execute(self):
 		raise NotImplementedError('Not implemented yet.')
+		

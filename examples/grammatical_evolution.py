@@ -10,6 +10,8 @@ import keras
 import numpy as np
 
 from algorithms import GrammaticalEvolution
+from algorithms import TournamentSelection
+
 from grammars import BNFGrammar
 from problems import CnnProblem
 from utils import checkpoint
@@ -32,7 +34,7 @@ def get_arg_parsersed():
 	parser.add_argument('-b', '--batch', default=32, type=int)
 	parser.add_argument('-v', '--verbose', default=0, type=int)
 
-	parser.add_argument('-e', '--evals', default=20, type=int)
+	parser.add_argument('-e', '--evals', default=10, type=int)
 
 	parser.add_argument('-min', '--mingenes', default=2, type=int)
 	parser.add_argument('-max', '--maxgenes', default=10, type=int)
@@ -56,6 +58,9 @@ if __name__ == '__main__':
 	# parses the arguments
 	args = get_arg_parsersed()
 
+	# checkpoint folder
+	checkpoint.ckpt_folder = args.folder
+
 	# read grammar and setup parser
 	parser = BNFGrammar(args.grammar)
 
@@ -65,13 +70,16 @@ if __name__ == '__main__':
 	problem.epochs = args.epochs
 	problem.DEBUG = True
 
-	# checkpoint folder
-	checkpoint.ckpt_folder = args.folder
+	# algorithms operators
+	selection = TournamentSelection(maximize=True)
 
 	# changing ge default parameters
 	algorithm = GrammaticalEvolution(problem)
 	algorithm.DEBUG = True
-	algorithm.MAX_PROCESSES = 2
+	algorithm.POP_SIZE = 10
+	algorithm.MAX_EVALS = 14
+	algorithm.selection = selection
+	algorithm.MAX_PROCESSES = 4
 
 	print('--config--')
 	print('DATASET', args.dataset)
