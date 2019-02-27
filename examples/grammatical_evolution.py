@@ -26,23 +26,29 @@ def get_arg_parsersed():
 
 	parser = argparse.ArgumentParser(prog='script.py', description='run experiment')
 
+	# not optional
 	parser.add_argument('grammar', type=str, help='grammar file in bnf format')
 	parser.add_argument('dataset', type=str, help='dataset file in pickle format')
 	
+	# checkpoint
 	parser.add_argument('-f', '--folder', dest='folder', default='checkpoints')
 	parser.add_argument('-c', '--checkpoint', default=True, type=str2bool)
 
+	# problem
 	parser.add_argument('-sd', '--seed', default=None, type=int)
-
 	parser.add_argument('-ep', '--epochs', default=1, type=int)
 	parser.add_argument('-b', '--batch', default=32, type=int)
 	parser.add_argument('-v', '--verbose', default=0, type=int)
 
+	# algorithm
+	parser.add_argument('-p', '--population', default=5, type=int)
 	parser.add_argument('-e', '--evals', default=10, type=int)
-
+	parser.add_argument('-cr', '--crossover', default=0.8, type=float)
+	parser.add_argument('-mt', '--mutation', default=0.1, type=float)
+	parser.add_argument('-pr', '--prune', default=0.1, type=float)
+	parser.add_argument('-dp', '--duplication', default=0.1, type=float)
 	parser.add_argument('-min', '--mingenes', default=2, type=int)
 	parser.add_argument('-max', '--maxgenes', default=10, type=int)
-
 	parser.add_argument('-mp', '--maxprocesses', default=8, type=int)
 
 	return parser.parse_args()
@@ -104,7 +110,7 @@ if __name__ == '__main__':
 	print('--running--')
 	best = algorithm.execute(args.checkpoint)
 
-	print('--best solution--')
+	#print('--best solution--')
 	#print(best.fitness, best)
 	
 	# if best.phenotype:
