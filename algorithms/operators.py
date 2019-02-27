@@ -80,6 +80,8 @@ class PointMutation:
 
 	def __init__(self, mut_rate, min_value=0, max_value=1):
 		self.mut_rate = mut_rate
+		self.min_value = min_value
+		self.max_value = max_value
 
 	def __str__(self):
 		return 'Point Mutation'
@@ -109,7 +111,7 @@ class GEPrune:
 					return
 					#if self.DEBUG: print('[prune] one gene, not applying:', off.genotype)
 					#continue
-				cut = self.RAND.randint(1, len(off.genotype))
+				cut = np.random.randint(1, len(off.genotype))
 				off.genotype = off.genotype[:cut]
 
 
@@ -124,10 +126,10 @@ class GEDuplication:
 		return 'Duplication'
 
 	def execute(self, offspring):
-		if np.ramdom.rand() < self.dupl_rate:
+		if np.random.rand() < self.dupl_rate:
 			for off in offspring:
 				if len(off.genotype) > 1:
-					cut = self.RAND.randint(0, len(off.genotype))
+					cut = np.random.randint(0, len(off.genotype))
 				else:
 					#if self.DEBUG: print('[duplication] one gene, setting cut to 1:', off)
 					cut = 1
