@@ -11,6 +11,10 @@ import numpy as np
 
 from algorithms import GrammaticalEvolution
 from algorithms import TournamentSelection
+from algorithms import OnePointCrossover
+from algorithms import PointMutation
+from algorithms import GEPrune
+from algorithms import GEDuplication
 
 from grammars import BNFGrammar
 from problems import CnnProblem
@@ -68,18 +72,24 @@ if __name__ == '__main__':
 	problem = CnnProblem(parser, args.dataset)
 	problem.batch_size = args.batch
 	problem.epochs = args.epochs
-	problem.DEBUG = True
 
-	# algorithms operators
+	# genetic operators to GE
 	selection = TournamentSelection(maximize=True)
+	crossover = OnePointCrossover(cross_rate=0.8)
+	mutation = PointMutation(mut_rate=0.1, min_value=0, max_value=255)
+	prune = GEPrune(prun_rate=0.1)
+	duplication = GEDuplication(dupl_rate=0.1)
 
 	# changing ge default parameters
 	algorithm = GrammaticalEvolution(problem)
-	algorithm.DEBUG = True
-	algorithm.POP_SIZE = 10
+	algorithm.POP_SIZE = 8
 	algorithm.MAX_EVALS = 14
 	algorithm.selection = selection
-	algorithm.MAX_PROCESSES = 4
+	algorithm.crossover = crossover
+	algorithm.mutation = mutation
+	algorithm.prune = prune
+	algorithm.duplication = duplication
+	algorithm.MAX_PROCESSES = 8
 
 	print('--config--')
 	print('DATASET', args.dataset)
