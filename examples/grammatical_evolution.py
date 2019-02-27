@@ -49,7 +49,7 @@ def get_arg_parsersed():
 	parser.add_argument('-dp', '--duplication', default=0.1, type=float)
 	parser.add_argument('-min', '--mingenes', default=2, type=int)
 	parser.add_argument('-max', '--maxgenes', default=10, type=int)
-	parser.add_argument('-mp', '--maxprocesses', default=8, type=int)
+	parser.add_argument('-mp', '--maxprocesses', default=2, type=int)
 
 	return parser.parse_args()
 
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 	args = get_arg_parsersed()
 
 	# checkpoint folder
-	checkpoint.ckpt_folder = args.folder
+	#checkpoint.ckpt_folder = args.folder
 
 	# read grammar and setup parser
 	parser = BNFGrammar(args.grammar)
@@ -81,21 +81,21 @@ if __name__ == '__main__':
 
 	# genetic operators to GE
 	selection = TournamentSelection(maximize=True)
-	crossover = OnePointCrossover(cross_rate=0.8)
-	mutation = PointMutation(mut_rate=0.1, min_value=0, max_value=255)
-	prune = GEPrune(prun_rate=0.1)
-	duplication = GEDuplication(dupl_rate=0.1)
+	crossover = OnePointCrossover(cross_rate=args.crossover)
+	mutation = PointMutation(mut_rate=args.mutation, min_value=0, max_value=255)
+	prune = GEPrune(prun_rate=args.prune)
+	duplication = GEDuplication(dupl_rate=args.duplication)
 
 	# changing ge default parameters
 	algorithm = GrammaticalEvolution(problem)
-	algorithm.POP_SIZE = 8
-	algorithm.MAX_EVALS = 14
+	algorithm.POP_SIZE = args.population
+	algorithm.MAX_EVALS = args.evals
+	algorithm.MAX_PROCESSES = args.maxprocesses
 	algorithm.selection = selection
 	algorithm.crossover = crossover
 	algorithm.mutation = mutation
 	algorithm.prune = prune
 	algorithm.duplication = duplication
-	algorithm.MAX_PROCESSES = 8
 
 	print('--config--')
 	print('DATASET', args.dataset)

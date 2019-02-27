@@ -1,7 +1,6 @@
 class BaseEvolutionaryAlgorithm:
 
 	def __init__(self, problem):
-
 		self.MAX_PROCESSES = 1
 		self.MAXIMIZE = True
 

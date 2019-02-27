@@ -16,8 +16,6 @@ from .ea import BaseEvolutionaryAlgorithm
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
-	RAND = np.random
-
 	DEBUG = False
 
 	def __init__(self, problem):
@@ -32,11 +30,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		self.MAX_GENES = 10
 		self.MIN_VALUE = 0
 		self.MAX_VALUE = 255
-
-		#self.CROSS_RATE = 0.8
-		#self.MUT_RATE = 0.1
-		self.PRUN_RATE = 0.1
-		self.DUPL_RATE = 0.1
 
 		self.selection = None
 		self.crossover = None
@@ -56,7 +49,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		if min_size >= max_size:
 			raise ValueError('[create solution] min >= max')
 
-		genes = self.RAND.randint(min_value, max_value, self.RAND.randint(
+		genes = np.random.randint(min_value, max_value, np.random.randint(
 			min_size, max_size))
 
 		return GESolution(genes)
@@ -83,7 +76,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 				else:
 					raise ValueError('Problem is None')
 			else:
-				fitness, model = self.problem.evaluate(solution, 1)
+				fitness, model = self.problem.evaluate(solution)
 		
 		if self.DEBUG: print('<{}> [evaluate] ended: {}'.format(
 			time.strftime('%x %X'), solution))
@@ -118,8 +111,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 	def execute(self, checkpoint=False):
 
-		#population = None
-		#evals = None
 		#if checkpoint:
 		#	print('starting from checkpoint')
 		#	population, evals = load_state()
