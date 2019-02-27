@@ -107,57 +107,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			sol.evaluated = True
 
 
-	# def selection(self, population):
-	# 	if len(population) < 2:
-	# 		raise ValueError('[selection] population size is less than minimum (2)')
-		
-	# 	p1 = None
-	# 	p2 = None
-	# 	p1 = self.RAND.choice(population)
-	# 	while not p2 or p1 is p2:
-	# 		p2 = self.RAND.choice(population)
-	# 	return [p1, p2]
-
-
-	# def crossover(self, parents, prob):
-	# 	off1 = parents[0].copy()
-	# 	off2 = parents[1].copy()
-
-	# 	if self.RAND.rand() < prob:
-	# 		p1 = off1.genotype[:]
-	# 		p2 = off2.genotype[:]
-	# 		min_ = min(len(p1), len(p2))
-	# 		cut = self.RAND.randint(0, min_)
-	# 		off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
-	# 	return [off1]
-
-
-	# def mutate(self, offspring, prob):
-	# 	pass
-
-
-	# def prune(self, offspring, prob):
-	# 	if self.RAND.rand() < prob:
-	# 		for off in offspring:
-	# 			if len(off.genotype) <= 1:
-	# 				if self.DEBUG: print('[prune] one gene, not applying:', off.genotype)
-	# 				continue
-	# 			cut = self.RAND.randint(1, len(off.genotype))
-	# 			off.genotype = off.genotype[:cut]
-
-
-	# def duplicate(self, offspring, prob):
-	# 	if self.RAND.rand() < prob:
-	# 		for off in offspring:
-	# 			if len(off.genotype) > 1:
-	# 				cut = self.RAND.randint(0, len(off.genotype))
-	# 			else:
-	# 				if self.DEBUG: print('[duplication] one gene, setting cut to 1:', off)
-	# 				cut = 1
-	# 			genes = off.genotype
-	# 			off.genotype = np.concatenate((genes, genes[:cut]))
-
-
 	def replace(self, population, offspring):
 		
 		population += offspring
