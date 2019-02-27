@@ -98,6 +98,9 @@ class PointMutation:
 
 class GEPrune:
 
+	'''
+	'''
+
 	def __init__(self, prun_rate):
 		self.prun_rate = prun_rate
 
@@ -118,6 +121,9 @@ class GEPrune:
 # Duplication
 
 class GEDuplication:
+
+	'''
+	'''
 
 	def __init__(self, dupl_rate):
 		self.dupl_rate = dupl_rate
