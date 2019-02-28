@@ -134,7 +134,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			self.population[0].fitness)
 		)
 
-		#	save_state(evals, population)
+		self.save_state()
 
 		while self.evals < self.MAX_EVALS:
 			parents = self.selection.execute(self.population)
@@ -168,30 +168,21 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		return self.population[0]
 
 
-def save_state(evals, population):
+	def save_state(self):
 
-	args = {
-		'POP_SIZE': POP_SIZE, 
-		'MIN_GENES': MIN_GENES, 
-		'MAX_GENES': MAX_GENES, 
-		'MAX_EVALS': MAX_EVALS, 
+		args = self.__dict__
+		for key in args.keys():
+			if key in ['selection', 'crossover', 'mutation', 'prune', 'duplication']:
+				print(key, args[key].__dict__)
 
-		'MAX_PROCESSES': MAX_PROCESSES, 
+			elif key not in ['population', 'problem']:
+				print(key, args[key])
 
-		'CROSS_RATE': CROSS_RATE, 
-		'MUT_RATE': MUT_RATE, 
-		'PRUN_RATE': PRUN_RATE, 
-		'DUPL_RATE': DUPL_RATE, 
+		#folder = checkpoint.ckpt_folder
+		#if not os.path.exists(folder): os.mkdir(folder)
+		#checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
+		#checkpoint.save_population(population, os.path.join(folder, 'pop_{}.ckpt'.format(evals)))
 
-		'MINIMIZE': MINIMIZE, 
-
-		'evals': evals
-	}
-
-	folder = checkpoint.ckpt_folder
-	if not os.path.exists(folder): os.mkdir(folder)
-	checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
-	checkpoint.save_population(population, os.path.join(folder, 'pop_{}.ckpt'.format(evals)))
 
 
 def load_state(args_file=None, pop_file=None):
