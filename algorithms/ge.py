@@ -126,14 +126,14 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 				for i, p in enumerate(self.population):
 					print(i, p.fitness, p)
 
-			print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-				time.strftime('%x %X'), 
-				self.evals, self.MAX_EVALS, 
-				self.population[0].genotype, 
-				self.population[0].fitness)
-			)
-
 			self.save_state()
+
+		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+			time.strftime('%x %X'), 
+			self.evals, self.MAX_EVALS, 
+			self.population[0].genotype, 
+			self.population[0].fitness)
+		)
 
 		while self.evals < self.MAX_EVALS:
 			parents = self.selection.execute(self.population)
@@ -162,35 +162,38 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 				self.population[0].fitness)
 			)
 			
-			save_state()
+			self.save_state()
 
 		return self.population[0]
 
 
 	def save_state(self):
 
-		# objects = ['population', 'problem']
-		# functions = ['selection', 'crossover', 'mutation', 'prune', 'duplication']
+		data = {
+			'evals': self.evals,
+			'MAX_EVALS': self.MAX_EVALS,
+			'population': self.population,
 
-		# args = self.__dict__
-		# temp = {}
-
-		# for key in args.keys():
-		# 	if key not in objects:
-		# 		if key in functions:
-		# 			aux = {
-		# 				'name': args[key].__str__(),
-		# 				'config': args[key].__dict__
-		# 			}
-		# 			if self.DEBUG: print(aux)
-		# 		else:
-		# 			temp[key] = args[key]
-		# 			if self.DEBUG: print(f'{key}: {args[key]}')
+			'selection': {
+				'name': self.selection.__str__(), 
+				'config': self.selection.__dict__},
+			'crossover': {
+				'name': self.crossover.__str__(), 
+				'config': self.crossover.__dict__},
+			'mutation': {
+				'name': self.mutation.__str__(), 
+				'config': self.mutation.__dict__},
+			'prune': {
+				'name': self.prune.__str__(), 
+				'config': self.prune.__dict__},
+			'duplication': {
+				'name': self.duplication.__str__(), 
+				'config': self.duplication.__dict__}
+		}
 
 		folder = checkpoint.ckpt_folder
 		if not os.path.exists(folder): os.mkdir(folder)
-		#checkpoint.save_args(temp, os.path.join(folder, f'args_{self.evals}.ckpt'))
-		checkpoint.save_population(self.population, self.evals, os.path.join(folder, f'pop_{self.evals}.ckpt'))
+		checkpoint.save_data(data, os.path.join(folder, f'data_{self.evals}.ckpt'))
 
 
 	def load_state(self, args_file=None, pop_file=None):
@@ -198,57 +201,20 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			if one is None, the default behavior is to try to load the 
 			most recent one
 		'''
-		#global MAX_EVALS, CROSS_RATE, MUT_RATE, PRUN_RATE, DUPL_RATE, MINIMIZE
 
 		folder = checkpoint.ckpt_folder
 
-		pop_files = glob.glob(os.path.join(folder, 'pop_*'))
-		for i, file in enumerate(pop_files):
-			m = re.match('\\S+_([\\d]+).ckpt', file)
-			id = int(m.group(1)) if m else 0
-			pop_files[i] = {'id': id, 'file': file}
-
-		# arg_files = glob.glob(os.path.join(folder, 'args_*'))
-		# for i, file in enumerate(arg_files):
-		# 	m = re.match('\\S+_([\\d]+).ckpt', file)
-		# 	id = int(m.group(1)) if m else 0
-		# 	arg_files[i] = {'id': id, 'file': file}
-
-		if pop_files == []:
-			self.population = None
+		data_files = glob.glob(os.path.join(folder, 'data_*'))
+		if data_files == []:
+			print('[checkpoint] no data file found')
 			self.evals = None
+			self.population = None
 			return
 
-		pop_files.sort(key=lambda x: x['id'], reverse=True)
-		pop_file = pop_files[0]['file']
-		self.population, self.evals = checkpoint.load_population(pop_file)
+		data_files.sort(reverse=True)
+		data = checkpoint.load_data(data_files[0])
 
-		# arg_files.sort(key=lambda x: x['id'], reverse=True)
-		# args_file = arg_files[0]['file']
-		# self.__dict__ = checkpoint.load_args(args_file)
-
-		#POP_SIZE = args['POP_SIZE'] 
-		#args['MIN_GENES']
-		#args['MAX_GENES']
-		#args['MAX_PROCESSES']
-		
-		# print('CROSS_RATE set to', CROSS_RATE)
-		# CROSS_RATE = args['CROSS_RATE']
-		
-		# print('MUT_RATE set to', MUT_RATE)
-		# MUT_RATE = args['MUT_RATE']
-
-		# print('PRUN_RATE set to', PRUN_RATE)
-		# PRUN_RATE = args['PRUN_RATE'] 
-
-		# print('DUPL_RATE set to', DUPL_RATE)
-		# DUPL_RATE = args['DUPL_RATE']
-
-		# print('MINIZE set to', MINIMIZE)
-		# MINIMIZE = args['MINIMIZE']
-
-		# evals = args['evals']
-		# print('evals set to', evals)
-
-		# MAX_EVALS = int(args['MAX_EVALS']) #temp
-		# print('MAX_EVALS set to', MAX_EVALS)
+		self.evals = data['evals']
+		self.MAX_EVALS = data['MAX_EVALS']
+		self.population = data['population']
+#
