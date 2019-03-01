@@ -18,6 +18,7 @@ from algorithms import GEDuplication
 
 from grammars import BNFGrammar
 from problems import CnnProblem
+
 from utils import checkpoint
 from keras.models import model_from_json
 
@@ -47,8 +48,8 @@ def get_arg_parsersed():
 	parser.add_argument('-mt', '--mutation', default=0.1, type=float)
 	parser.add_argument('-pr', '--prune', default=0.1, type=float)
 	parser.add_argument('-dp', '--duplication', default=0.1, type=float)
-	parser.add_argument('-min', '--mingenes', default=2, type=int)
-	parser.add_argument('-max', '--maxgenes', default=10, type=int)
+	parser.add_argument('-mig', '--mingenes', default=2, type=int)
+	parser.add_argument('-mag', '--maxgenes', default=10, type=int)
 	parser.add_argument('-mp', '--maxprocesses', default=2, type=int)
 
 	return parser.parse_args()
@@ -69,7 +70,7 @@ if __name__ == '__main__':
 	args = get_arg_parsersed()
 
 	# checkpoint folder
-	#checkpoint.ckpt_folder = args.folder
+	checkpoint.ckpt_folder = args.folder
 
 	# read grammar and setup parser
 	parser = BNFGrammar(args.grammar)
@@ -111,8 +112,8 @@ if __name__ == '__main__':
 	print('--running--')
 	best = algorithm.execute(args.checkpoint)
 
-	#print('--best solution--')
-	#print(best.fitness, best)
+	print('--best solution--')
+	print(best.fitness, best)
 	
 	# if best.phenotype:
 	# 	model = keras.models.model_from_json(best.phenotype)

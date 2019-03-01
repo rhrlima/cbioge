@@ -71,7 +71,6 @@ def save_data(data, filename='data.ckpt'):
 
 def load_data(filename):
 
-	data = None
 	with open(filename, 'rb') as f:
 		data = pickle.load(f)
 		print(f'data loaded from file: {filename}')
