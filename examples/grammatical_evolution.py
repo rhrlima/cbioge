@@ -88,6 +88,7 @@ if __name__ == '__main__':
 
 	# changing ge default parameters
 	algorithm = GrammaticalEvolution(problem)
+	#algorithm.DEBUG = True
 	algorithm.POP_SIZE = args.population
 	algorithm.MAX_EVALS = args.evals
 	algorithm.MAX_PROCESSES = args.maxprocesses
@@ -102,10 +103,10 @@ if __name__ == '__main__':
 	print('GRAMMAR', args.grammar)
 	print('EPOCHS', args.epochs)
 	print('BATCH', args.batch)
-	#print('CKPT', args.folder, args.checkpoint)
+	print('CKPT', args.folder, args.checkpoint)
 
-	print('dict')
-	print(algorithm.__dict__)
+	print('POP', args.population)
+	print('EVALS', args.evals)
 
 	print('--running--')
 	best = algorithm.execute(args.checkpoint)
