@@ -111,30 +111,29 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 	def execute(self, checkpoint=False):
 
-		#if checkpoint:
-		#	print('starting from checkpoint')
-		#	population, evals = load_state()
+		if checkpoint:
+			print('starting from checkpoint')
+			self.load_state()
 		
-		#if not population and not evals:
-		#	print('starting from zero')
-		self.population = self.create_population(self.POP_SIZE)
-		self.evaluate_population(self.population)
-		self.population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
+		if not self.population or not self.evals:
+			print('starting from scratch')
+			self.population = self.create_population(self.POP_SIZE)
+			self.evaluate_population(self.population)
+			self.population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
+			self.evals = len(self.population)
 
-		self.evals = len(self.population)
+			if self.DEBUG:
+				for i, p in enumerate(self.population):
+					print(i, p.fitness, p)
 
-		if self.DEBUG:
-			for i, p in enumerate(self.population):
-				print(i, p.fitness, p)
+			print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
+				time.strftime('%x %X'), 
+				self.evals, self.MAX_EVALS, 
+				self.population[0].genotype, 
+				self.population[0].fitness)
+			)
 
-		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-			time.strftime('%x %X'), 
-			self.evals, self.MAX_EVALS, 
-			self.population[0].genotype, 
-			self.population[0].fitness)
-		)
-
-		self.save_state()
+			self.save_state()
 
 		while self.evals < self.MAX_EVALS:
 			parents = self.selection.execute(self.population)
@@ -163,84 +162,93 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 				self.population[0].fitness)
 			)
 			
-			#save_state(evals, population)
+			save_state()
 
 		return self.population[0]
 
 
 	def save_state(self):
 
-		args = self.__dict__
-		for key in args.keys():
-			if key in ['selection', 'crossover', 'mutation', 'prune', 'duplication']:
-				print(key, args[key].__dict__)
+		# objects = ['population', 'problem']
+		# functions = ['selection', 'crossover', 'mutation', 'prune', 'duplication']
 
-			elif key not in ['population', 'problem']:
-				print(key, args[key])
+		# args = self.__dict__
+		# temp = {}
 
-		#folder = checkpoint.ckpt_folder
-		#if not os.path.exists(folder): os.mkdir(folder)
-		#checkpoint.save_args(args, os.path.join(folder, 'args_{}.ckpt'.format(evals)))
-		#checkpoint.save_population(population, os.path.join(folder, 'pop_{}.ckpt'.format(evals)))
+		# for key in args.keys():
+		# 	if key not in objects:
+		# 		if key in functions:
+		# 			aux = {
+		# 				'name': args[key].__str__(),
+		# 				'config': args[key].__dict__
+		# 			}
+		# 			if self.DEBUG: print(aux)
+		# 		else:
+		# 			temp[key] = args[key]
+		# 			if self.DEBUG: print(f'{key}: {args[key]}')
+
+		folder = checkpoint.ckpt_folder
+		if not os.path.exists(folder): os.mkdir(folder)
+		#checkpoint.save_args(temp, os.path.join(folder, f'args_{self.evals}.ckpt'))
+		checkpoint.save_population(self.population, self.evals, os.path.join(folder, f'pop_{self.evals}.ckpt'))
 
 
+	def load_state(self, args_file=None, pop_file=None):
+		''' loads the state stored in both args file and pop file
+			if one is None, the default behavior is to try to load the 
+			most recent one
+		'''
+		#global MAX_EVALS, CROSS_RATE, MUT_RATE, PRUN_RATE, DUPL_RATE, MINIMIZE
 
-def load_state(args_file=None, pop_file=None):
-	''' loads the state stored in both args file and pop file
-		if one is None, the default behavior is to try to load the 
-		most recent one
-	'''
-	global MAX_EVALS, CROSS_RATE, MUT_RATE, PRUN_RATE, DUPL_RATE, MINIMIZE
+		folder = checkpoint.ckpt_folder
 
-	folder = checkpoint.ckpt_folder
+		pop_files = glob.glob(os.path.join(folder, 'pop_*'))
+		for i, file in enumerate(pop_files):
+			m = re.match('\\S+_([\\d]+).ckpt', file)
+			id = int(m.group(1)) if m else 0
+			pop_files[i] = {'id': id, 'file': file}
 
-	pop_files = glob.glob(os.path.join(folder, 'pop_*'))
-	for i, file in enumerate(pop_files):
-		m = re.match('\\S+_([\\d]+).ckpt', file)
-		id = int(m.group(1)) if m else 0
-		pop_files[i] = {'id': id, 'file': file}
+		# arg_files = glob.glob(os.path.join(folder, 'args_*'))
+		# for i, file in enumerate(arg_files):
+		# 	m = re.match('\\S+_([\\d]+).ckpt', file)
+		# 	id = int(m.group(1)) if m else 0
+		# 	arg_files[i] = {'id': id, 'file': file}
 
-	arg_files = glob.glob(os.path.join(folder, 'args_*'))
-	for i, file in enumerate(arg_files):
-		m = re.match('\\S+_([\\d]+).ckpt', file)
-		id = int(m.group(1)) if m else 0
-		arg_files[i] = {'id': id, 'file': file}
+		if pop_files == []:
+			self.population = None
+			self.evals = None
+			return
 
-	if pop_files == [] or arg_files == []:
-		return None, None
+		pop_files.sort(key=lambda x: x['id'], reverse=True)
+		pop_file = pop_files[0]['file']
+		self.population, self.evals = checkpoint.load_population(pop_file)
 
-	pop_files.sort(key=lambda x: x['id'], reverse=True)
-	pop_file = pop_files[0]['file']
-	population = checkpoint.load_population(pop_file)
+		# arg_files.sort(key=lambda x: x['id'], reverse=True)
+		# args_file = arg_files[0]['file']
+		# self.__dict__ = checkpoint.load_args(args_file)
 
-	arg_files.sort(key=lambda x: x['id'], reverse=True)
-	args_file = arg_files[0]['file']
-	args = checkpoint.load_args(args_file)
+		#POP_SIZE = args['POP_SIZE'] 
+		#args['MIN_GENES']
+		#args['MAX_GENES']
+		#args['MAX_PROCESSES']
+		
+		# print('CROSS_RATE set to', CROSS_RATE)
+		# CROSS_RATE = args['CROSS_RATE']
+		
+		# print('MUT_RATE set to', MUT_RATE)
+		# MUT_RATE = args['MUT_RATE']
 
-	#POP_SIZE = args['POP_SIZE'] 
-	#args['MIN_GENES']
-	#args['MAX_GENES']
-	#args['MAX_PROCESSES']
-	
-	print('CROSS_RATE set to', CROSS_RATE)
-	CROSS_RATE = args['CROSS_RATE']
-	
-	print('MUT_RATE set to', MUT_RATE)
-	MUT_RATE = args['MUT_RATE']
+		# print('PRUN_RATE set to', PRUN_RATE)
+		# PRUN_RATE = args['PRUN_RATE'] 
 
-	print('PRUN_RATE set to', PRUN_RATE)
-	PRUN_RATE = args['PRUN_RATE'] 
+		# print('DUPL_RATE set to', DUPL_RATE)
+		# DUPL_RATE = args['DUPL_RATE']
 
-	print('DUPL_RATE set to', DUPL_RATE)
-	DUPL_RATE = args['DUPL_RATE']
+		# print('MINIZE set to', MINIMIZE)
+		# MINIMIZE = args['MINIMIZE']
 
-	print('MINIZE set to', MINIMIZE)
-	MINIMIZE = args['MINIMIZE']
+		# evals = args['evals']
+		# print('evals set to', evals)
 
-	evals = args['evals']
-	print('evals set to', evals)
-
-	MAX_EVALS = int(args['MAX_EVALS']) #temp
-	print('MAX_EVALS set to', MAX_EVALS)
-
-	return population, evals
+		# MAX_EVALS = int(args['MAX_EVALS']) #temp
+		# print('MAX_EVALS set to', MAX_EVALS)

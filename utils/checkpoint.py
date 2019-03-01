@@ -20,11 +20,16 @@ def load_solution(pickle_data):
 	return solution
 
 
-def save_population(population, filename='pop.ckpt'):
+def save_population(population, evals, filename='pop.ckpt'):
 	
 	pickle_population = [save_solution(s) for s in population]
+	data = {
+		'evals': evals,
+		'population': pickle_population
+	}
+	
 	with open(filename, 'wb') as f:
-		pickle.dump(pickle_population, f)
+		pickle.dump(data, f)
 	print('population saved to file "{}"'.format(filename))
 	
 
@@ -33,24 +38,25 @@ def load_population(filename='pop.ckpt'):
 	with open(filename, 'rb') as f:
 		temp = pickle.load(f)
 		
+	evals = temp['evals']
 	population = []
-	for s in temp:
+	for s in temp['population']:
 		solution = load_solution(s)
 		population.append(solution)
 	print('population loaded from file "{}"'.format(filename))
-	return population
+	return population, evals
 
 
 def save_args(args, filename='args.ckpt'):
 
 	with open(filename, 'wb') as f:
 		pickle.dump(args, f)
-	print('args saved to file "{}"'.format(filename))
+	print(f'args saved to file "{filename}"')
 
 
 def load_args(filename):
 
 	with open(filename, 'rb') as f:
 		args = pickle.load(f)
-	print('args loaded from file "{}"'.format(filename))
+	print(f'args loaded from file "{filename}"')
 	return args
