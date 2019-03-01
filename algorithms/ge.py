@@ -112,11 +112,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 	def execute(self, checkpoint=False):
 
 		if checkpoint:
-			print('starting from checkpoint')
+			print('[execute] starting from checkpoint')
 			self.load_state()
 		
 		if not self.population or not self.evals:
-			print('starting from scratch')
+			print('[execute] starting from scratch')
 			self.population = self.create_population(self.POP_SIZE)
 			self.evaluate_population(self.population)
 			self.population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
@@ -127,6 +127,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 					print(i, p.fitness, p)
 
 			self.save_state()
+
 
 		print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
 			time.strftime('%x %X'), 
@@ -171,25 +172,17 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 		data = {
 			'evals': self.evals,
-			'MAX_EVALS': self.MAX_EVALS,
+			#'MAX_EVALS': self.MAX_EVALS,
 			'population': self.population,
 
-			'selection': {
-				'name': self.selection.__str__(), 
-				'config': self.selection.__dict__},
-			'crossover': {
-				'name': self.crossover.__str__(), 
-				'config': self.crossover.__dict__},
-			'mutation': {
-				'name': self.mutation.__str__(), 
-				'config': self.mutation.__dict__},
-			'prune': {
-				'name': self.prune.__str__(), 
-				'config': self.prune.__dict__},
-			'duplication': {
-				'name': self.duplication.__str__(), 
-				'config': self.duplication.__dict__}
+			#'selection': self.selection.export(),
+			#'crossover': self.crossover.export(),
+			#'mutation': self.mutation.export(),
+			#'prune': self.prune.export(),
+			#'duplication': self.duplication.export()
 		}
+
+		print(data)
 
 		folder = checkpoint.ckpt_folder
 		if not os.path.exists(folder): os.mkdir(folder)
@@ -197,10 +190,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 
 	def load_state(self, args_file=None, pop_file=None):
-		''' loads the state stored in both args file and pop file
-			if one is None, the default behavior is to try to load the 
-			most recent one
-		'''
 
 		folder = checkpoint.ckpt_folder
 
@@ -215,6 +204,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		data = checkpoint.load_data(data_files[0])
 
 		self.evals = data['evals']
-		self.MAX_EVALS = data['MAX_EVALS']
+		#self.MAX_EVALS = data['MAX_EVALS']
 		self.population = data['population']
 #
