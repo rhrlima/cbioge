@@ -1,8 +1,14 @@
 import numpy as np
 
+class GeneticOperator:
+
+	def export(self):
+		return {'name': self.__str__(), 'config': self.__dict__}
+
+
 # Selection
 
-class TournamentSelection:
+class TournamentSelection(GeneticOperator):
 
 	''' Tournament Selection picks N random solutions,
 		the best solution among these N is added to list of parents.
@@ -37,7 +43,7 @@ class TournamentSelection:
 
 # Crossover
 
-class OnePointCrossover:
+class OnePointCrossover(GeneticOperator):
 
 	''' One Point Crossover combines two solutions into one new by
 		combining the first half of the first parent solution and
@@ -67,7 +73,7 @@ class OnePointCrossover:
 
 # Mutation
 
-class PointMutation:
+class PointMutation(GeneticOperator):
 
 	''' Point Mutation changes a list of solutions by selecting a random
 		point and generating a new value for that position (repeate for
@@ -96,7 +102,7 @@ class PointMutation:
 
 # Prune
 
-class GEPrune:
+class GEPrune(GeneticOperator):
 
 	'''
 	'''
@@ -120,7 +126,7 @@ class GEPrune:
 
 # Duplication
 
-class GEDuplication:
+class GEDuplication(GeneticOperator):
 
 	'''
 	'''

@@ -9,18 +9,12 @@ import argparse
 import keras
 import numpy as np
 
-from algorithms import GrammaticalEvolution
-from algorithms import TournamentSelection
-from algorithms import OnePointCrossover
-from algorithms import PointMutation
-from algorithms import GEPrune
-from algorithms import GEDuplication
+from algorithms import *
 
 from grammars import BNFGrammar
 from problems import CnnProblem
 
 from utils import checkpoint
-from keras.models import model_from_json
 
 
 def get_arg_parsersed():
@@ -113,21 +107,4 @@ if __name__ == '__main__':
 	best = algorithm.execute(args.checkpoint)
 
 	print('--best solution--')
-	print(best.fitness, best)
-	
-	# if best.phenotype:
-	# 	model = keras.models.model_from_json(best.phenotype)
-	# 	model.summary()
-
-	# 	model.compile(loss='categorical_crossentropy', 
-	# 		optimizer='adam', metrics=['accuracy'])
-
-	# 	print('--training--')
-	# 	hist = model.fit(problem.x_train, problem.y_train, 
-	# 		batch_size=128, epochs=50, verbose=args.verbose)
-	# 	print('loss: {}\taccuracy: {}'.format(
-	# 		np.mean(hist.history['loss']), np.mean(hist.history['acc'])))
-
-	# 	print('--testing--')
-	# 	score = model.evaluate(problem.x_test, problem.y_test, verbose=args.verbose)
-	# 	print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
+	if best: print(best.fitness, best)
