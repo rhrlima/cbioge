@@ -60,3 +60,19 @@ def load_args(filename):
 		args = pickle.load(f)
 	print(f'args loaded from file "{filename}"')
 	return args
+
+
+def save_data(data, filename='data.ckpt'):
+
+	with open(filename, 'wb') as f:
+		pickle.dump(data, f)
+		print(f'data saved to file: {filename}')
+
+
+def load_data(filename):
+
+	data = None
+	with open(filename, 'rb') as f:
+		data = pickle.load(f)
+		print(f'data loaded from file: {filename}')
+	return data
