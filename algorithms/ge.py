@@ -172,14 +172,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
 		data = {
 			'evals': self.evals,
-			#'MAX_EVALS': self.MAX_EVALS,
 			'population': self.population,
-
-			#'selection': self.selection.export(),
-			#'crossover': self.crossover.export(),
-			#'mutation': self.mutation.export(),
-			#'prune': self.prune.export(),
-			#'duplication': self.duplication.export()
 		}
 
 		folder = checkpoint.ckpt_folder
@@ -202,6 +195,5 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		data = checkpoint.load_data(data_files[0])
 
 		self.evals = data['evals']
-		#self.MAX_EVALS = data['MAX_EVALS']
 		self.population = data['population']
 #
