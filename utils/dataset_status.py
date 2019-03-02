@@ -1,8 +1,6 @@
 import pickle
 import sys
 
-
-
 dataset_file = sys.argv[1]
 
 with open(dataset_file, 'rb') as f:
