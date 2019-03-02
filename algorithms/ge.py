@@ -182,8 +182,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			#'duplication': self.duplication.export()
 		}
 
-		print(data)
-
 		folder = checkpoint.ckpt_folder
 		if not os.path.exists(folder): os.mkdir(folder)
 		checkpoint.save_data(data, os.path.join(folder, f'data_{self.evals}.ckpt'))
