@@ -8,8 +8,6 @@ import numpy as np
 
 from grammars import BNFGrammar
 from problems import CnnProblem
-#from keras.models import model_from_json
-
 
 #disable warning on gpu enable systems
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
@@ -24,7 +22,7 @@ def get_arg_parsersed():
 	parser.add_argument('dataset', type=str, help='dataset file in pickle format')
 	parser.add_argument('solution', type=str)
 	parser.add_argument('-e', '--epochs', default=500, type=int)
-	parser.add_argument('-b', '--batch', default=128, type=int)
+	parser.add_argument('-b', '--batch', default=32, type=int)
 	parser.add_argument('-v', '--verbose', default=0, type=int)
 
 	return parser.parse_args()
