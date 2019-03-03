@@ -13,14 +13,18 @@ for i, line in enumerate(data):
   if 1 < i < len(data) - 1:
     running.append(line.split('@')[1])
 
+
+scriptname = 'run_experiment.py'
 runs = 5
 datasets = ['c10']
 evals = ['600', '1000']
 
-# compare the running jobs with the configs we want to run
+# runs the configs that are not in the running list
 for d in datasets:
 	for e in evals:
 		for r in range(runs):
 			jobname = f'{d}-{e}-{r+1}'
-			command = f"'../grammars/cnn.bnf ../datasets/{d}.pickle -p 20 -ep 50 -b 128 -e {e} -f {jobname}'"
-			print(command in running, command)
+			if jobname not in running:
+				args = f"'../grammars/cnn.bnf ../datasets/{d}.pickle -p 20 -ep 50 -b 128 -e {e} -f {jobname}'"
+				command = f'./run_intel.sh {jobname} {scriptname} {args}'
+				os.system(command)
