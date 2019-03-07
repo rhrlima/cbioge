@@ -191,7 +191,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			self.population = None
 			return
 
-		data_files.sort(reverse=True)
+		data_files.sort(key=lambda x: checkpoint.natural_key(x), reverse=True)
 		data = checkpoint.load_data(data_files[0])
 
 		self.evals = data['evals']
