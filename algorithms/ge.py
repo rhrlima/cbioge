@@ -180,7 +180,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 		checkpoint.save_data(data, os.path.join(folder, f'data_{self.evals}.ckpt'))
 
 
-	def load_state(self, args_file=None, pop_file=None):
+	def load_state(self):
 
 		folder = checkpoint.ckpt_folder
 
@@ -191,7 +191,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 			self.population = None
 			return
 
-		data_files.sort(reverse=True)
+		data_files.sort(key=lambda x: checkpoint.natural_key(x), reverse=True)
 		data = checkpoint.load_data(data_files[0])
 
 		self.evals = data['evals']
