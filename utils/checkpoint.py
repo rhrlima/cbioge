@@ -1,3 +1,4 @@
+import re
 import pickle
 
 
@@ -17,3 +18,7 @@ def load_data(filename):
 		data = pickle.load(f)
 		print(f'data loaded from file: {filename}')
 	return data
+
+
+def natural_key(string_):
+	return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
