@@ -1,4 +1,4 @@
-﻿ criar modelo a partir da gramatica
+﻿[X] criar modelo a partir da gramatica
 [X] criar modelo a partir do json
 [X] problema receber arquivo pickle
 [X] expandir a gramatica (adicionar demais possibilidades)
@@ -8,18 +8,14 @@
 [X] implementar operadores prune e duplication
 [ ] otimizar gramatica (substituir regras com 1 produção)
 
-[ ] criar validações nos métodos (GE e demais)
-[ ] implementar gp cartesiana
 [X] adicionar timestamp
 [X] remover loss do fitness
-
-[ ] escrever relatório
 [X] verificar base cifar 100
 [X] ver early stop
 [X] paralelizar avaliações
 [X] criar checkpoint
 [ ] testar abordagem x random
-
+[ ] flexibilizar filters, ksize, psize, units (igual rate)
 
 ---
 
