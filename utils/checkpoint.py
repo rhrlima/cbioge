@@ -21,4 +21,5 @@ def load_data(filename):
 
 
 def natural_key(string_):
+	
 	return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]

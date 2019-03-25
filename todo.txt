@@ -20,8 +20,3 @@
 ---
 
 download datasets (dropbox)
-[X] wget https://www.dropbox.com/s/pzkxpuydh9zusjh/cifar-10.pickle
-[X] wget https://www.dropbox.com/s/t8upzwdxf9b4wbr/cifar-100.pickle
-[X] wget https://www.dropbox.com/s/cqdl0rolo5wr9xs/fmnist.pickle
-[X] wget https://www.dropbox.com/s/arx2whk5btkb2qh/mnist.pickle
-[X] wget https://www.dropbox.com/s/5ytds18osox2aao/notMNIST.pickle

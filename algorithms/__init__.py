@@ -1,3 +1,5 @@
+"""Overwrites __init__ module to offer desired components"""
+
 from .rs import RandomSearch
 from .ge import GrammaticalEvolution
 
@@ -8,11 +10,5 @@ from .operators import GEPrune
 from .operators import GEDuplication
 
 __all__ = [
-	'RandomSearch', 
-	'GrammaticalEvolution',
-	'TournamentSelection',
-	'OnePointCrossover',
-	'PointMutation',
-	'GEPrune',
-	'GEDuplication'
-	]
+    'RandomSearch', 'GrammaticalEvolution', 'TournamentSelection',
+    'OnePointCrossover', 'PointMutation', 'GEPrune', 'GEDuplication']
