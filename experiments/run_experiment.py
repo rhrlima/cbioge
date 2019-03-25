@@ -90,7 +90,7 @@ if __name__ == '__main__':
 	# changing ge default parameters
 	alg = GrammaticalEvolution(problem)
 	#alg.DEBUG = False
-	alg.SEED 		= args.seed
+	alg.seed 		= args.seed
 	alg.POP_SIZE 	= args.population
 	alg.MAX_EVALS 	= args.evals
 	alg.MIN_GENES 	= args.mingenes
