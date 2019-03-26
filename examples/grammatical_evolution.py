@@ -1,25 +1,26 @@
-import sys
+import sys; sys.path.append('..')  # workarround
 import os
 import argparse
 
-sys.path.append('..')
-
-from algorithms import *
+from algorithms import TournamentSelection, OnePointCrossover, PointMutation
+from algorithms import GEPrune, GEDuplication, GrammaticalEvolution
 from grammars import BNFGrammar
 from problems import CnnProblem
 from utils import checkpoint
+
 
 # disable warning on gpu enable systems
 os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+
 def get_arg_parsersed():
 
-    parser = argparse.ArgumentParser(prog='script.py', description='run experiment')
+    parser = argparse.ArgumentParser(prog='script.py')
 
     # not optional
-    parser.add_argument('grammar', type=str, help='grammar file in bnf format')
-    parser.add_argument('dataset', type=str, help='dataset file in pickle format')
+    parser.add_argument('grammar', type=str)
+    parser.add_argument('dataset', type=str)
 
     # checkpoint
     parser.add_argument('-f', '--folder', dest='folder', default='checkpoints')
@@ -73,13 +74,14 @@ if __name__ == '__main__':
     # genetic operators to GE
     selection = TournamentSelection(maximize=True)
     crossover = OnePointCrossover(cross_rate=args.crossover)
-    mutation = PointMutation(mut_rate=args.mutation, min_value=0, max_value=255)
+    mutation = PointMutation(mut_rate=args.mutation,
+                             min_value=0, max_value=255)
     prune = GEPrune(prun_rate=args.prune)
     duplication = GEDuplication(dupl_rate=args.duplication)
 
     # changing ge default parameters
     algorithm = GrammaticalEvolution(problem)
-    #algorithm.DEBUG = True
+    # algorithm.DEBUG = True
     algorithm.POP_SIZE = args.population
     algorithm.MAX_EVALS = args.evals
     algorithm.MAX_PROCESSES = args.maxprocesses
@@ -103,4 +105,7 @@ if __name__ == '__main__':
     best = algorithm.execute(args.checkpoint)
 
     print('--best solution--')
-    if best: print(best.fitness, best)
+    if best:
+        print(best.fitness, best)
+    else:
+        print('None solution')
