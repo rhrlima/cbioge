@@ -90,6 +90,7 @@ if __name__ == '__main__':
     algorithm.mutation = mutation
     algorithm.prune = prune
     algorithm.duplication = duplication
+    algorithm.verbose = args.verbose
 
     print('--config--')
     print('DATASET', args.dataset)
