@@ -1,5 +1,3 @@
-"""Operators"""
-
 import numpy as np
 
 
@@ -107,7 +105,11 @@ class PointMutation(GeneticOperator):
 
 class GEPrune(GeneticOperator):
 
-    '''
+    ''' The Prune operator truncates a solution in a random point, it repeates
+        for each solution of the offspring list
+
+        prun_rate: chance of applying the operator
+        offspring: list of solutions
     '''
 
     def __init__(self, prun_rate):
@@ -119,10 +121,9 @@ class GEPrune(GeneticOperator):
     def execute(self, offspring):
         if np.random.rand() < self.prun_rate:
             for off in offspring:
+                # not apply when solution has one gene
                 if len(off.genotype) <= 1:
                     return
-                    #if self.DEBUG: print('[prune] one gene, not applying:', off.genotype)
-                    #continue
                 cut = np.random.randint(1, len(off.genotype))
                 off.genotype = off.genotype[:cut]
 
@@ -131,7 +132,11 @@ class GEPrune(GeneticOperator):
 
 class GEDuplication(GeneticOperator):
 
-    '''
+    ''' Duplication selects part of a solution and copy-paste it at the end
+        of that solution, it repeats for each solution in the offpring list.
+
+        dupl_rate: change of applying the operator
+        offspring: list of solutions
     '''
 
     def __init__(self, dupl_rate):
@@ -146,8 +151,7 @@ class GEDuplication(GeneticOperator):
                 if len(off.genotype) > 1:
                     cut = np.random.randint(0, len(off.genotype))
                 else:
-                    #if self.DEBUG: print('[duplication] one gene, setting cut to 1:', off)
+                    # if one gene, setting cut to 1
                     cut = 1
                 genes = off.genotype
                 off.genotype = np.concatenate((genes, genes[:cut]))
-#

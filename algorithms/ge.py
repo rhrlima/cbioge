@@ -1,13 +1,8 @@
-''''''
-
-import sys
 import os
 import glob
 import time
 from multiprocessing import Pool
 import numpy as np
-
-sys.path.append('..')
 from utils import checkpoint
 from .solutions import GESolution
 from .ea import BaseEvolutionaryAlgorithm
@@ -60,10 +55,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             population.append(solution)
         return population
 
-
     def evaluate_solution(self, solution):
-        if self.DEBUG: print('<{}> [evaluate] started: {}'.format(
-            time.strftime('%x %X'), solution))
+        if self.DEBUG:
+            print('<{}> [evaluate] started: {}'.format(
+                time.strftime('%x %X'), solution))
 
         if not solution.evaluated:
             if self.problem is None:
@@ -75,11 +70,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             else:
                 fitness, model = self.problem.evaluate(solution)
 
-        if self.DEBUG: print('<{}> [evaluate] ended: {}'.format(
-            time.strftime('%x %X'), solution))
+        if self.DEBUG:
+            print('<{}> [evaluate] ended: {}'.format(
+                time.strftime('%x %X'), solution))
 
         return fitness, model
-
 
     def evaluate_population(self, population):
 
@@ -96,15 +91,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             sol.phenotype = model
             sol.evaluated = True
 
-
     def replace(self, population, offspring):
-        
+
         population += offspring
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
         for _ in range(len(offspring)):
             population.pop()
-
 
     def execute(self, checkpoint=False):
 
@@ -116,7 +109,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             print('[execute] starting from scratch')
             self.population = self.create_population(self.POP_SIZE)
             self.evaluate_population(self.population)
-            self.population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+            self.population.sort(key=lambda x: x.fitness,
+                                 reverse=self.maximize)
             self.evals = len(self.population)
 
             if self.DEBUG:
@@ -126,9 +120,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.save_state()
 
         print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-            time.strftime('%x %X'), 
-            self.evals, self.MAX_EVALS, 
-            self.population[0].genotype, 
+            time.strftime('%x %X'),
+            self.evals, self.MAX_EVALS,
+            self.population[0].genotype,
             self.population[0].fitness))
 
         while self.evals < self.MAX_EVALS:
@@ -152,9 +146,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     print(i, p.fitness, p)
 
             print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-                time.strftime('%x %X'), 
-                self.evals, self.MAX_EVALS, 
-                self.population[0].genotype, 
+                time.strftime('%x %X'),
+                self.evals, self.MAX_EVALS,
+                self.population[0].genotype,
                 self.population[0].fitness))
 
             self.save_state()
@@ -171,7 +165,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         folder = checkpoint.ckpt_folder
         if not os.path.exists(folder):
             os.mkdir(folder)
-        checkpoint.save_data(data, os.path.join(folder, f'data_{self.evals}.ckpt'))
+        checkpoint.save_data(
+            data, os.path.join(folder, f'data_{self.evals}.ckpt'))
 
     def load_state(self, args_file=None, pop_file=None):
 

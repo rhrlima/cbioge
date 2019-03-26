@@ -1,5 +1,3 @@
-"""Overwrites __init__ module to offer desired components"""
-
 from .rs import RandomSearch
 from .ge import GrammaticalEvolution
 
