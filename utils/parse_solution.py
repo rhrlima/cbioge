@@ -1,27 +1,25 @@
-import sys
-sys.path.append('..')
+import sys; sys.path.append('..')
 
 import argparse
-
 from grammars import BNFGrammar
 from problems import CnnProblem
 
 if __name__ == '__main__':
-	
-	parser = argparse.ArgumentParser(prog='parse_solution.py')
-	parser.add_argument('grammar', type=str)
-	parser.add_argument('solution', type=str)
 
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser(prog='parse_solution.py')
+    parser.add_argument('grammar', type=str)
+    parser.add_argument('solution', type=str)
 
-	grammar = BNFGrammar(args.grammar)
-	problem = CnnProblem(grammar, None)
-	solution = [int(s) for s in args.solution.replace(' ', '').split(',')]
+    args = parser.parse_args()
 
-	model = problem.map_genotype_to_phenotype(solution)
+    grammar = BNFGrammar(args.grammar)
+    problem = CnnProblem(grammar, None)
+    solution = [int(s) for s in args.solution.replace(' ', '').split(',')]
 
-	if model:
-		print('solution', solution)
-		print(model)
-	else:
-		print('invalid')
+    model = problem.map_genotype_to_phenotype(solution)
+
+    if model:
+        print('solution', solution)
+        print(model)
+    else:
+        print('invalid')
