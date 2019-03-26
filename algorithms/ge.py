@@ -11,6 +11,7 @@ from .ea import BaseEvolutionaryAlgorithm
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     DEBUG = False
+    verbose = False
 
     def __init__(self, problem):
         super(GrammaticalEvolution, self).__init__(problem)
@@ -68,7 +69,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 else:
                     raise ValueError('Problem is None')
             else:
-                fitness, model = self.problem.evaluate(solution)
+                fitness, model = self.problem.evaluate(solution, self.verbose)
 
         if self.DEBUG:
             print('<{}> [evaluate] ended: {}'.format(
