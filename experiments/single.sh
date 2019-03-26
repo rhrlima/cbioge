@@ -1,4 +1,4 @@
-#'/bin/bash
+#!/bin/bash
 
 dset=$1
 evals=$2
@@ -19,4 +19,3 @@ python run_experiment.py ../grammars/cnn.bnf ../datasets/${dset}.pickle -e ${eva
 echo -e ${PBS}
 echo -e ${PBS} | qsub
 echo "done"
-
