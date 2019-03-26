@@ -1,8 +1,6 @@
 import numpy as np
 import time
-
 from multiprocessing import Pool
-
 from .solutions import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
@@ -20,10 +18,10 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 
         super(RandomSearch, self).__init__(problem)
 
-    def create_solution(self, min_size, max_size=None, min_value=0, max_value=1):
-
+    def create_solution(self, min_size, max_size=None, min_value=MIN_VALUE,
+                        max_value=MAX_VALUE):
         values = np.random.randint(
-            min_value, max_value, 
+            min_value, max_value,
             np.random.randint(min_size, max_size))
 
         return GESolution(values)
@@ -42,7 +40,7 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
             population = []
             for _ in range(self.MAX_PROCESSES):
                 solution = self.create_solution(
-                    self.MIN_SIZE, self.MAX_SIZE, 
+                    self.MIN_SIZE, self.MAX_SIZE,
                     self.MIN_VALUE, self.MAX_VALUE)
                 population.append(solution)
 
@@ -59,16 +57,17 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
                 solution.phenotype = model
                 solution.evaluated = True
 
-            if best: population.append(best)
+            if best:
+                population.append(best)
             population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
 
             best = population[0].copy(deep=True)
             evals += len(population)
 
             print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-                time.strftime('%x %X'), 
-                evals, self.MAX_EVALS, 
-                best.genotype, 
+                time.strftime('%x %X'),
+                evals, self.MAX_EVALS,
+                best.genotype,
                 best.fitness)
             )
 
