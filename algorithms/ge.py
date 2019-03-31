@@ -50,37 +50,32 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def create_population(self, size):
         population = []
-        for _ in range(size):
+        for i in range(size):
             solution = self.create_solution(self.MIN_GENES, self.MAX_GENES,
                                             self.MIN_VALUE, self.MAX_VALUE)
+            solution.id = i
             population.append(solution)
         return population
 
     def evaluate_solution(self, solution):
-        if self.DEBUG:
-            print('<{}> [evaluate] started: {}'.format(
-                time.strftime('%x %X'), solution))
+
+        print('[eval] solution', solution.id, 'started')
 
         if not solution.evaluated:
-            if self.problem is None:
-                if self.DEBUG:
-                    print('[evaluation] Problem is None, bypassing')
-                    solution.fitness = -1
-                else:
-                    raise ValueError('Problem is None')
-            else:
-                fitness, model = self.problem.evaluate(solution, self.verbose)
+            fitness, model = self.problem.evaluate(solution)
+            self.save_solution(solution)
+        else:
+            print(f'[eval] solution {solution.id} already evaluated')
+            fitness = solution.fitness
+            model = solution.model
 
-        if self.DEBUG:
-            print('<{}> [evaluate] ended: {}'.format(
-                time.strftime('%x %X'), solution))
+        print('[eval] solution', solution.id, 'ended')
 
         return fitness, model
 
     def evaluate_population(self, population):
 
         pool = Pool(processes=self.max_processes)
-
         result = pool.map_async(self.evaluate_solution, population)
 
         pool.close()
@@ -109,6 +104,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         if not self.population or not self.evals:
             print('[execute] starting from scratch')
             self.population = self.create_population(self.POP_SIZE)
+            print('## evaluate')
             self.evaluate_population(self.population)
             self.population.sort(key=lambda x: x.fitness,
                                  reverse=self.maximize)
@@ -127,15 +123,18 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.population[0].fitness))
 
         while self.evals < self.MAX_EVALS:
-            parents = self.selection.execute(self.population)
-            offspring_pop = []
 
-            for _ in self.population:
-                offspring = self.crossover.execute(parents)
-                self.mutation.execute(offspring)
-                self.prune.execute(offspring)
-                self.duplication.execute(offspring)
-                offspring_pop += offspring
+            parents = self.selection.execute(self.population)
+            offspring_pop = self.load_solutions()
+
+            if offspring_pop == []:
+                for index in range(self.POP_SIZE):
+                    offspring = self.crossover.execute(parents)
+                    offspring[0].id = self.evals + index  # check
+                    self.mutation.execute(offspring)
+                    self.prune.execute(offspring)
+                    self.duplication.execute(offspring)
+                    offspring_pop += offspring
 
             self.evaluate_population(offspring_pop)
             self.replace(self.population, offspring_pop)
@@ -169,7 +168,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         checkpoint.save_data(
             data, os.path.join(folder, f'data_{self.evals}.ckpt'))
 
-    def load_state(self, args_file=None, pop_file=None):
+    def load_state(self):
 
         folder = checkpoint.ckpt_folder
 
@@ -185,3 +184,25 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.evals = data['evals']
         self.population = data['population']
+
+    def save_solution(self, solution):
+
+        folder = checkpoint.ckpt_folder
+
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+
+        filename = f"solution{solution.id}.ckpt"
+        checkpoint.save_data(solution, os.path.join(folder, filename))
+
+    def load_solutions(self):
+
+        folder = checkpoint.ckpt_folder
+
+        solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
+        if solution_files == []:
+            print('[checkpoint] no solution files found')
+            return []
+
+        print('[checkpoint] solution files found')
+        return [checkpoint.load_data(file) for file in solution_files]

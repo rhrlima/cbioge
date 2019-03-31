@@ -23,6 +23,7 @@ class BaseSolution:
 
 class GESolution(BaseSolution):
 
+    id = None
     phenotype = None
 
     def copy(self, deep=False):
