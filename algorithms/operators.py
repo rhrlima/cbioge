@@ -29,6 +29,8 @@ class TournamentSelection(GeneticOperator):
         return 'Tournament Selection'
 
     def execute(self, population):
+        if len(population) <= self.t_size:
+            raise ValueError('population size <= tournament size')
         parents = []
         while len(parents) < self.n_parents:
             pool = []

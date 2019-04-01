@@ -59,17 +59,25 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def evaluate_solution(self, solution):
 
-        print('[eval] solution', solution.id, 'started')
-
         if not solution.evaluated:
+
+            print('[eval] solution', solution.id, 'started')
+
             fitness, model = self.problem.evaluate(solution)
+
+            # alterações locais que servem apenas para o arquivo gerado
+            # informação é perdida ao sair do método
+            solution.fitness = fitness
+            solution.phenotype = model
+            solution.evaluated = True
+
             self.save_solution(solution)
+
+            print(f'[eval] solution {solution.id} ended')
         else:
             print(f'[eval] solution {solution.id} already evaluated')
             fitness = solution.fitness
-            model = solution.model
-
-        print('[eval] solution', solution.id, 'ended')
+            model = solution.phenotype
 
         return fitness, model
 
@@ -104,7 +112,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         if not self.population or not self.evals:
             print('[execute] starting from scratch')
             self.population = self.create_population(self.POP_SIZE)
-            print('## evaluate')
             self.evaluate_population(self.population)
             self.population.sort(key=lambda x: x.fitness,
                                  reverse=self.maximize)
@@ -122,19 +129,21 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.population[0].genotype,
             self.population[0].fitness))
 
+        offspring_pop = self.load_solutions()
         while self.evals < self.MAX_EVALS:
-
-            parents = self.selection.execute(self.population)
-            offspring_pop = self.load_solutions()
 
             if offspring_pop == []:
                 for index in range(self.POP_SIZE):
+                    parents = self.selection.execute(self.population)
                     offspring = self.crossover.execute(parents)
                     offspring[0].id = self.evals + index  # check
                     self.mutation.execute(offspring)
                     self.prune.execute(offspring)
                     self.duplication.execute(offspring)
                     offspring_pop += offspring
+
+                    print(f'[execute] pre saving solution {offspring[0].id}')
+                    self.save_solution(offspring[0])
 
             self.evaluate_population(offspring_pop)
             self.replace(self.population, offspring_pop)
@@ -150,6 +159,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 self.evals, self.MAX_EVALS,
                 self.population[0].genotype,
                 self.population[0].fitness))
+
+            offspring_pop = []
 
             self.save_state()
 
@@ -167,6 +178,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             os.mkdir(folder)
         checkpoint.save_data(
             data, os.path.join(folder, f'data_{self.evals}.ckpt'))
+
+        print('[checkpoint] cleaning solutions already evaluated')
+        solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
+        for file in solution_files:
+            os.remove(file)
 
     def load_state(self):
 
@@ -196,7 +212,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         checkpoint.save_data(solution, os.path.join(folder, filename))
 
     def load_solutions(self):
-
         folder = checkpoint.ckpt_folder
 
         solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
@@ -205,4 +220,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             return []
 
         print('[checkpoint] solution files found')
-        return [checkpoint.load_data(file) for file in solution_files]
+        solutions = []
+        for file in solution_files:
+            print(f'loading and deleting \'{file}\'')
+            solutions.append(checkpoint.load_data(file))
+            os.remove(file)
+
+        return solutions
