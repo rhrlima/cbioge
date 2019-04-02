@@ -7,68 +7,66 @@ from .ea import BaseEvolutionaryAlgorithm
 
 class RandomSearch(BaseEvolutionaryAlgorithm):
 
-    MIN_VALUE = 0
-    MAX_VALUE = 1
-    MIN_SIZE = 1
-    MAX_SIZE = 10
-
-    MAX_EVALS = 100
-
     def __init__(self, problem):
-
         super(RandomSearch, self).__init__(problem)
 
-    def create_solution(self, min_size, max_size=None, min_value=MIN_VALUE,
-                        max_value=MAX_VALUE):
-        values = np.random.randint(
-            min_value, max_value,
-            np.random.randint(min_size, max_size))
+        self.seed = None
+
+        self.min_value = 0
+        self.max_value = 1
+        self.min_size = 1
+        self.max_size = 10
+        self.max_evals = 100
+
+        self.best = None
+        self.evals = 0
+
+        np.random.seed(seed=self.seed)
+
+    def create_solution(self, min_size, max_size, min_value, max_value):
+        values = np.random.randint(min_value, max_value, np.random.randint(
+            min_size, max_size))
 
         return GESolution(values)
 
     def evaluate_solution(self, solution):
 
-        return self.problem.evaluate(solution, 1)
+        if not solution.evaluated:
+            return self.problem.evaluate(solution)
+        else:
+            return solution.fitness, solution.phenotype
 
     def execute(self):
 
-        best = None
-        evals = 0
-
-        while evals < self.MAX_EVALS:
+        while self.evals < self.max_evals:
 
             population = []
-            for _ in range(self.MAX_PROCESSES):
+            for _ in range(self.max_processes):
                 solution = self.create_solution(
-                    self.MIN_SIZE, self.MAX_SIZE,
-                    self.MIN_VALUE, self.MAX_VALUE)
+                    self.min_size, self.max_size,
+                    self.min_value, self.max_value)
                 population.append(solution)
 
-            pool = Pool(processes=self.MAX_PROCESSES)
-
+            pool = Pool(processes=self.max_processes)
             result = pool.map_async(self.evaluate_solution, population)
 
             pool.close()
             pool.join()
 
             for solution, result in zip(population, result.get()):
-                fit, model = result
-                solution.fitness = fit
-                solution.phenotype = model
+                solution.fitness, solution.phenotype = result
                 solution.evaluated = True
 
-            if best:
-                population.append(best)
-            population.sort(key=lambda x: x.fitness, reverse=self.MAXIMIZE)
+            if self.best:
+                population.append(self.best)
+            population.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
-            best = population[0].copy(deep=True)
-            evals += len(population)
+            self.best = population[0].copy(deep=True)
+            self.evals += len(self.max_processes)
 
-            print('<{}> evals: {}/{} \tbest so far: {}\tfitness: {}'.format(
-                time.strftime('%x %X'),
-                evals, self.MAX_EVALS,
-                best.genotype,
-                best.fitness)
-            )
+        return self.best
 
-        return best
+    def print_progress(self):
+        curr_time = time.strftime('%x %X')
+        print(f'<{curr_time}> evals: {self.evals}/{self.max_evals} ',
+              f'best so far: {self.best} fitness: {self.best.fitness}')

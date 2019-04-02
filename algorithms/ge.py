@@ -33,6 +33,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.population = None
         self.evals = None
 
+        np.random.seed(seed=self.seed)
+
     def create_solution(self, min_size, max_size, min_value, max_value):
 
         if min_size >= max_size:

@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # algorithm.DEBUG = True
     algorithm.pop_size = args.population
     algorithm.max_evals = args.evals
-    algorithm.MAX_PROCESSES = args.maxprocesses
+    algorithm.max_processes = args.maxprocesses
     algorithm.selection = selection
     algorithm.crossover = crossover
     algorithm.mutation = mutation
