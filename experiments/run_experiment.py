@@ -34,7 +34,7 @@ def get_arg_parsersed():
     parser.add_argument('-sd', '--seed', default=None, type=int)
     parser.add_argument('-ep', '--epochs', default=1, type=int)
     parser.add_argument('-b', '--batch', default=32, type=int)
-    parser.add_argument('-v', '--verbose', default=0, type=int)
+    parser.add_argument('-v', '--verbose', default=False, type=str2bool)
 
     # algorithm
     parser.add_argument('-p', '--population', default=5, type=int)
@@ -85,18 +85,18 @@ if __name__ == '__main__':
 
     # changing ge default parameters
     alg = GrammaticalEvolution(problem)
-    # alg.DEBUG = False
     alg.seed = args.seed
-    alg.POP_SIZE = args.population
-    alg.MAX_EVALS = args.evals
-    alg.MIN_GENES = args.mingenes
-    alg.MAX_GENES = args.maxgenes
-    alg.MAX_PROCESSES = args.maxprocesses
+    alg.pop_size = args.population
+    alg.max_evals = args.evals
+    alg.min_genes = args.mingenes
+    alg.max_genes = args.maxgenes
+    alg.max_processes = args.maxprocesses
     alg.selection = selection
     alg.crossover = crossover
     alg.mutation = mutation
     alg.prune = prune
     alg.duplication = duplication
+    alg.verbose = args.verbose
 
     print('--config--')
     print('DATASET', args.dataset)
@@ -108,10 +108,8 @@ if __name__ == '__main__':
     print('SEED', args.seed)
     print('POP', args.population)
     print('EVALS', args.evals)
-    print(f'CROSS({args.crossover}) \
-        MUT({args.mutation}) \
-        PRUN({args.prune}) \
-        DUPL({args.duplication})')
+    print(f'CROSS({args.crossover}) MUT({args.mutation}) ',
+          f'PRUN({args.prune}) DUPL({args.duplication})')
 
     print('--running--')
     best = alg.execute(checkpoint=args.checkpoint)
