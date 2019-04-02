@@ -30,7 +30,7 @@ def get_arg_parsersed():
     parser.add_argument('-sd', '--seed', default=None, type=int)
     parser.add_argument('-ep', '--epochs', default=1, type=int)
     parser.add_argument('-b', '--batch', default=32, type=int)
-    parser.add_argument('-v', '--verbose', default=0, type=int)
+    parser.add_argument('-v', '--verbose', default=False, type=str2bool)
 
     # algorithm
     parser.add_argument('-p', '--population', default=5, type=int)
@@ -82,8 +82,8 @@ if __name__ == '__main__':
     # changing ge default parameters
     algorithm = GrammaticalEvolution(problem)
     # algorithm.DEBUG = True
-    algorithm.POP_SIZE = args.population
-    algorithm.MAX_EVALS = args.evals
+    algorithm.pop_size = args.population
+    algorithm.max_evals = args.evals
     algorithm.MAX_PROCESSES = args.maxprocesses
     algorithm.selection = selection
     algorithm.crossover = crossover
