@@ -17,20 +17,22 @@ def get_arg_parsersed():
 
     parser = argparse.ArgumentParser(prog='script.py')
 
+    # not optional
     parser.add_argument('grammar', type=str)
     parser.add_argument('dataset', type=str)
 
+    # checkpoint
     parser.add_argument('-f', '--folder', dest='folder', default='checkpoints')
     parser.add_argument('-c', '--checkpoint', default=True, type=str2bool)
 
+    # problem
     parser.add_argument('-sd', '--seed', default=None, type=int)
-
     parser.add_argument('-ep', '--epochs', default=1, type=int)
     parser.add_argument('-b', '--batch', default=128, type=int)
     parser.add_argument('-v', '--verbose', default=0, type=int)
 
+    # algorithm
     parser.add_argument('-e', '--evals', default=20, type=int)
-
     parser.add_argument('-min', '--mingenes', default=2, type=int)
     parser.add_argument('-max', '--maxgenes', default=10, type=int)
 
@@ -67,11 +69,11 @@ if __name__ == '__main__':
     # changing pge default parameters
     algorithm = RandomSearch(problem)
 
-    algorithm.MIN_VALUE = 0
-    algorithm.MAX_VALUE = 255
-    algorithm.MIN_SIZE = 2
-    algorithm.MAX_SIZE = 20
-    algorithm.MAX_EVALS = 10
+    algorithm.min_value = 0
+    algorithm.max_value = 255
+    algorithm.min_size = 2
+    algorithm.max_size = 20
+    algorithm.max_evals = 10
     algorithm.MAX_PROCESSES = 2
 
     print('--config--')
