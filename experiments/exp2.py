@@ -1,5 +1,6 @@
 import re
 import subprocess
+import sys
 import os
 
 # get the output from 'qstat' command
@@ -12,10 +13,9 @@ for i, line in enumerate(data):
     if 1 < i < len(data) - 1:
         running.append(line.split('@')[1])
 
-
 scriptname = 'run_experiment.py'
 runs = 5
-datasets = ['c10']
+datasets = ['c10', 'mnist']
 evals = ['600', '1000']
 
 # runs the configs that are not in the running list
