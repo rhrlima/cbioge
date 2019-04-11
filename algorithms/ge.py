@@ -149,6 +149,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         data = {
             'evals': self.evals,
             'population': self.population,
+            'selection': self.selection,
+            'crossover': self.crossover,
+            'mutation': self.mutation,
+            'prune': self.prune,
+            'duplication': self.duplication
         }
 
         folder = checkpoint.ckpt_folder
@@ -178,6 +183,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.evals = data['evals']
         self.population = data['population']
+        self.selection = data['selection']
+        self.crossover = data['crossover']
+        self.mutation = data['mutation']
+        self.prune = data['prune']
+        self.duplication = data['duplication']
 
     def save_solution(self, solution):
 
