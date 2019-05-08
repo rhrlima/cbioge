@@ -179,13 +179,15 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.evals = data['evals']
         self.population = data['population']
 
-    def save_solution(self, solution):
+    def save_solution(self, solution, filename):
 
         folder = checkpoint.ckpt_folder
         if not os.path.exists(folder):
             os.mkdir(folder)
 
-        filename = f"solution{solution.id}.ckpt"
+        sufix = 'e.ckpt' if solution.evaluated else '.ckpt'
+        filename = f'solution{solution.id}' + sufix
+
         checkpoint.save_data(solution, os.path.join(folder, filename))
 
     def load_solutions(self):
