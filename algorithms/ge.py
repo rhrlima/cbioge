@@ -176,6 +176,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         data_files.sort(key=lambda x: checkpoint.natural_key(x), reverse=True)
         data = checkpoint.load_data(data_files[0])
 
+        print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
         self.evals = data['evals']
         self.population = data['population']
 
