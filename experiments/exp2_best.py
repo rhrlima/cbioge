@@ -15,7 +15,7 @@ solutions = [
     '150,67',
 ]
 
-for r in runs:
+for r in range(runs):
     for s in solutions:
         os.system(f"./run_intel.sh {s} run_solution.py '{s} -b 128'")
 
