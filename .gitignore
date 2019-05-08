@@ -23,3 +23,6 @@
 #specific
 datasets/notmnist/notMNIST_large/
 datasets/notmnist/notMNIST_small/
+
+*.o*
+*.e*
