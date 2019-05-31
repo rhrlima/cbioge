@@ -70,6 +70,10 @@ if __name__ == '__main__':
     problem = CnnProblem(parser, args.dataset)
     problem.batch_size = args.batch
     problem.epochs = args.epochs
+    problem.x_train = problem.x_train[:1000]
+    problem.y_train = problem.y_train[:1000]
+    problem.x_valid = problem.x_valid[:1000]
+    problem.y_valid = problem.y_valid[:1000]
 
     # genetic operators to GE
     selection = TournamentSelection(maximize=True)
@@ -81,7 +85,6 @@ if __name__ == '__main__':
 
     # changing ge default parameters
     algorithm = GrammaticalEvolution(problem)
-    # algorithm.DEBUG = True
     algorithm.pop_size = args.population
     algorithm.max_evals = args.evals
     algorithm.max_processes = args.maxprocesses
