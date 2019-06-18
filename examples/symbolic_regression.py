@@ -36,7 +36,7 @@ def get_arg_parsersed():
     parser.add_argument('-min', '--mingenes', default=2, type=int)
     parser.add_argument('-max', '--maxgenes', default=10, type=int)
 
-    parser.add_argument('-mp', '--maxprocesses', default=8, type=int)
+    parser.add_argument('-mp', '--maxprocesses', default=2, type=int)
 
     return parser.parse_args()
 
@@ -50,6 +50,11 @@ def str2bool(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
+def equation(x):
+
+    return x - 1.0
+
+
 if __name__ == '__main__':
 
     # parses the arguments
@@ -60,6 +65,7 @@ if __name__ == '__main__':
 
     # problem dataset and parameters
     problem = SymbolicRegressionProblem(parser)
+    problem.equation = equation
 
     from algorithms.solutions import GESolution
     solution = GESolution([0, 3, 0, 1, 3, 1])
@@ -75,12 +81,13 @@ if __name__ == '__main__':
 
     # # changing pge default parameters
     algorithm = RandomSearch(problem)
+    algorithm.maximize = False
 
     algorithm.min_value = 0
     algorithm.max_value = 255
     algorithm.min_size = 2
     algorithm.max_size = 20
-    algorithm.max_evals = 10
+    algorithm.max_evals = 100
     # algorithm.MAX_PROCESSES = 2
 
     print('--config--')
