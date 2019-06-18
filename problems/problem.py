@@ -244,9 +244,9 @@ class DNNProblem(BaseProblem):
 
 class SymbolicRegressionProblem(BaseProblem):
 
-    def __init__(self, parser_):
+    def __init__(self, parser_, eq=None):
         self.parser = parser_
-        self.equation = 'x-1'
+        self.equation = eq
         self.inputs = np.arange(-1, 1, 0.1)
 
     def map_genotype_to_phenotype(self, genotype):
@@ -257,9 +257,13 @@ class SymbolicRegressionProblem(BaseProblem):
 
     def evaluate(self, solution):
 
+        if not solution.phenotype:
+            print('NONE')
+            return float('inf'), None
+
+        print(type(solution.phenotype))
         eq1 = lambda x: eval(solution.phenotype)
-        eq2 = lambda x: eval(self.equation)
-        diff_func = lambda x: (eq1(x) - eq2(x))**2
+        diff_func = lambda x: (eq1(x) - self.equation(x))**2
         diff = sum(map(diff_func, self.inputs))
 
-        return diff
+        return diff, solution.phenotype

@@ -62,7 +62,9 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
             population.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
             self.best = population[0].copy(deep=True)
-            self.evals += len(self.max_processes)
+            self.evals += self.max_processes
+
+            self.print_progress()
 
         return self.best
 
