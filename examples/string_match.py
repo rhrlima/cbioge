@@ -5,10 +5,11 @@ import argparse
 from algorithms import RandomSearch, GrammaticalEvolution
 from algorithms import TournamentSelection, OnePointCrossover, PointMutation
 from algorithms import GEPrune, GEDuplication, GrammaticalEvolution
+
 from grammars import BNFGrammar
 
-from problems import SymbolicRegressionProblem, StringMatchProblem
-from utils import checkpoint
+from problems import StringMatchProblem
+#from utils import checkpoint
 
 
 # disable warning on gpu enable systems
@@ -22,11 +23,6 @@ def get_arg_parsersed():
 
     # not optional
     parser.add_argument('grammar', type=str)
-    #parser.add_argument('dataset', type=str)
-
-    # checkpoint
-    parser.add_argument('-f', '--folder', dest='folder', default='checkpoints')
-    parser.add_argument('-c', '--checkpoint', default=True, type=str2bool)
 
     # problem
     parser.add_argument('-sd', '--seed', default=None, type=int)
@@ -44,20 +40,6 @@ def get_arg_parsersed():
     return parser.parse_args()
 
 
-def str2bool(value):
-    if value.lower() in ('true', 't', '1'):
-        return True
-    elif value.lower() in ('false', 'f', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def equation(x):
-
-    return x**4 + x**3 + x**2 + x + 1.0
-
-
 if __name__ == '__main__':
 
     # parses the arguments
@@ -66,26 +48,16 @@ if __name__ == '__main__':
     # read grammar and setup parser
     parser = BNFGrammar(args.grammar)
 
-    # problem dataset and parameters
-    #problem = SymbolicRegressionProblem(parser)
-    #problem.equation = equation
-    #problem.known_best = 0.0
+    # problem parameters
+    # problem = StringMatchProblem(parser)
 
-    problem = StringMatchProblem(parser)
+    # from algorithms.solutions import GESolution
+    # solution = GESolution([])
+    # solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+    # diff = problem.evaluate(solution)
+    # print(diff)
 
-    from algorithms.solutions import GESolution
-    solution = GESolution([0, 3, 0, 1, 3, 1])
-
-    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-
-    diff = problem.evaluate(solution)
-
-    print(diff)
-
-    # checkpoint folder
-    # checkpoint.ckpt_folder = args.folder
-
-    # # changing pge default parameters
+    # changing pge default parameters
     # algorithm = RandomSearch(problem)
 
     # selection = TournamentSelection()

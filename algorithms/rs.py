@@ -66,6 +66,10 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
 
             self.print_progress()
 
+            if (not self.best.fitness and
+                    self.best.fitness == self.problem.known_best):
+                return self.best
+
         return self.best
 
     def print_progress(self):
