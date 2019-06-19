@@ -6,6 +6,8 @@ class BNFGrammar:
     GRAMMAR = None
     MAX_LOOPS = 1000
 
+    rule_reg = '<[a-zA-Z0-9_-]+>'
+
     def __init__(self, grammar_file):
 
         lines = []
@@ -13,27 +15,38 @@ class BNFGrammar:
 
             for line in gf:
 
-                # remove spaces and '\n'
-                line = re.sub('\\s+|\n', '', line)
+                # remove '\n'
+                line = re.sub('\n', '', line)
+
+                # if line starts with '#', ignore
+                if line.startswith('#') or line == '':
+                    continue
 
                 # if line does not match 'new rule line', append to previous
-                if re.match('<[a-z_]+>::=', line) is None:
+                if re.match(self.rule_reg, line) is None:
                     lines[len(lines)-1] += line
-
-                elif line != '':
+                else:
                     lines.append(line)
+
+        print('lines')
+        for l in lines:
+            print(l)
+        print('-------')
 
         self.GRAMMAR = {'<start>': None}
         for line in lines:
 
             # split into key and productions
             rule, prod = line.split('::=')
+            print(rule)
+            print(prod.split('|'))
 
-            # split productions in options
-            self.GRAMMAR[rule] = prod.split('|')
+        #     # split productions in options
+        #     self.GRAMMAR[rule] = prod.split('|')
 
-            if self.GRAMMAR['<start>'] is None:
-                self.GRAMMAR['<start>'] = rule
+        #     if self.GRAMMAR['<start>'] is None:
+        #         self.GRAMMAR['<start>'] = rule
+        # print(self.GRAMMAR)
 
     def parse(self, codons):
         index = 0
