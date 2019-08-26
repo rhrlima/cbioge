@@ -1,0 +1,7 @@
+<expr> ::= <expr><op><expr> | (<expr><op><expr>) | <pre_op>(<expr>) | <var>
+
+<op> ::= '+' | '-' | '*' | '/'
+
+<pre_op> ::= 'sin' | 'cos' | 'exp' | 'inv' | 'log'
+
+<var> ::= 'x' | '1.0'
