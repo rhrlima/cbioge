@@ -1,9 +1,11 @@
-import sys; sys.path.append('..')
+# import sys; sys.path.append('..')
 
 import json
 import numpy as np
 import pickle
 import re
+
+from math import sin, cos, exp, log
 
 from keras.models import model_from_json
 from keras.utils import np_utils
@@ -184,3 +186,121 @@ class CnnProblem(BaseProblem):
                 print('[evaluation] invalid model from solution: {}'.format(
                     solution.genotype))
             return -1, None
+
+
+class DNNProblem(BaseProblem):
+
+    parser = None
+
+    x_train = None
+    y_train = None
+    x_valid = None
+    y_valid = None
+    x_test = None
+    y_test = None
+
+    input_shape = None
+    num_classes = None
+
+    batch_size = 128
+    epochs = 1
+
+    loss = 'categorical_crossentropy'
+    opt = 'adam'
+    metrics = ['accuracy']
+
+    def __init__(self, parser_, dataset=None):
+        self.parser = parser_
+        if dataset:
+            self.load_dataset_from_pickle(dataset)
+
+    def load_dataset_from_pickle(self, pickle_file):
+        with open(pickle_file, 'rb') as f:
+            temp = pickle.load(f)
+
+            self.x_train = temp['train_dataset']
+            self.y_train = temp['train_labels']
+
+            self.x_valid = temp['valid_dataset']
+            self.y_valid = temp['valid_labels']
+
+            self.x_test = temp['test_dataset']
+            self.y_test = temp['test_labels']
+
+            self.input_shape = temp['input_shape']
+            self.num_classes = temp['num_classes']
+
+            del temp
+
+        self.x_train = self.x_train.reshape((-1,)+self.input_shape)
+        self.x_valid = self.x_valid.reshape((-1,)+self.input_shape)
+        self.x_test = self.x_test.reshape((-1,)+self.input_shape)
+
+        self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
+        self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
+        self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
+
+    def map_genotype_to_phenotype(self, genotype):
+        pass
+
+
+class SymbolicRegressionProblem(BaseProblem):
+
+    def __init__(self, parser_, eq=None):
+        self.parser = parser_
+        self.equation = eq
+        self.inputs = np.arange(-1, 1, 0.1)
+        self.known_best = None
+
+    def map_genotype_to_phenotype(self, genotype):
+        deriv = self.parser.parse(genotype)
+        if not deriv:
+            return None
+        return ''.join(deriv)
+
+    def evaluate(self, solution):
+
+        solution.phenotype = self.map_genotype_to_phenotype(solution.genotype)
+
+        if not solution.phenotype:
+            return float('inf'), None
+
+        try:
+            eq1 = lambda x: eval(solution.phenotype)
+            diff_func = lambda x: (eq1(x) - self.equation(x))**2
+            diff = sum(map(diff_func, self.inputs))
+        except Exception:
+            return float('inf'), None
+
+        return diff, solution.phenotype
+
+
+def inv(x):
+    return 1 / x
+
+
+class StringMatchProblem(BaseProblem):
+
+    def __init__(self, parser_, target='Hello World!'):
+        self.parser = parser_
+        self.target = target
+
+    def map_genotype_to_phenotype(self, genotype):
+        deriv = self.parser.parse(genotype)
+        if not deriv:
+            return None
+        return ''.join(deriv)
+
+    def evaluate(self, solution):
+
+        phen = self.map_genotype_to_phenotype(solution.genotype)
+
+        if not phen:
+            return float('inf'), None
+
+        fit = sum([(a == b) for a, b in zip(phen, self.target)]) / len(self.target)
+
+        solution.phenotype = phen
+        solution.fitness = fit
+
+        return fit, phen
