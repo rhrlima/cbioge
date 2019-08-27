@@ -57,6 +57,9 @@ def str2bool(value):
 
 if __name__ == '__main__':
 
+    # hardcoded
+    sys.argv = ['grammatical_evolution.py', '../grammars/cnn.bnf', '../datasets/mnist.pickle', '-p', '4', '-e', '8', '-mp', '4']
+
     # parses the arguments
     args = get_arg_parsersed()
 
