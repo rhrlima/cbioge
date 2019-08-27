@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class GeneticOperator:
@@ -101,6 +102,34 @@ class PointMutation(GeneticOperator):
                 index = np.random.randint(0, len(off.genotype))
                 off.genotype[index] = np.random.randint(
                     self.min_value, self.max_value)
+
+
+# Replacement
+
+class ReplaceWorst(GeneticOperator):
+
+    def __init__(self, maximize=False):
+        self.maximize = maximize
+
+    def execute(self, population, offspring):
+        population += offspring
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+        population = population[:len(offspring)]
+
+
+class ElitistReplacement(GeneticOperator):
+
+    def __init__(self, rate=0.1, maximize=False):
+        self.rate = rate
+        self.maximize = maximize
+
+    def execute(self, population, offspring):
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+        offspring.sort(key=lambda x: x.fitness, reverse=self.maximize)
+
+        save = math.floor(self.rate * len(population))
+
+        population = population[:save] + offspring[:len(offspring)-save]
 
 
 # Prune

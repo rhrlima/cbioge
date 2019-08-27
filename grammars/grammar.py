@@ -28,25 +28,15 @@ class BNFGrammar:
                 else:
                     lines.append(line)
 
-        print('lines')
-        for l in lines:
-            print(l)
-        print('-------')
-
         self.GRAMMAR = {'<start>': None}
         for line in lines:
 
             # split into key and productions
             rule, prod = line.split('::=')
-            print(rule)
-            print(prod.split('|'))
+            self.GRAMMAR[rule.strip()] = [p.strip() for p in prod.split('|')]
 
-        #     # split productions in options
-        #     self.GRAMMAR[rule] = prod.split('|')
-
-        #     if self.GRAMMAR['<start>'] is None:
-        #         self.GRAMMAR['<start>'] = rule
-        # print(self.GRAMMAR)
+            if self.GRAMMAR['<start>'] is None:
+                self.GRAMMAR['<start>'] = rule
 
     def parse(self, codons):
         index = 0
