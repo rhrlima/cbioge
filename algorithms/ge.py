@@ -29,6 +29,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.mutation = None
         self.prune = None
         self.duplication = None
+        self.replacement = None
 
         self.population = None
         self.evals = None
@@ -93,11 +94,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             sol.fitness, sol.phenotype = res
             sol.evaluated = True
 
-        self.population.sort(key=lambda x: x.fitness, reverse=self.maximize)
-
     def replace(self, population, offspring):
 
         population += offspring
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         for _ in range(len(offspring)):
             population.pop()
 
@@ -132,7 +132,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     self.save_solution(offspring[0])
 
             self.evaluate_population(offspring_pop)
-            self.replace(self.population, offspring_pop)
+            self.replacement.execute(self.population, offspring_pop)
 
             self.evals += len(offspring_pop)
 

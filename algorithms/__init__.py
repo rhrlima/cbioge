@@ -4,9 +4,12 @@ from .ge import GrammaticalEvolution
 from .operators import TournamentSelection
 from .operators import OnePointCrossover
 from .operators import PointMutation
+from .operators import ReplaceWorst
+from .operators import ElitistReplacement
 from .operators import GEPrune
 from .operators import GEDuplication
 
 __all__ = [
     'RandomSearch', 'GrammaticalEvolution', 'TournamentSelection',
-    'OnePointCrossover', 'PointMutation', 'GEPrune', 'GEDuplication']
+    'OnePointCrossover', 'PointMutation', 'GEPrune', 'GEDuplication',
+    'ReplaceWorst', 'ElitistReplacement']

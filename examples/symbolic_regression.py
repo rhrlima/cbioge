@@ -8,12 +8,6 @@ from algorithms import GEPrune, GEDuplication, GrammaticalEvolution
 from grammars import BNFGrammar
 
 from problems import SymbolicRegressionProblem, StringMatchProblem
-from utils import checkpoint
-
-
-# disable warning on gpu enable systems
-os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def get_arg_parsersed():
@@ -22,7 +16,6 @@ def get_arg_parsersed():
 
     # not optional
     parser.add_argument('grammar', type=str)
-    #parser.add_argument('dataset', type=str)
 
     # checkpoint
     parser.add_argument('-f', '--folder', dest='folder', default='checkpoints')
@@ -44,15 +37,6 @@ def get_arg_parsersed():
     return parser.parse_args()
 
 
-def str2bool(value):
-    if value.lower() in ('true', 't', '1'):
-        return True
-    elif value.lower() in ('false', 'f', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
 def equation(x):
 
     return x**4 + x**3 + x**2 + x + 1.0
@@ -60,63 +44,27 @@ def equation(x):
 
 if __name__ == '__main__':
 
-    # parses the arguments
-    args = get_arg_parsersed()
+    parser = BNFGrammar('../grammars/reg.bnf')
 
-    # read grammar and setup parser
-    parser = BNFGrammar(args.grammar)
+    problem = SymbolicRegressionProblem(parser, equation)
 
-    # problem dataset and parameters
-    #problem = SymbolicRegressionProblem(parser)
-    #problem.equation = equation
-    #problem.known_best = 0.0
+    alg = GrammaticalEvolution(problem)
+    alg.maximize = False
+    alg.pop_size = 100
+    alg.max_evals = 50000
+    alg.max_processes = 1
+    alg.selection = TournamentSelection()
+    alg.crossover = OnePointCrossover(cross_rate=0.75)
+    alg.mutation = PointMutation(mut_rate=0.1, min_value=0, max_value=255)
+    alg.prune = GEPrune(prun_rate=0.1)
+    alg.duplication = GEDuplication(dupl_rate=0.1)
 
-    problem = StringMatchProblem(parser)
+    print('--running--')
+    best = alg.execute()
 
-    from algorithms.solutions import GESolution
-    solution = GESolution([0, 3, 0, 1, 3, 1])
-
-    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-
-    diff = problem.evaluate(solution)
-
-    print(diff)
-
-    # checkpoint folder
-    # checkpoint.ckpt_folder = args.folder
-
-    # # changing pge default parameters
-    # algorithm = RandomSearch(problem)
-
-    # selection = TournamentSelection()
-    # crossover = OnePointCrossover(cross_rate=0.75)
-    # mutation = PointMutation(mut_rate=0.1, min_value=0, max_value=255)
-    # prune = GEPrune(prun_rate=0.1)
-    # duplication = GEDuplication(dupl_rate=0.1)
-
-    # algorithm = GrammaticalEvolution(problem)
-    # algorithm.maximize = True
-    # algorithm.pop_size = 100
-    # algorithm.max_evals = 50000
-    # algorithm.max_processes = 1
-    # algorithm.selection = selection
-    # algorithm.crossover = crossover
-    # algorithm.mutation = mutation
-    # algorithm.prune = prune
-    # algorithm.duplication = duplication
-    # # algorithm.verbose = args.verbose
-
-    # print('--config--')
-    # # print('DATASET', args.dataset)
-    # print('GRAMMAR', args.grammar)
-    # # print('CKPT', args.folder, args.checkpoint)
-
-    # print('--running--')
-    # best = algorithm.execute()
-
-    # print('--best solution--')
-    # if best:
-    #     print(best.fitness, best)
-    #     print(best.phenotype)
-    # else:
-    #     print('None solution')
+    print('--best solution--')
+    if best:
+        print(best.fitness, best)
+        print(best.phenotype)
+    else:
+        print('None solution')
