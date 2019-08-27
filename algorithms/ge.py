@@ -52,8 +52,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             solution = self.create_solution(self.min_genes, self.max_genes,
                                             self.min_value, self.max_value)
             solution.id = i
-            self.save_solution(solution)
             population.append(solution)
+            self.save_solution(solution)
         return population
 
     def evaluate_solution(self, solution):
@@ -79,7 +79,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             return fitness, model
         else:
-            print(f'<{curr_time}> [eval] skipping solution {solution.id}')
+            if self.verbose:
+                print(f'<{curr_time}> [eval] skipping solution {solution.id}')
+
             return solution.fitness, solution.phenotype
 
     def evaluate_population(self, population):
@@ -136,9 +138,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             self.evals += len(offspring_pop)
 
-            self.print_progress()
-
             offspring_pop = []
+
+            self.print_progress()
 
             self.save_state()
 
@@ -159,13 +161,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         folder = checkpoint.ckpt_folder
         if not os.path.exists(folder):
             os.mkdir(folder)
-        checkpoint.save_data(
-            data, os.path.join(folder, f'data_{self.evals}.ckpt'))
+
+        filename = f'data_{self.evals}.ckpt'
+        checkpoint.save_data(data, os.path.join(folder, filename))
 
         # remove solution files already evaluated
         solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
-        for file in solution_files:
-            os.remove(file)
+        [os.remove(file) for file in solution_files]
 
     def load_state(self):
 

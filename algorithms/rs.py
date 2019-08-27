@@ -24,6 +24,7 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
         np.random.seed(seed=self.seed)
 
     def create_solution(self, min_size, max_size, min_value, max_value):
+
         values = np.random.randint(min_value, max_value, np.random.randint(
             min_size, max_size))
 
