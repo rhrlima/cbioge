@@ -136,9 +136,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.evaluate_population(offspring_pop)
             self.replace(self.population, offspring_pop)
 
-            offspring_pop = []
-
             self.evals += len(offspring_pop)
+
+            offspring_pop = []
 
             self.print_progress()
 
