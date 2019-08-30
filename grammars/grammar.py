@@ -91,13 +91,12 @@ class BNFGrammar:
                 # print('repl', replacement)
 
         # print('final', prod)
+        print('final', prod)
+        print('codons', codons)
 
         prod = prod.replace('\' \'', '@')\
             .replace('\'', '') \
             .split('@')
-
-        # print('final', prod)
-        # print('codons', codons)
 
         return list(filter(lambda x: x != '&', prod))
 
