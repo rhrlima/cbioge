@@ -69,12 +69,26 @@ class OnePointCrossover(GeneticOperator):
         off2 = parents[1].copy()
 
         if np.random.rand() < self.cross_rate:
+            print('APLICOU')
             p1 = off1.genotype[:]
             p2 = off2.genotype[:]
+            print(len(p1), len(p2))
             min_len = min(len(p1), len(p2))
             cut = np.random.randint(0, min_len)
             off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
         return [off1]
+
+
+class DSGECrossover(GeneticOperator):
+
+    def __init__(self, cross_rate):
+        pass
+
+    def execute(self, parents):
+        pass
+
+    def __str__(self):
+        return 'DSGE Crossover'
 
 
 # Mutation
