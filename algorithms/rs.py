@@ -24,6 +24,7 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
         np.random.seed(seed=self.seed)
 
     def create_solution(self, min_size, max_size, min_value, max_value):
+
         values = np.random.randint(min_value, max_value, np.random.randint(
             min_size, max_size))
 
@@ -62,7 +63,13 @@ class RandomSearch(BaseEvolutionaryAlgorithm):
             population.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
             self.best = population[0].copy(deep=True)
-            self.evals += len(self.max_processes)
+            self.evals += self.max_processes
+
+            self.print_progress()
+
+            if (not self.best.fitness and
+                    self.best.fitness == self.problem.known_best):
+                return self.best
 
         return self.best
 

@@ -1,3 +1,13 @@
 from problems.problem import CnnProblem
+from problems.problem import DNNProblem
 
-__all__ = ['CnnProblem']
+from problems.stringmatch import StringMatchProblem
+from problems.regression import SymbolicRegressionProblem
+
+
+__all__ = [
+    'CnnProblem',
+    'DNNProblem',
+    'SymbolicRegressionProblem',
+    'StringMatchProblem'
+]
