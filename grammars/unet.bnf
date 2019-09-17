@@ -1,0 +1,5 @@
+<unet> ::= <grow> Conv1x1
+
+<grow> ::= Conv <grow> Conv | MaxPool <grow> UpConv Copy | <middle>
+
+<middle> ::= <middle> <middle> | Conv | Dropout | &
