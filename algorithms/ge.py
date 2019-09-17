@@ -93,11 +93,12 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             sol.fitness, sol.phenotype = res
             sol.evaluated = True
 
-        self.population.sort(key=lambda x: x.fitness, reverse=self.maximize)
-
     def replace(self, population, offspring):
 
         population += offspring
+
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+
         for _ in range(len(offspring)):
             population.pop()
 
@@ -180,7 +181,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.evals = data['evals']
         self.population = data['population']
 
-    def save_solution(self, solution, filename):
+    def save_solution(self, solution):
 
         folder = checkpoint.ckpt_folder
         if not os.path.exists(folder):
