@@ -1,6 +1,6 @@
 import copy
+import numpy as np
 import re
-import random
 
 
 class BNFGrammar:
@@ -12,16 +12,25 @@ class BNFGrammar:
     rule_reg = '<[a-zA-Z0-9_-]+>'
 
     def __init__(self, grammar_file):
+        self.GRAMMAR = {}
+        self.NT = []
 
+        lines = self._read_grammar(grammar_file)
+        self._build_structure(lines)
+
+        # print(self.GRAMMAR)
+        # print(self.NT)
+        # self._check_recursive_rules()
+        for i, nt in enumerate(self.NT):
+            print(i, nt)
+
+    def _read_grammar(self, grammar_file):
         lines = []
         with open(grammar_file, 'r') as gf:
-
             for line in gf:
+                line = re.sub('\n', '', line) # remove '\n'
 
-                # remove '\n'
-                line = re.sub('\n', '', line)
-
-                # if line starts with '#', ignore
+                # if line starts with '#' or it is empty, ignore
                 if line.startswith('#') or line == '':
                     continue
 
@@ -30,7 +39,9 @@ class BNFGrammar:
                     lines[len(lines)-1] += line
                 else:
                     lines.append(line)
+        return lines
 
+    def _build_structure(self, lines):
         self.GRAMMAR = {}
         self.NT = []
         for line in lines:
@@ -38,11 +49,20 @@ class BNFGrammar:
             # split into key and productions
             rule, prod = line.split('::=')
 
-            self.GRAMMAR[rule.strip()] = [p.strip() for p in prod.split('|')]
+            self.GRAMMAR[rule.strip()] = [p.strip().split(' ') for p in prod.split('|')]
             self.NT.append(rule.strip())
 
-        print(self.GRAMMAR)
-        print(self.NT)
+    def _check_recursive_rules(self):
+        visited = []
+        for nt in self.NT:
+            print('nt:', nt)
+            for opt in self.GRAMMAR[nt]:
+                print('option:', opt)
+                if opt not in visited:
+                    # print('not visited')
+                    visited.append(opt) 
+                else:
+                    print('recursive?')
 
     def parse(self, codons):
         index = 0
@@ -90,7 +110,6 @@ class BNFGrammar:
                 # print('value', value)
                 # print('repl', replacement)
 
-        # print('final', prod)
         print('final', prod)
         print('codons', codons)
 
@@ -120,5 +139,86 @@ class BNFGrammar:
                 # print('repl', replacement)
 
         # print(codons)
-        # print(prod)
+        print(prod)
         return codons
+
+    def dsge_create_solution(self, max_depth, genotype=None, symb=None, depth=0):
+
+        '''falta adicionar comportamento quando ultrapassa 
+        profundidade maxima'''
+
+        prod = []
+        if symb is None:
+            gen = [[] for _ in range(len(self.NT))]
+            symb = self.NT[0] # assigns initial symbol
+        else:
+            gen = genotype
+
+        # print('symbol', symb, 'depth', depth, 'genotype', gen)
+
+        value = np.random.randint(0, len(self.GRAMMAR[symb]))
+        gen[self.NT.index(symb)].append(value)
+        expansion = self.GRAMMAR[symb][value]
+
+        for s in expansion:
+            if s in self.NT:
+                self.dsge_create_solution(max_depth, gen, s, depth+1)
+
+        return gen
+
+    def dsge_recursive_parse(self, genotype):
+
+        '''falta incorporar comportamento para quando ultrapassa 
+        profundidade maxima
+
+        falta parte que corrige a solucao quando a mesma é
+        modificada pelos operadores geneticos'''
+
+        #gen = copy.deepcopy(genotype) # saves genotype before use
+        gen_cpy = copy.deepcopy(genotype)
+        to_add = [[] for _ in range(len(self.NT))]
+        symb = self.NT[0] # assigns initial symbol
+
+        prod = self._recursive_parse_call(
+            genotype=gen_cpy, new_gen=to_add, symb=symb, depth=0)
+
+        #print('gen', genotype, prod)
+        #print('remove', gen_cpy)
+        #print('add', to_add)
+
+        # remove extra values
+        for genA, genB in zip(genotype, gen_cpy):
+            for value in genB:
+                genA.remove(value)
+
+        # add new values when necessary
+        for genA, genB in zip(genotype, to_add):
+            for value in genB:
+                genA.append(value)
+
+        return prod
+
+    def _recursive_parse_call(self, genotype, new_gen, symb, depth):
+
+            prod = []
+            
+            # print('symbol', symb, 'depth', depth, 'genotype', gen)
+
+            #print(genotype[self.NT.index(symb)])
+            if genotype[self.NT.index(symb)] == []:
+                value = np.random.randint(0, len(self.GRAMMAR[symb]))
+                print('pop from empty list, added:', value)
+                new_gen[self.NT.index(symb)].append(value)
+            else:
+                value = genotype[self.NT.index(symb)].pop(0)
+
+            # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
+            expansion = self.GRAMMAR[symb][value]
+
+            for s in expansion:
+                if s not in self.NT:
+                    prod.append(s)
+                else:
+                    prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
+
+            return prod

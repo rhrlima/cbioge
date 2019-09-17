@@ -11,7 +11,7 @@
 <d_node> ::= <dense> | <dropout>
 
 
-<conv> ::= 'class_name' 'Conv2D' 'filters' <filters> 'kernel_size' <k_size> 'activation' <activation>
+<conv> ::= [Conv, <filters>, <ksize>, <strides>, <padding>, <activation>]
 
 <dense> ::= 'class_name' 'Dense' 'units' <units>
 
@@ -24,11 +24,11 @@
 
 <activation> ::= 'relu' | 'selu' | 'elu' | 'tanh' | 'sigmoid' | 'linear'
 
-<padding> ::= 'valid' | 'same'
+<padding> ::= valid | same
 
-<filters> ::= '16' | '32' | '64' | '128'
+<filters> ::= 16 | 32 | 64 | 128
 
-<k_size> ::= '(3, 3)' | '(5, 5)' | '(7, 7)'
+<ksize> ::= '(3, 3)' | '(5, 5)' | '(7, 7)'
 
 <p_size> ::= '(2, 2)' | '(4, 4)' | '(6, 6)'
 
