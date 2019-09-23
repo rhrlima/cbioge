@@ -56,12 +56,12 @@ def unet(input_size = (256,256,1)):
 
 if __name__ == '__main__':
 
-    train_ids = [f'{i}.png' for i in range(30)]
+    train_ids = [f'{i}.npy' for i in range(4000)]
+    #train_gen = DataGenerator('datasets/membrane/npy/train', train_ids, (256, 256, 1), batch_size=1)
+    train_gen = DataGenerator('datasets/m2nist/train', train_ids, (64, 64, 1), batch_size=4)
+    valid_ids = train_ids[:1000]
+    valid_gen = DataGenerator('datasets/m2nist/test', valid_ids)
 
-    train_gen = DataGenerator('datasets/membrane/train', train_ids)
-    valid_gen = DataGenerator('datasets/membrane/test', train_ids)
-
-    model = unet(input_size=(256, 256, 1))
-    model.fit_generator(train_gen, steps_per_epoch=1, epochs=1)
-
+    model = unet(input_size=(64, 64, 1))
+    model.fit_generator(train_gen, steps_per_epoch=1, epochs=1, verbose=1)
     results = model.predict_generator(valid_gen, 1, verbose=1)
