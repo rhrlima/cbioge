@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class GeneticOperator:
@@ -29,8 +30,10 @@ class TournamentSelection(GeneticOperator):
         return 'Tournament Selection'
 
     def execute(self, population):
+
         if len(population) <= self.t_size:
             raise ValueError('population size <= tournament size')
+
         parents = []
         while len(parents) < self.n_parents:
             pool = []
@@ -74,6 +77,29 @@ class OnePointCrossover(GeneticOperator):
         return [off1]
 
 
+class DSGECrossover(GeneticOperator):
+
+    def __init__(self, cross_rate):
+        self.cross_rate = cross_rate
+
+    def execute(self, parents):
+        off1 = parents[0].copy()
+        off2 = parents[1].copy()
+
+        if np.random.rand() < self.cross_rate:
+            print('CRUZOU')
+            p1 = off1.genotype[:]
+            p2 = off2.genotype[:]
+            min_len = min(len(p1), len(p2))
+            cut = np.random.randint(0, min_len)
+            off1.genotype = p1[:cut] + p2[cut:]
+            off2.genotype = p2[:cut] + p1[cut:]
+        return [off1, off2]
+
+    def __str__(self):
+        return 'DSGE Crossover'
+
+
 # Mutation
 
 class PointMutation(GeneticOperator):
@@ -101,6 +127,54 @@ class PointMutation(GeneticOperator):
                 index = np.random.randint(0, len(off.genotype))
                 off.genotype[index] = np.random.randint(
                     self.min_value, self.max_value)
+
+
+class DSGEMutation(GeneticOperator):
+
+    def __init__(self, mut_rate, parser):
+        self.mut_rate = mut_rate
+        self.parser = parser
+
+    def __str__(self):
+        return 'DSGE Point Mutation'
+
+    def execute(self, solution):
+        for gidx, genes in enumerate(solution.genotype):
+            symb = self.parser.NT[gidx] # symbol on the gene index
+            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
+            for i, _ in enumerate(genes):
+                if np.random.rand() < self.mut_rate:
+                    new_val = np.random.randint(0, max_value)
+                    print('MUTOU', _, 'to', new_val, 'out of', max_value)
+                    genes[i] = new_val
+
+
+# Replacement
+
+class ReplaceWorst(GeneticOperator):
+
+    def __init__(self, maximize=False):
+        self.maximize = maximize
+
+    def execute(self, population, offspring):
+        population += offspring
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+        population = population[:len(offspring)]
+
+
+class ElitistReplacement(GeneticOperator):
+
+    def __init__(self, rate=0.1, maximize=False):
+        self.rate = rate
+        self.maximize = maximize
+
+    def execute(self, population, offspring):
+        population.sort(key=lambda x: x.fitness, reverse=self.maximize)
+        offspring.sort(key=lambda x: x.fitness, reverse=self.maximize)
+
+        save = math.floor(self.rate * len(population))
+
+        population = population[:save] + offspring[:len(offspring)-save]
 
 
 # Prune
