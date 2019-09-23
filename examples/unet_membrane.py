@@ -62,34 +62,28 @@ def iou_accuracy(true, pred):
 
 if __name__ == '__main__':
 
-    #train_gen = DataGenerator('datasets/membrane/npy/train', train_ids, (256, 256, 1), batch_size=1)
+    input_shape = (256, 256, 1)
 
-    input_shape = (64, 64, 1)
-
-    train_ids = [f'{i}.npy' for i in range(4000)]
-    train_gen = DataGenerator('datasets/m2nist/train', train_ids, input_shape, batch_size=32)
+    train_ids = [f'{i}.npy' for i in range(30)]
+    train_gen = DataGenerator('datasets/membrane/npy/train', train_ids, input_shape, batch_size=2)
     
-    valid_ids = train_ids[:500]
-    valid_gen = DataGenerator('datasets/m2nist/valid', valid_ids, input_shape, batch_size=32)
+    test_ids = train_ids
+    test_gen = DataGenerator('datasets/membrane/npy/test', test_ids, input_shape, batch_size=1, shuffle=False)
 
-    test_ids = train_ids[:500]
-    test_gen = DataGenerator('datasets/m2nist/test', test_ids, input_shape, batch_size=32, shuffle=False)
-
-    model_checkpoint = callbacks.ModelCheckpoint('unet_m2nist.hdf5', monitor='loss', verbose=1, save_best_only=True)
+    model_checkpoint = callbacks.ModelCheckpoint('unet_membrane.hdf5', monitor='loss', verbose=1, save_best_only=True)
     model = unet(input_size=input_shape)
     model.fit_generator(
         train_gen, 
-        validation_data=valid_gen, 
-        steps_per_epoch=10, 
+        steps_per_epoch=30, 
         epochs=1, 
-        callbacks=[model_checkpoint],
+        callbacks=[model_checkpoint], 
         verbose=1)
     
-    results = model.predict_generator(test_gen, 10, verbose=1)
+    results = model.predict_generator(test_gen, 30, verbose=1)
 
     acc = 0.0
     for i, pred in enumerate(results):
-        true = np.load(f'datasets/m2nist/test/label/{i}.npy')
+        true = np.load(f'datasets/membrane/npy/test/label/{i}.npy')
         acc += iou_accuracy(true, pred)
 
     print('acc', acc/len(results))
