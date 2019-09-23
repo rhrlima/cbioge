@@ -1,0 +1,37 @@
+<cnn> ::= <conv> <c_layer> <d_layer> <dense>
+
+
+<c_layer> ::= <c_layer> <c_layer> | <c_node> | '&'
+
+<d_layer> ::= <d_node> <d_node> | <d_node> | '&'
+
+
+<c_node> ::= <conv> | <pool>
+
+<d_node> ::= <dense> | <dropout>
+
+
+<conv> ::= [Conv, <filters>, <ksize>, <strides>, <padding>, <activation>]
+
+<dense> ::= 'class_name' 'Dense' 'units' <units>
+
+<dropout> ::= 'class_name' 'Dropout' 'rate' <rate>
+
+<pool> ::= 'class_name' <pool_type> 'pool_size' <p_size> 'padding' <padding>
+
+
+<pool_type> ::= 'MaxPooling2D' | 'AveragePooling2D'
+
+<activation> ::= 'relu' | 'selu' | 'elu' | 'tanh' | 'sigmoid' | 'linear'
+
+<padding> ::= valid | same
+
+<filters> ::= 16 | 32 | 64 | 128
+
+<ksize> ::= '(3, 3)' | '(5, 5)' | '(7, 7)'
+
+<p_size> ::= '(2, 2)' | '(4, 4)' | '(6, 6)'
+
+<units> ::= '32' | '64' | '128' | '256'
+
+<rate> ::= '[0.0, 1.0]'
