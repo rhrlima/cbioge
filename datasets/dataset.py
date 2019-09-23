@@ -1,8 +1,13 @@
 import os
-import keras
+
 import numpy as np
 
+import keras
 import skimage.io as io
+
+from keras.preprocessing.image import ImageDataGenerator
+
+
 #https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 class DataGenerator(keras.utils.Sequence):
@@ -22,7 +27,7 @@ class DataGenerator(keras.utils.Sequence):
 		in .npy files (for now)
 	'''
 
-	def __init__(self, path, ids, input_shape, batch_size=32, shuffle=True):
+	def __init__(self, path, ids, input_shape, batch_size=32, shuffle=True, ):
 		self.path = path
 		self.ids = ids
 		self.input_shape = input_shape
@@ -66,7 +71,19 @@ class DataGenerator(keras.utils.Sequence):
 			x[i,] = np.load(os.path.join(self.path, 'image', id))
 			y[i,] = np.load(os.path.join(self.path, 'label', id))
 
-		return x, y
+		#TEST
+		data_gen_args = dict(rotation_range=0.2,
+                    width_shift_range=0.05,
+                    height_shift_range=0.05,
+                    shear_range=0.05,
+                    zoom_range=0.05,
+                    horizontal_flip=True,
+                    fill_mode='nearest')
+
+		datagen = ImageDataGenerator(**data_gen_args)
+		datagen.flow(x, y, batch_size=self.batch_size)
+
+		return datagen.next()
 
 	# def _load_data_from_image(self, ids):
 
