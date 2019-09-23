@@ -134,7 +134,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     self.save_solution(offspring[0])
 
             self.evaluate_population(offspring_pop)
-            self.replacement.execute(self.population, offspring_pop)
+            #self.replacement.execute(self.population, offspring_pop)
+            self.replace(self.population, offspring_pop)
 
             self.evals += len(offspring_pop)
 
@@ -192,7 +193,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.prune = data['prune']
         self.duplication = data['duplication']
 
-    def save_solution(self, solution, filename):
+    def save_solution(self, solution):
 
         folder = checkpoint.ckpt_folder
         if not os.path.exists(folder):
