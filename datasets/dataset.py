@@ -2,6 +2,7 @@ import os
 import keras
 import numpy as np
 
+import skimage.io as io
 #https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 class DataGenerator(keras.utils.Sequence):
@@ -21,9 +22,10 @@ class DataGenerator(keras.utils.Sequence):
 		in .npy files (for now)
 	'''
 
-	def __init__(self, path, ids, batch_size=32, shuffle=True):
+	def __init__(self, path, ids, input_shape, batch_size=32, shuffle=True):
 		self.path = path
 		self.ids = ids
+		self.input_shape = input_shape
 		self.batch_size = batch_size
 		self.shuffle = shuffle
 		self.on_epoch_end()
@@ -42,7 +44,7 @@ class DataGenerator(keras.utils.Sequence):
 		temp_ids = [self.ids[i] for i in indexes]
 
 		# load them and return
-		return self._load_data_from_image(temp_ids)
+		return self._load_data(temp_ids)
 
 	def on_epoch_end(self):
 
@@ -53,32 +55,29 @@ class DataGenerator(keras.utils.Sequence):
 		if self.shuffle:
 			np.random.shuffle(self.indexes)
 
-	def _load_data_from_npy(self, ids):
+	def _load_data(self, ids):
 
 		# create placeholders for data
-		x = np.empty((self.batch_size, 64, 64))
-		y = np.empty((self.batch_size, 64, 64))
+		x = np.empty((self.batch_size, *self.input_shape))
+		y = np.empty((self.batch_size, *self.input_shape))
 
 		# loads it
 		for i, id in enumerate(ids):
-			print(os.path.join(self.path, 'image', f'{id}.npy'))
-			x[i] = np.load(os.path.join(self.path, 'image', id))
-			x[i] = np.reshape(x[i], (1, 64, 64))
-			y[i] = np.load(os.path.join(self.path, 'label', id))
-			y[i] = np.reshape(y[i], (1, 64, 64))
+			x[i,] = np.load(os.path.join(self.path, 'image', id))
+			y[i,] = np.load(os.path.join(self.path, 'label', id))
 
 		return x, y
 
-	def _load_data_from_image(self, ids):
+	# def _load_data_from_image(self, ids):
 
-		# create placeholders for data
-		x = np.empty((self.batch_size, 256, 256, 1))
-		y = np.empty((self.batch_size, 256, 256, 1))
+	# 	# create placeholders for data
+	# 	x = np.empty((self.batch_size, 256, 256, 1))
+	# 	y = np.empty((self.batch_size, 256, 256, 1))
 
-		# loads it
-		for i, id in enumerate(ids):
-			print(os.path.join(self.path, 'image', id))
-			x[i,] = io.imread(os.path.join(self.path, 'image', id), as_gray = True)
-			y[i,] = io.imread(os.path.join(self.path, 'label', id), as_gray = True)
+	# 	# loads it
+	# 	for i, id in enumerate(ids):
+	# 		print(os.path.join(self.path, 'image', id))
+	# 		x[i,] = io.imread(os.path.join(self.path, 'image', id), as_gray = True)
+	# 		y[i,] = io.imread(os.path.join(self.path, 'label', id), as_gray = True)
 
-		return x, y
+	# 	return x, y
