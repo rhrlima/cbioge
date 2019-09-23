@@ -6,7 +6,7 @@ from keras.optimizers import *
 
 from datasets.dataset import DataGenerator
 
-def unet(input_size = (256,256,1)):
+def unet(input_size):
     inputs = Input(input_size)
     conv1 = Conv2D(64, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(inputs)
     conv1 = Conv2D(64, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv1)
@@ -54,14 +54,39 @@ def unet(input_size = (256,256,1)):
 
     return model
 
+def iou_accuracy(true, pred):
+    intersection = true * pred
+    union = true + ((1. - true) * pred)
+    return np.sum(intersection) / np.sum(union)
+
 if __name__ == '__main__':
 
-    train_ids = [f'{i}.npy' for i in range(4000)]
     #train_gen = DataGenerator('datasets/membrane/npy/train', train_ids, (256, 256, 1), batch_size=1)
-    train_gen = DataGenerator('datasets/m2nist/train', train_ids, (64, 64, 1), batch_size=4)
-    valid_ids = train_ids[:1000]
-    valid_gen = DataGenerator('datasets/m2nist/test', valid_ids)
 
-    model = unet(input_size=(64, 64, 1))
-    model.fit_generator(train_gen, steps_per_epoch=1, epochs=1, verbose=1)
-    results = model.predict_generator(valid_gen, 1, verbose=1)
+    input_shape = (64, 64, 1)
+
+    train_ids = [f'{i}.npy' for i in range(4000)]
+    train_gen = DataGenerator('datasets/m2nist/train', train_ids, input_shape, batch_size=32)
+    
+    valid_ids = train_ids[:500]
+    valid_gen = DataGenerator('datasets/m2nist/valid', valid_ids, input_shape, batch_size=32)
+
+    test_ids = train_ids[:500]
+    test_gen = DataGenerator('datasets/m2nist/test', test_ids, input_shape, batch_size=32, shuffle=False)
+
+    model = unet(input_size=input_shape)
+    model.fit_generator(
+        train_gen, 
+        validation_data=valid_gen, 
+        steps_per_epoch=4000, 
+        epochs=1, 
+        verbose=1)
+    
+    results = model.predict_generator(test_gen, 500, verbose=1)
+
+    acc = 0.0
+    for i, pred in enumerate(results):
+        true = np.load(f'datasets/m2nist/test/label/{i}.npy')
+        acc += iou_accuracy(true, pred)
+
+    print('acc', acc/len(results))
