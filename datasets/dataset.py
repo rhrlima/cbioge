@@ -81,9 +81,9 @@ class DataGenerator(keras.utils.Sequence):
                     fill_mode='nearest')
 
 		datagen = ImageDataGenerator(**data_gen_args)
-		datagen.flow(x, y, batch_size=self.batch_size)
+		it = datagen.flow(x, y, batch_size=self.batch_size)
 
-		return datagen.next()
+		return it.next()
 
 	# def _load_data_from_image(self, ids):
 
