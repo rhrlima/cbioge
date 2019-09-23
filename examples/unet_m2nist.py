@@ -1,5 +1,6 @@
 import numpy as np
 
+from keras import callbacks
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -74,15 +75,28 @@ if __name__ == '__main__':
     test_ids = train_ids[:500]
     test_gen = DataGenerator('datasets/m2nist/test', test_ids, input_shape, batch_size=32, shuffle=False)
 
+<<<<<<< HEAD
+=======
+    model_checkpoint = callbacks.ModelCheckpoint('unet_m2nist.hdf5', monitor='loss', verbose=1, save_best_only=True)
+>>>>>>> 61fbec43d512038117542bb78c0cc44f03f663b7
     model = unet(input_size=input_shape)
     model.fit_generator(
         train_gen, 
         validation_data=valid_gen, 
+<<<<<<< HEAD
         steps_per_epoch=4000, 
         epochs=1, 
         verbose=1)
     
     results = model.predict_generator(test_gen, 500, verbose=1)
+=======
+        steps_per_epoch=10, 
+        epochs=1, 
+        callbacks=[model_checkpoint],
+        verbose=1)
+    
+    results = model.predict_generator(test_gen, 10, verbose=1)
+>>>>>>> 61fbec43d512038117542bb78c0cc44f03f663b7
 
     acc = 0.0
     for i, pred in enumerate(results):
