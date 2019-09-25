@@ -1,4 +1,7 @@
+import os
+
 import numpy as np
+
 import skimage.io as io
 
 
@@ -14,25 +17,30 @@ def iou_loss(true, pred):
 
 def adjust_image(img, threshold=0.5):
 	img = (img - img.min()) / (img.max() - img.min())
-	# print(img.min(), img.max())
 	img[img > threshold ] = 1.
 	img[img <= threshold] = 0.
 	return img
 
+if __name__ == '__main__':
+	
+	path = 'datasets/membrane/test/'
+	ids = [f'{i}.png' for i in range(30)]
 
-#img = np.array(io.imread('datasets/membrane/test/0.png'))
-gt = io.imread('datasets/membrane/test/0_true.png', as_gray = True)
-pred = io.imread('datasets/membrane/test/1_predict.png', as_gray = True)
+	cum_iou = 0.0
+	for id in ids:
+		true = io.imread(os.path.join(path, 'label', id), as_gray = True)
+		pred = io.imread(os.path.join(path, 'pred', id), as_gray = True)
 
-#thresholds = [.4, .45, .5, .55, .6]
-thresholds = np.arange(.05, .95, .05)
+		thresholds = np.arange(.05, .95, .05)
 
-cum_iou = 0.0
-for t in thresholds:
-	gt2 = adjust_image(gt, t)
-	pred2 = adjust_image(pred, t)
-	iou = iou_accuracy(gt2, pred2)
-	cum_iou += iou
-	print(iou)
+		temp_iou = 0.0
+		for t in thresholds:
+			true = adjust_image(true, t)
+			pred = adjust_image(pred, t)
+			iou = iou_accuracy(true, pred)
+			temp_iou += iou
+		temp_iou = temp_iou / len(thresholds)
+		cum_iou += temp_iou
+		print('id', temp_iou)
 
-print('avg:', cum_iou/len(thresholds))
+	print('avg:', cum_iou/len(ids))

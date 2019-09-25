@@ -1,6 +1,3 @@
-import glob
-import os
-
 import numpy as np
 
 from keras import callbacks
@@ -12,6 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from datasets.dataset import DataGenerator
 
 import skimage.io as io
+import skimage.transform as trans
 
 def unet(input_size):
     inputs = Input(input_size)
@@ -61,23 +59,13 @@ def unet(input_size):
 
     return model
 
-def adjust_image(img, threshold=0.5):
-    img = (img - img.min()) / (img.max() - img.min())
-    img[img > threshold ] = 1.
-    img[img <= threshold] = 0.
-    return img
-
-def iou_accuracy(true, pred):
-    intersection = true * pred
-    union = true + ((1. - true) * pred)
-    return np.sum(intersection) / np.sum(union)
-
-def train_generator(data_gen_args):
+def trainGenerator(batch_size, train_path, aug_dict, target_size = (256, 256), seed = 1):
+  
     image_datagen = ImageDataGenerator(**aug_dict)
     mask_datagen = ImageDataGenerator(**aug_dict)
     image_generator = image_datagen.flow_from_directory(
         train_path,
-        classes = ['images'],
+        classes = ['image'],
         class_mode = None,
         color_mode = "grayscale",
         target_size = target_size,
@@ -87,7 +75,7 @@ def train_generator(data_gen_args):
         seed = seed)
     mask_generator = mask_datagen.flow_from_directory(
         train_path,
-        classes = ['masks'],
+        classes = ['label'],
         class_mode = None,
         color_mode = "grayscale",
         target_size = target_size,
@@ -104,10 +92,28 @@ def train_generator(data_gen_args):
             mask[mask <= 0.5] = 0
         yield img, mask
 
+def testGenerator(test_path, num_image = 30, target_size = (256,256)):
+    for i in range(num_image):
+        img = io.imread(os.path.join(test_path, f'{i}.png'), as_gray = True)
+        img = img / 255
+        img = trans.resize(img, target_size)
+        img = np.reshape(img, img.shape + (1,))
+        img = np.reshape(img,(1,)+img.shape) #???
+        yield img
+
+def adjust_image(img, threshold=0.5):
+    img = (img - img.min()) / (img.max() - img.min())
+    img[img > threshold ] = 1.
+    img[img <= threshold] = 0.
+    return img
+
+def iou_accuracy(true, pred):
+    intersection = true * pred
+    union = true + ((1. - true) * pred)
+    return np.sum(intersection) / np.sum(union)
 
 if __name__ == '__main__':
 
-    path = 'datasets/membrane'
     input_shape = (256, 256, 1)
 
     #TEST
@@ -119,16 +125,10 @@ if __name__ == '__main__':
                 horizontal_flip=True,
                 fill_mode='nearest')
 
-    #data_aug = ImageDataGenerator(**data_gen_args)
+    train_gen = trainGenerator(2, 'datasets/membrane/train', aug_dict)
+    test_gen = testGenerator('datasets/membrane/test/image', 30)
 
-    #train_ids = [f'{i}.npy' for i in range(30)]
-    train_ids = glob.glob(os.path.join(path, 'train/aug/image', '*.png'))
-    train_gen = DataGenerator(os.path.join(path, 'train/aug'), train_ids, input_shape, batch_size=2)
-    
-    test_ids = [f'{i}.png' for i in range(30)]
-    test_gen = DataGenerator(os.path.join(path, 'test'), test_ids, input_shape, batch_size=2, shuffle=False)
-
-    model_checkpoint = callbacks.ModelCheckpoint('unet_membrane.hdf5', monitor='loss', verbose=1, save_best_only=True)
+    model_checkpoint = callbacks.ModelCheckpoint('unet_membrane2.hdf5', monitor='loss', verbose=1, save_best_only=True)
     model = unet(input_size=input_shape)
     model.fit_generator(
         train_gen, 
@@ -141,10 +141,8 @@ if __name__ == '__main__':
 
     acc = 0.0
     for i, pred in enumerate(results):
-        io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
-        true = np.load(f'datasets/membrane/test/label/{i}.png')
-        pred = adjust_image(pred)
-        true = adjust_image(true)
+        io.imsave(f'datasets/membrane/npy/test/pred/{i}.png', pred)
+        true = io.imread(f'datasets/membrane/test/label/{i}.png')
         acc += iou_accuracy(true, pred)
 
     print('acc', acc/len(results))
