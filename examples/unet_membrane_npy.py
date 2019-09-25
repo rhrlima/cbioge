@@ -105,7 +105,6 @@ def testGenerator(test_path, num_image = 30, target_size = (256,256)):
 
 def adjust_image(img, threshold=0.5):
     img = (img - img.min()) / (img.max() - img.min())
-    # print(img.min(), img.max())
     img[img > threshold ] = 1.
     img[img <= threshold] = 0.
     return img
@@ -120,7 +119,7 @@ if __name__ == '__main__':
     input_shape = (256, 256, 1)
 
     #TEST
-    aug_dict = dict(rotation_range=0.2,
+    data_gen_args = dict(rotation_range=0.2,
                 width_shift_range=0.05,
                 height_shift_range=0.05,
                 shear_range=0.05,
@@ -128,7 +127,7 @@ if __name__ == '__main__':
                 horizontal_flip=True,
                 fill_mode='nearest')
 
-    train_gen = trainGenerator(2, 'datasets/membrane/train', aug_dict)
+    train_gen = trainGenerator(2, 'datasets/membrane/train', data_gen_args)
     test_gen = testGenerator('datasets/membrane/test/image', 30)
 
     model_checkpoint = callbacks.ModelCheckpoint('unet_membrane2.hdf5', monitor='loss', verbose=1, save_best_only=True)

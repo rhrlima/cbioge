@@ -1,4 +1,5 @@
 #folders
+__pycache__/
 */__pycache__/
 
 #dataset
@@ -21,8 +22,10 @@
 *.pdf
 
 #specific
-datasets/notmnist/notMNIST_large/
-datasets/notmnist/notMNIST_small/
+
+# ignore all but .py files
+datasets/*
+!datasets/*.py
 
 *.o*
 *.e*

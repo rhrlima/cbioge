@@ -72,56 +72,11 @@ def iou_accuracy(true, pred):
     union = true + ((1. - true) * pred)
     return np.sum(intersection) / np.sum(union)
 
-def train_generator(data_gen_args):
-    image_datagen = ImageDataGenerator(**aug_dict)
-    mask_datagen = ImageDataGenerator(**aug_dict)
-    image_generator = image_datagen.flow_from_directory(
-        train_path,
-        classes = ['images'],
-        class_mode = None,
-        color_mode = "grayscale",
-        target_size = target_size,
-        batch_size = batch_size,
-        save_to_dir = None,
-        save_prefix  = 'image',
-        seed = seed)
-    mask_generator = mask_datagen.flow_from_directory(
-        train_path,
-        classes = ['masks'],
-        class_mode = None,
-        color_mode = "grayscale",
-        target_size = target_size,
-        batch_size = batch_size,
-        save_to_dir = None,
-        save_prefix  = 'mask',
-        seed = seed)
-
-    for img, mask in zip(image_generator, mask_generator):
-        if np.max(img) > 1:
-            img = img / 255
-            mask = mask / 255
-            mask[mask > 0.5 ] = 1
-            mask[mask <= 0.5] = 0
-        yield img, mask
-
-
 if __name__ == '__main__':
 
     path = 'datasets/membrane'
     input_shape = (256, 256, 1)
 
-    #TEST
-    data_gen_args = dict(rotation_range=0.2,
-                width_shift_range=0.05,
-                height_shift_range=0.05,
-                shear_range=0.05,
-                zoom_range=0.05,
-                horizontal_flip=True,
-                fill_mode='nearest')
-
-    #data_aug = ImageDataGenerator(**data_gen_args)
-
-    #train_ids = [f'{i}.npy' for i in range(30)]
     train_ids = glob.glob(os.path.join(path, 'train/aug/image', '*.png'))
     train_ids = [os.path.basename(id) for id in train_ids]
     train_gen = DataGenerator(os.path.join(path, 'train/aug'), train_ids, input_shape, batch_size=2)
@@ -129,7 +84,7 @@ if __name__ == '__main__':
     test_ids = [f'{i}.png' for i in range(30)]
     test_gen = DataGenerator(os.path.join(path, 'test'), test_ids, input_shape, batch_size=2, shuffle=False)
 
-    model_checkpoint = callbacks.ModelCheckpoint('unet_membrane.hdf5', monitor='loss', verbose=1, save_best_only=True)
+    model_checkpoint = callbacks.ModelCheckpoint('unet_membrane_pre_aug.hdf5', monitor='loss', verbose=1, save_best_only=True)
     model = unet(input_size=input_shape)
     model.fit_generator(
         train_gen, 
@@ -143,6 +98,7 @@ if __name__ == '__main__':
     acc = 0.0
     for i, pred in enumerate(results):
         io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
+        
         true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
         pred = adjust_image(pred)
         true = adjust_image(true)
