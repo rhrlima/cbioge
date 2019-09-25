@@ -66,7 +66,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         target_size = target_size,
         batch_size = batch_size,
         save_to_dir = os.path.join(path, 'aug/image'),
-        save_prefix  = 'image',
+        save_prefix  = '',
         seed = seed)
     mask_gen = mask_datagen.flow_from_directory(
         path,
@@ -76,7 +76,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         target_size = target_size,
         batch_size = batch_size,
         save_to_dir = os.path.join(path, 'aug/label'),
-        save_prefix  = 'mask',
+        save_prefix  = '',
         seed = seed)
 
     for img, mask in zip(image_gen, mask_gen): #add a stop
@@ -91,15 +91,15 @@ if __name__ == '__main__':
 
     images = load_images('train/image', False)
     masks = load_images('train/label')
-    #save_to_images('new/train/image', images)
-    #save_to_images('new/train/label', masks)
+    save_to_images('posproc/train/image', images)
+    save_to_images('posproc/train/label', masks)
     #save_to_npy('npy/train/image', images)
     #save_to_npy('npy/train/label', masks)
 
     images = load_images('test/image', False)
     masks = load_images('test/label')
-    #save_to_images('new/test/image', images)
-    #save_to_images('new/test/label', masks)
+    save_to_images('posproc/test/image', images)
+    save_to_images('posproc/test/label', masks)
     #save_to_npy('npy/test/image', images)
     #save_to_npy('npy/test/label', masks)
 
