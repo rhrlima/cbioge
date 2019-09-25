@@ -6,7 +6,6 @@ import keras
 import skimage.io as io
 
 
-
 #https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 class DataGenerator(keras.utils.Sequence):
@@ -85,8 +84,10 @@ class DataGenerator(keras.utils.Sequence):
 
         # loads it
         for i, id in enumerate(ids):
-            x[i,] = io.imread(os.path.join(self.path, 'image', id))
-            y[i,] = io.imread(os.path.join(self.path, 'label', id))
+            img = io.imread(os.path.join(self.path, 'image', id))
+            msk = io.imread(os.path.join(self.path, 'label', id))
+            x[i,] = np.reshape(img, img.shape+(1,))
+            y[i,] = np.reshape(msk, msk.shape+(1,))
 
         if self.data_aug != None:
             it = self.data_aug.flow(x, y, batch_size=self.batch_size)
