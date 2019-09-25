@@ -2,30 +2,13 @@
 __pycache__/
 */__pycache__/
 
-#dataset
-*.pickle
-*.zip
-*tar.gz
-*.csv
-
-#tex
-*.aux
-*.bbl
-*.blg
-*.log
-*.nav
-*.out
-*.run.xml
-*.snm
-*.synctex.gz
-*.toc
-*.pdf
-
-#specific
-
 # ignore all but .py files
 datasets/*
 !datasets/*.py
 
+# outputs
 *.o*
 *.e*
+
+# run scripts
+*.sbatch

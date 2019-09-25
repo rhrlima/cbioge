@@ -6,11 +6,10 @@ import keras
 import skimage.io as io
 
 
-#https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
-
 class DataGenerator(keras.utils.Sequence):
 
-    '''The dataset should be organized as:
+    '''https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
+    The dataset should be organized as:
         dataset
         --train
         ----image
