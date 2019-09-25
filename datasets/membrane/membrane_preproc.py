@@ -66,7 +66,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         target_size = target_size,
         batch_size = batch_size,
         save_to_dir = os.path.join(path, 'aug/image'),
-        save_prefix  = 'image',
+        save_prefix  = '',
         seed = seed)
     mask_gen = mask_datagen.flow_from_directory(
         path,
@@ -76,7 +76,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         target_size = target_size,
         batch_size = batch_size,
         save_to_dir = os.path.join(path, 'aug/label'),
-        save_prefix  = 'mask',
+        save_prefix  = '',
         seed = seed)
 
     for img, mask in zip(image_gen, mask_gen): #add a stop
