@@ -11,18 +11,13 @@ class DataGenerator(keras.utils.Sequence):
 
     '''https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
     The dataset should be organized as:
-        dataset
-        --train
-        ----image
-        ----label
-        --validation
-        ----image
-        ----label
-        --test
-        ----image
-        ----label
-
-        in .npy files (for now)
+        dataset/
+        --train/
+        ----image/
+        ----label/
+        --test/
+        ----image/
+        ----label/
     '''
 
     def __init__(self, path, ids, input_shape, batch_size=32, data_aug=None, shuffle=True):
@@ -84,10 +79,23 @@ class DataGenerator(keras.utils.Sequence):
 
         # loads it
         for i, id in enumerate(ids):
-            img = io.imread(os.path.join(self.path, 'image', id))
-            msk = io.imread(os.path.join(self.path, 'label', id))
+            # read image and label from source
+            img = io.imread(os.path.join(self.path, 'image', id), as_gray=True)
+            msk = io.imread(os.path.join(self.path, 'label', id), as_gray=True)
+
+            # normalize
+            img = (img - img.min()) / (img.max() - img.min())
+            msk = (msk - msk.min()) / (msk.max() - msk.min())
+
+            # binarize mask
+            msk[msk > 0.5 ] = 1
+            msk[msk <= 0.5] = 0
+
+            # reshape to (w, h, 1)
             x[i,] = np.reshape(img, img.shape+(1,))
             y[i,] = np.reshape(msk, msk.shape+(1,))
+
+            print(id, x[i].shape, y[i].shape, x[i].min(), x[i].max())
 
         if self.data_aug != None:
             it = self.data_aug.flow(x, y, batch_size=self.batch_size)

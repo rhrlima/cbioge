@@ -64,8 +64,8 @@ def unet(input_size):
 
 def adjust_image(img, threshold=0.5):
     img = (img - img.min()) / (img.max() - img.min())
-    img[img > threshold ] = 1.
-    img[img <= threshold] = 0.
+    img[img > threshold ] = 1
+    img[img <= threshold] = 0
     return img
 
 def iou_accuracy(true, pred):
@@ -83,16 +83,18 @@ if __name__ == '__main__':
     train_gen = DataGenerator(os.path.join(path, 'train/aug'), train_ids, input_shape, batch_size=2)
     
     test_ids = [f'{i}.png' for i in range(30)]
-    test_gen = DataGenerator(os.path.join(path, 'test'), test_ids, input_shape, batch_size=2, shuffle=False)
+    test_gen = DataGenerator(os.path.join(path, 'posproc/test'), test_ids, input_shape, batch_size=1, shuffle=False)
 
     model_checkpoint = callbacks.ModelCheckpoint('unet_membrane_pre_aug.hdf5', monitor='loss', verbose=1, save_best_only=True)
     model = unet(input_size=input_shape)
     model.fit_generator(
         train_gen, 
-        steps_per_epoch=300, 
+        steps_per_epoch=300, # DATA SIZE / BATCH SIZE = 600 / 2 
         epochs=1, 
         callbacks=[model_checkpoint], 
-        verbose=1)
+        verbose=1,
+        use_multiprocessing=True,
+        workers=4)
     
     results = model.predict_generator(test_gen, 30, verbose=1)
 
@@ -100,7 +102,7 @@ if __name__ == '__main__':
     for i, pred in enumerate(results):
         io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
         
-        true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
+        true = io.imread(f'datasets/membrane/posproc/test/label/{i}.png', as_gray=True)
         pred = adjust_image(pred)
         true = adjust_image(true)
         acc += iou_accuracy(true, pred)
