@@ -79,7 +79,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         save_prefix  = '',
         seed = seed)
 
-    for img, mask in zip(image_gen, mask_gen): #add a stop
+    for img, mask in zip(image_gen, mask_gen):
         if np.max(img) > 1:
             img = normalize(img)
             mask = normalize(mask)
@@ -91,15 +91,15 @@ if __name__ == '__main__':
 
     images = load_images('train/image', False)
     masks = load_images('train/label')
-    save_to_images('posproc/train/image', images)
-    save_to_images('posproc/train/label', masks)
+    #save_to_images('posproc/train/image', images)
+    #save_to_images('posproc/train/label', masks)
     #save_to_npy('npy/train/image', images)
     #save_to_npy('npy/train/label', masks)
 
     images = load_images('test/image', False)
     masks = load_images('test/label')
-    save_to_images('posproc/test/image', images)
-    save_to_images('posproc/test/label', masks)
+    #save_to_images('posproc/test/image', images)
+    #save_to_images('posproc/test/label', masks)
     #save_to_npy('npy/test/image', images)
     #save_to_npy('npy/test/label', masks)
 
@@ -117,5 +117,5 @@ if __name__ == '__main__':
 
     aug_gen = generate_augmented_data(1, 'train', data_gen_args)
 
-    for _ in range(300):
+    for _ in range(600):
         next(aug_gen)
