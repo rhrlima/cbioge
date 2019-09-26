@@ -5,6 +5,7 @@ import numpy as np
 import keras
 import skimage.io as io
 
+from utils.image import *
 
 class DataGenerator(keras.utils.Sequence):
 
@@ -76,25 +77,24 @@ class DataGenerator(keras.utils.Sequence):
         x = np.empty((self.batch_size, *self.input_shape))
         y = np.empty((self.batch_size, *self.input_shape))
 
-        # loads it
         for i, id in enumerate(ids):
+            
             # read image and label from source
             img = io.imread(os.path.join(self.path, 'image', id), as_gray=True)
             msk = io.imread(os.path.join(self.path, 'label', id), as_gray=True)
 
             # normalize
-            img = (img - img.min()) / (img.max() - img.min())
-            msk = (msk - msk.min()) / (msk.max() - msk.min())
+            img = normalize(img)
+            msk = normalize(msk)
 
             # binarize mask
-            msk[msk > 0.5 ] = 1
-            msk[msk <= 0.5] = 0
+            msk = binarize(msk)
 
             # reshape to (w, h, 1)
             x[i,] = np.reshape(img, img.shape+(1,))
             y[i,] = np.reshape(msk, msk.shape+(1,))
 
-            print(id, x[i].shape, y[i].shape, x[i].min(), x[i].max())
+            # print(id, x[i].shape, y[i].shape, x[i].min(), x[i].max())
 
         if self.data_aug != None:
             it = self.data_aug.flow(x, y, batch_size=self.batch_size)

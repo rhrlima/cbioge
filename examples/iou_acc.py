@@ -31,7 +31,8 @@ if __name__ == '__main__':
 		true = io.imread(os.path.join(path, 'label', id), as_gray = True)
 		pred = io.imread(os.path.join(path, 'pred', id), as_gray = True)
 
-		thresholds = np.arange(.05, .95, .05)
+		#thresholds = np.arange(.05, .95, .05)
+		thresholds = [0.5]
 
 		temp_iou = 0.0
 		for t in thresholds:
