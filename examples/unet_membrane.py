@@ -64,8 +64,8 @@ def unet(input_size):
 
 def adjust_image(img, threshold=0.5):
     img = (img - img.min()) / (img.max() - img.min())
-    img[img > threshold ] = 1.
-    img[img <= threshold] = 0.
+    img[img > threshold ] = 1
+    img[img <= threshold] = 0
     return img
 
 def iou_accuracy(true, pred):
@@ -97,7 +97,9 @@ def train_generator(train_path, batch_size, aug_dict, target_size = (256, 256)):
         save_prefix  = 'mask',
         seed = 1)
 
+    i = 0
     for img, mask in zip(image_generator, mask_generator):
+        i += 1
         if np.max(img) > 1:
             img = img / 255
             mask = mask / 255
@@ -108,7 +110,7 @@ def train_generator(train_path, batch_size, aug_dict, target_size = (256, 256)):
 def test_generator(test_path, num_image = 30, target_size = (256, 256)):
     for i in range(num_image):
         img = io.imread(os.path.join(test_path, f'{i}.png'), as_gray = True)
-        img = adjust_image(img)
+        ĩmg = (img - img.min()) / (img.max() - img.min())
         img = trans.resize(img, target_size)
         img = np.reshape(img,img.shape+(1,)) # (256, 256, 1)
         img = np.reshape(img,(1,)+img.shape) # (1, 256, 256, 1) ??
