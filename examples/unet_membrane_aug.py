@@ -1,7 +1,4 @@
-import glob
 import os
-
-import numpy as np
 
 from keras import callbacks
 from keras.models import *
@@ -12,9 +9,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from datasets.dataset import DataGenerator
 
 import skimage.io as io
-import skimage.transform as trans
 
-from unet_model import *
+from examples.unet_model import *
 from utils.image import *
 
 
@@ -34,21 +30,27 @@ if __name__ == '__main__':
     data_aug = ImageDataGenerator(**data_gen_args)
 
     img_ids = [f'{i}.png' for i in range(30)]
-    train_gen = DataGenerator(os.path.join(path, 'posproc/train'), img_ids, input_shape, batch_size=2, data_aug=data_aug)
-    test_gen = DataGenerator(os.path.join(path, 'posproc/test'), img_ids, input_shape, batch_size=1, shuffle=False)
 
-    model = unet(input_size=input_shape)
-    model.fit_generator(train_gen, steps_per_epoch=300, epochs=1, verbose=1, use_multiprocessing=True, workers=4)
+    train_gen = DataGenerator(os.path.join(path, 'train_posproc'), img_ids, input_shape, batch_size=2, data_aug=data_aug)
+    test_gen = DataGenerator(os.path.join(path, 'test_posproc'), img_ids, input_shape, batch_size=1, shuffle=False)
+
+    model = unet(input_shape)
+    model.fit_generator(train_gen, steps_per_epoch=300, epochs=1, verbose=1)
     
-    results = model.predict_generator(test_gen, 30, verbose=1)
+    loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)
+    print('loss', loss, 'acc', acc)
 
-    acc = 0.0
-    for i, pred in enumerate(results):
-        io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
+    # results = model.predict_generator(test_gen, 30, verbose=1)
+
+    # acc = 0.0
+    # for i, pred in enumerate(results):
+    #     io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
         
-        true = io.imread(f'datasets/membrane/posproc/test/label/{i}.png', as_gray=True)
-        pred = adjust_image(pred)
-        true = adjust_image(true)
-        acc += iou_accuracy(true, pred)
+    #     true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
+    #     pred = normalize(pred)
+    #     pred = binarize(pred)
+    #     true = normalize(true)
+    #     true = binarize(true)
+    #     acc += iou_accuracy(true, pred)
 
-    print('acc', acc/len(results))
+    # print('acc', acc/len(results))
