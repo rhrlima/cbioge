@@ -1,3 +1,5 @@
+import numpy as np
+
 def normalize(img):
 
 	return (img - img.min()) / (img.max() - img.min())

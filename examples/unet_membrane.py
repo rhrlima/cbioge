@@ -1,20 +1,13 @@
-import glob
 import os
 
 import numpy as np
 
-from keras import callbacks
-from keras.models import *
-from keras.layers import *
-from keras.optimizers import *
-from keras.preprocessing.image import ImageDataGenerator
-
-from datasets.dataset import DataGenerator
-
 import skimage.io as io
 import skimage.transform as trans
 
-from unet_model import *
+from keras.preprocessing.image import ImageDataGenerator
+
+from examples.unet_model import *
 from utils.image import *
 
 
@@ -50,12 +43,17 @@ def train_generator(train_path, batch_size, aug_dict, target_size = (256, 256)):
 
 def test_generator(test_path, num_image = 30, target_size = (256, 256)):
     for i in range(num_image):
-        img = io.imread(os.path.join(test_path, f'{i}.png'), as_gray = True)
-        img = normalize(img)
+        img = io.imread(os.path.join(test_path, 'image', f'{i}.png'), as_gray = True)
+        msk = io.imread(os.path.join(test_path, 'label', f'{i}.png'), as_gray = True)
         img = trans.resize(img, target_size)
-        img = np.reshape(img,img.shape+(1,)) # (256, 256, 1)
-        img = np.reshape(img,(1,)+img.shape) # (1, 256, 256, 1) ??
-        yield img
+        img = normalize(img)
+        msk = normalize(msk)
+        msk = binarize(msk)
+        img = np.reshape(img, img.shape+(1,)) # (256, 256, 1)
+        msk = np.reshape(msk, msk.shape+(1,)) # (256, 256, 1)
+        img = np.reshape(img,(1,)+img.shape) # (1, 256, 256, 1)
+        msk = np.reshape(msk,(1,)+msk.shape) # (1, 256, 256, 1)
+        yield img, msk
 
 if __name__ == '__main__':
 
@@ -70,22 +68,25 @@ if __name__ == '__main__':
                     fill_mode='nearest')
 
     train_gen = train_generator('datasets/membrane/train', 2, aug_dict=data_gen_args)
-    test_gen = test_generator('datasets/membrane/test/image')
+    test_gen = test_generator('datasets/membrane/test')
 
     model = unet(input_shape)
     model.fit_generator(train_gen, steps_per_epoch=300, epochs=1, verbose=1)
     
-    results = model.predict_generator(test_gen, 30, verbose=1)
+    loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)
+    print('loss', loss, 'acc', acc)
 
-    acc = 0.0
-    for i, pred in enumerate(results):
-        io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
+    #results = model.predict_generator(test_gen, 30, verbose=1)
+
+    # acc = 0.0
+    # for i, pred in enumerate(results):
+    #     io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
         
-        true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
-        pred = normalize(pred)
-        pred = binarize(pred)
-        true = normalize(true)
-        true = binarize(true)
-        acc += iou_accuracy(true, pred)
+    #     true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
+    #     pred = normalize(pred)
+    #     pred = binarize(pred)
+    #     true = normalize(true)
+    #     true = binarize(true)
+    #     acc += iou_accuracy(true, pred)
 
-    print('acc', acc/len(results))
+    # print('acc', acc/len(results))
