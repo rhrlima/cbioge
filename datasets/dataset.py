@@ -20,13 +20,14 @@ class DataGenerator(keras.utils.Sequence):
         ----label/
     '''
 
-    def __init__(self, path, ids, input_shape, batch_size=32, data_aug=None, shuffle=True):
+    def __init__(self, path, ids, input_shape, batch_size=32, data_aug=None, shuffle=True, npy=False):
         self.path = path
         self.ids = ids
         self.input_shape = input_shape
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.data_aug = data_aug
+        self.npy = npy
         self.on_epoch_end()
 
     def __len__(self):
@@ -43,6 +44,8 @@ class DataGenerator(keras.utils.Sequence):
         temp_ids = [self.ids[i] for i in indexes]
 
         # load them and return
+        if self.npy:
+            return self._load_data_from_npy(temp_ids)
         return self._load_data_from_image(temp_ids)
 
     def on_epoch_end(self):
