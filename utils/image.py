@@ -1,15 +1,21 @@
 import numpy as np
-
-def normalize(img):
-
-	return (img - img.min()) / (img.max() - img.min())
-
+import skimage.transform as trans
 
 def binarize(img, threshold=0.5):
 
 	img[img > threshold ] = 1
 	img[img <= threshold] = 0
 	return img
+
+
+def normalize(img):
+
+	return (img - img.min()) / (img.max() - img.min())
+
+
+def resize(img, size):
+
+	return trans.resize(img, size)
 
 
 def iou_accuracy(true, pred):
