@@ -14,6 +14,7 @@ class ImageSegmentationProblem(BaseProblem):
 
     parser = None
 
+    batch_size
     steps_per_epoch = 1
     epochs = 1
 
