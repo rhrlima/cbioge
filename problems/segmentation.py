@@ -26,6 +26,8 @@ class ImageSegmentationProblem(BaseProblem):
         self.test_generator = None
         self.data_augmentation = None
 
+        self.verbose = False
+
     def map_genotype_to_phenotype(self, genotype):
         return None
 
@@ -35,10 +37,18 @@ class ImageSegmentationProblem(BaseProblem):
         if not model:
             return -1
 
-        model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
+        model.compile(
+            optimizer=self.opt, 
+            loss=self.loss, 
+            metrics=self.metrics)
 
-        model.fit_generator(self.train_generator, self.dataset['train_steps'], self.epochs)
+        model.fit_generator(
+            self.train_generator, 
+            self.dataset['train_steps'], 
+            self.epochs, verbose=self.verbose)
 
-        loss, acc = model.evaluate_generator(self.test_generator, self.dataset['test_steps'], verbose=1)
+        loss, acc = model.evaluate_generator(
+            self.test_generator, 
+            self.dataset['test_steps'], verbose=self.verbose)
 
         return acc
