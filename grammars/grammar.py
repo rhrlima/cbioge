@@ -21,8 +21,6 @@ class BNFGrammar:
         # print(self.GRAMMAR)
         # print(self.NT)
         # self._check_recursive_rules()
-        for i, nt in enumerate(self.NT):
-            print(i, nt)
 
     def _read_grammar(self, grammar_file):
         lines = []
@@ -142,7 +140,7 @@ class BNFGrammar:
         print(prod)
         return codons
 
-    def dsge_create_solution(self, max_depth, genotype=None, symb=None, depth=0):
+    def dsge_create_solution(self, max_depth=10, genotype=None, symb=None, depth=0):
 
         '''falta adicionar comportamento quando ultrapassa 
         profundidade maxima'''
@@ -196,29 +194,29 @@ class BNFGrammar:
             for value in genB:
                 genA.append(value)
 
-        return prod
+        return list(filter(lambda x: x != '&', prod))
 
     def _recursive_parse_call(self, genotype, new_gen, symb, depth):
 
-            prod = []
-            
-            # print('symbol', symb, 'depth', depth, 'genotype', gen)
+        prod = []
+        
+        # print('symbol', symb, 'depth', depth, 'genotype', gen)
 
-            #print(genotype[self.NT.index(symb)])
-            if genotype[self.NT.index(symb)] == []:
-                value = np.random.randint(0, len(self.GRAMMAR[symb]))
-                print('pop from empty list, added:', value)
-                new_gen[self.NT.index(symb)].append(value)
+        #print(genotype[self.NT.index(symb)])
+        if genotype[self.NT.index(symb)] == []:
+            value = np.random.randint(0, len(self.GRAMMAR[symb]))
+            print('pop from empty list, added:', value)
+            new_gen[self.NT.index(symb)].append(value)
+        else:
+            value = genotype[self.NT.index(symb)].pop(0)
+
+        # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
+        expansion = self.GRAMMAR[symb][value]
+
+        for s in expansion:
+            if s not in self.NT:
+                prod.append(s)
             else:
-                value = genotype[self.NT.index(symb)].pop(0)
+                prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
 
-            # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
-            expansion = self.GRAMMAR[symb][value]
-
-            for s in expansion:
-                if s not in self.NT:
-                    prod.append(s)
-                else:
-                    prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
-
-            return prod
+        return prod

@@ -150,6 +150,14 @@ class CnnProblem(BaseProblem):
         # returns the model as string
         return json.dumps(model)
 
+    def map_v2(self, genotype):
+
+        deriv = self.parser.dsge_recursive_parse(genotype)
+
+        print(deriv)
+
+        return None
+
     def evaluate(self, solution, verbose=0):
 
         try:
