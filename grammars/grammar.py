@@ -212,9 +212,11 @@ class BNFGrammar:
 
         # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
         expansion = self.GRAMMAR[symb][value]
+        # print('###', expansion)
 
         for s in expansion:
             if s not in self.NT:
+                # print(symb, s)
                 prod.append(s)
             else:
                 prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
