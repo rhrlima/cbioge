@@ -22,7 +22,6 @@ layer = common_layers(layer)
 
 layer = BatchNormalization()(layer)
 
-print(layer)
 # upscale when size dont match
 aux = Conv2D(256, 1, strides=1)(inputs)
 aux = common_layers(aux)

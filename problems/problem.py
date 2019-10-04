@@ -23,7 +23,7 @@ class BaseProblem:
         raise NotImplementedError('Not implemented yet.')
 
 
-class CnnProblem(BaseProblem):
+class CNNProblem(BaseProblem):
 
     parser = None
 
@@ -150,11 +150,52 @@ class CnnProblem(BaseProblem):
         # returns the model as string
         return json.dumps(model)
 
+    def _reshape_mapping(self, phenotype):
+
+        new_mapping = []
+
+        index = 0
+        while index < len(phenotype):
+            if phenotype[index] == 'conv':
+                end = index+6
+            elif phenotype[index] == 'avgpool':
+                end = index+3
+            else:
+                end = 2
+
+            new_mapping.append(phenotype[index:end])
+            phenotype = phenotype[end:]
+
+        return new_mapping
+
+    def _build_block(self, block, params):
+        base = {'class_name': None, 'config': {}}
+
+        layers = {
+            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
+            'avgpool': ['AveragePooling2D', 'kernel_size', 'padding'],
+            'dense': ['Dense', 'units'],
+        }
+
+        base['class_name'] = layers[block].pop(0)
+        for name, value in zip(layers[block], params):
+            base['config'][name] = value
+
+        return base
+
     def map_v2(self, genotype):
 
         deriv = self.parser.dsge_recursive_parse(genotype)
 
         print(deriv)
+        deriv = self._reshape_mapping(deriv)
+        print(deriv)
+        
+        for layer in deriv:
+            block_name = layer[0]
+            params = layer[1:]
+            block = self._build_block(block_name, params)
+            print(block)
 
         return None
 
