@@ -1,5 +1,3 @@
-# import sys; sys.path.append('..')
-
 import json
 import numpy as np
 import pickle
@@ -48,7 +46,6 @@ class CNNProblem(BaseProblem):
         self.parser = parser_
         if dataset:
             self.load_dataset_from_pickle(dataset)
-
         self._create_layers_base()
         
 
@@ -154,12 +151,13 @@ class CNNProblem(BaseProblem):
         return json.dumps(model)
 
     def _create_layers_base(self):
-        self.names = {}
         self.layers = {
-            'input': ['InputLayer', 'batch_input_shape:'],
-            'conv': ['Conv2D', 'filters:int', 'kernel_size:int', 'strides:int', 'padding:', 'activation:'],
-            'avgpool': ['AveragePooling2D', 'pool_size:int', 'padding:'],
-            'dense': ['Dense', 'units:int'],
+            'input': ['InputLayer', 'batch_input_shape'],
+            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
+            'avgpool': ['AveragePooling2D', 'pool_size', 'padding'],
+            'maxpool': ['MaxPooling2D', 'pool_size', 'padding'],
+            'dropout': ['Dropout', 'rate'],
+            'dense': ['Dense', 'units'],
         }
 
     def _reshape_mapping(self, phenotype):
@@ -168,12 +166,13 @@ class CNNProblem(BaseProblem):
 
         index = 0
         while index < len(phenotype):
-            if phenotype[index] == 'conv':
+            block = phenotype[index]
+            if block == 'conv':
                 end = index+6
-            elif phenotype[index] == 'avgpool':
+            elif block == 'avgpool' or block == 'maxpool':
                 end = index+3
             else:
-                end = 2
+                end = index+2
 
             new_mapping.append(phenotype[index:end])
             phenotype = phenotype[end:]
@@ -190,14 +189,11 @@ class CNNProblem(BaseProblem):
             self.names[block_name] = 0
         name = f'{block_name}_{self.names[block_name]}'
 
-        base_block['class_name'] = self.layers[block_name].pop(0)
+        base_block['class_name'] = self.layers[block_name][0]
         base_block['name'] = name
-        for name, value in zip(self.layers[block_name], params):
-            name, op = name.split(':')
-            if op != '' :
-                value = int(value) if op == 'int' else float(value)
+        for name, value in zip(self.layers[block_name][1:], params):
             base_block['config'][name] = value
-
+        #print(base_block)
         return base_block
 
     def _add_layer_to_model(self, model, layer):
@@ -218,10 +214,11 @@ class CNNProblem(BaseProblem):
 
         deriv = self.parser.dsge_recursive_parse(genotype)
 
-        print(deriv)
+        #print(deriv)
         deriv = self._reshape_mapping(deriv)
         print(deriv)
-        
+
+        self.names = {}
         model = {'class_name': 'Model', 'config': {'layers': [], 'input_layers': [], 'output_layers': []}, }
 
         input_layer = self._build_block('input', [self.input_shape])
@@ -235,7 +232,7 @@ class CNNProblem(BaseProblem):
 
         model = self._wrap_up_model(model)
 
-        print(model)
+        #print(model)
 
         return json.dumps(model)
 

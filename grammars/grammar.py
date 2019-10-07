@@ -50,17 +50,23 @@ class BNFGrammar:
             self.GRAMMAR[rule.strip()] = [p.strip().split(' ') for p in prod.split('|')]
             self.NT.append(rule.strip())
 
-    def _check_recursive_rules(self):
-        visited = []
-        for nt in self.NT:
-            print('nt:', nt)
-            for opt in self.GRAMMAR[nt]:
-                print('option:', opt)
-                if opt not in visited:
-                    # print('not visited')
-                    visited.append(opt) 
+    def _parse_value(self, value):
+        try:
+            value = value.replace(' ', '')
+            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+            if m:
+                min_ = eval(m.group(1))
+                max_ = eval(m.group(2))
+                if type(min_) == int and type(max_) == int:
+                    return np.random.randint(min_, max_)
+                elif type(min_) == float and type(max_) == float:
+                    return np.random.uniform(min_, max_)
                 else:
-                    print('recursive?')
+                    raise TypeError('type mismatch')
+
+            return float(value) if '.' in value else int(value)
+        except:
+            return value
 
     def parse(self, codons):
         index = 0
@@ -217,7 +223,7 @@ class BNFGrammar:
         for s in expansion:
             if s not in self.NT:
                 # print(symb, s)
-                prod.append(s)
+                prod.append(self._parse_value(s))
             else:
                 prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
 
