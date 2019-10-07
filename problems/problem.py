@@ -1,5 +1,3 @@
-# import sys; sys.path.append('..')
-
 import json
 import numpy as np
 import pickle

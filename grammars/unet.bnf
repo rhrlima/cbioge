@@ -1,5 +1,37 @@
-<unet> ::= <grow> Conv1x1
+<unet> ::= <conv3> <grow> <conv3> <conv1>
 
-<grow> ::= Conv <grow> Conv | MaxPool <grow> UpConv Copy | <middle>
+<grow> ::= <conv3> <grow> <conv3> | <pool> <grow> <upconv> concat 3 | <middle>
 
-<middle> ::= <middle> <middle> | Conv | Dropout | &
+<middle> ::= <middle> <middle> | <conv3> | <drop> | &
+
+
+
+<conv1> ::= conv <filters> 1 <strides> <padding> <activation>
+
+<conv3> ::= conv <filters> 3 <strides> <padding> <activation>
+
+<upconv> ::= <conv2> <upsamp>
+
+<conv2> ::= conv <filters> 2 <strides> <padding> <activation> 
+
+<upsamp> ::= upsamp 2
+
+<pool> ::= <ptype> <psize> <padding>
+
+<drop> ::= dropout <rate>
+
+
+
+<filters> ::= 32 | 64
+
+<strides> ::= 1 | 2
+
+<padding> ::= valid | same
+
+<activation> ::= relu | sig | tahn | linear
+
+<ptype> ::= maxpool | avgpool
+
+<psize> ::= 2 | 4
+
+<rate> ::= [0.,1.]

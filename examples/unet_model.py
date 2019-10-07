@@ -50,3 +50,7 @@ def unet(input_size):
     model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
     return model
+
+if __name__ == '__main__':
+    
+    print(unet((256, 256, 1)).to_json())
