@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 
 from keras.layers import *
+from keras.models import model_from_json
 
 from grammars import BNFGrammar
 from problems import *
@@ -128,11 +129,15 @@ if __name__ == '__main__':
 
     parser = BNFGrammar('grammars/cnn2.bnf')
     problem = CNNProblem(parser)
+    problem.input_shape = (None, 256, 256, 1)
 
     #gen = parser.dsge_create_solution()
     gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [0], []]
     print(gen)
     fen = problem.map_v2(gen)
+    fen = model_from_json(fen)
+    print(fen)
+    fen.compile('adam', loss='categorical_crossentropy')
     #fen = parser.dsge_recursive_parse(gen)
     #print(fen)
     #fen = reshape_mapping(fen)
