@@ -8,16 +8,17 @@ from grammars import BNFGrammar
 from problems import *
 
 
-def calculate_output_size(img_shape, k, p, s):
+def calculate_output_size(img_shape, k, s, p):
     ''' width, height, kernel, padding, stride'''
     p = 0 if p == 'valid' else (k-1)/2
-    ow = ((img_shape[0] - k + 2 * p) / s) + 1
-    oh = ((img_shape[1] - k + 2 * p) / s) + 1
-    return ow, oh
+    ow = ((img_shape[0] - k + 2 * p) // s) + 1
+    oh = ((img_shape[1] - k + 2 * p) // s) + 1
+    return ow, oh, img_shape[2]
+
 
 def is_valid_conv(input_shape, k, p, s):
-    
-    return (0, 0) < calculate_output_size(input_shape, k, p, s)
+    output_shape = calculate_output_size(input_shape, k, p, s)
+    return (0, 0) < output_shape, output_shape
 
 
 def is_valid_merge(shape_1, shape_2):
@@ -25,31 +26,12 @@ def is_valid_merge(shape_1, shape_2):
     return shape_1 == shape_2
 
  
-def built_block(block, params):
-    base = {'class_name': None, 'config': None}
-
-    layers = {
-        'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
-        'avgpool': {'kernel_size': params[0], 'padding': params[1]},
-        'dense': {'units': params[0]},
-    }
-
-    base['class_name'] = layers[block].pop(0)
-    for name, value in zip(params, layers[block]):
-        base['config'][name] = value
-
-    return baseblocks[block]
-
-
-
 def get_conv_combinations(parser):
     kernels = [int(i[0]) for i in parser.GRAMMAR['<ksize>']]
-    padding = [i[0] for i in parser.GRAMMAR['<padding>']]
     strides = [int(i[0]) for i in parser.GRAMMAR['<strides>']]
-    combinations = itertools.product(kernels, padding, strides)
-    for comb in combinations:
-        print(comb)
-    return combinations
+    padding = [i[0] for i in parser.GRAMMAR['<padding>']]
+    return list(itertools.product(kernels, strides, padding))
+
 
 def reshape_mapping(mapping):
 
@@ -70,45 +52,55 @@ def reshape_mapping(mapping):
     return new_mapping
 
 
-def repair(parser, genotype, mapping, input_shape, index=0):
+def repair(parser, genotype, mapping, input_shape, index=0, depth=0):
     '''validar casos:
     verificar shape do input com output para convoluções
     verificar compatibilidade entre junção de layers'''
 
-    # reached the end without errors
+    print(f"### DEPTH {depth} ###")
+
     if index >= len(mapping):
+        # it only returns TRUE when reaches the end without errors
         return True
 
+    #print(input_shape)
     block = mapping[index][0]
     params = mapping[index][1:]
 
     if block == 'conv': #consumes 6 spots
-        #filters = int(params[0])
-        kernels = int(params[1])
-        strides = int(params[2])
-        padding = params[3]
-        #activation = params[4]
+        this_config = tuple(params[1:4])
 
-        if is_valid_conv(input_shape, kernels, padding, strides):
+        is_valid, output_shape = is_valid_conv(input_shape, *this_config)
+        if not is_valid:
             # valid, call next node
-            print(kernels, padding, strides, 'VALID')
-            return repair(parser, genotype, mapping, input_shape, index+1)
-        else:
+            #print(this_config, 'VALID')
             combinations = get_conv_combinations(parser)
-            print(len(combinations))
-            combinations.remove(set(kernels, padding, strides))
-            print(len(combinations))
+            combinations.remove(this_config)
+            #print('original', this_config)
             for comb in combinations:
-                is_valid = repair(parser, genotype, mapping, input_shape, index)
-                if is_valid:
+                # tests a different config for the current block
+                # if return is TRUE, it means it reached the end, just break loop and exit
+                # it return is FALSE, try next config
+                # if there's no valid config, returns FALSE (it will go up one recursive call)
+                #print('testing combination:', comb)
+                is_valid, output_shape = is_valid_conv(input_shape, *this_config)
+                #is_valid = repair(parser, genotype, mapping, input_shape, index, depth)
+                if is_valid: break
                     # if valid, no need to test other combination
                     # if false, should test next, if no next, then return false
-                    return is_valid
+                #print(comb, 'not valid')
             # returns false only when theres no valid combination in list
-            return False
+            #print('no valid combination found')
+        if is_valid:
+            return repair(parser, genotype, mapping, output_shape, index+1, depth+1)
+        return False
 
-    print('SKIPPING')
-    return repair(parser, genotype, mapping, input_shape, index+1)
+    else:
+        #print('no next SKIPPING')
+        return repair(parser, genotype, mapping, input_shape, index+1)
+
+    #print('ended')
+    #return result
     # elif mapping[index] == 'avgpool': #consumes 3 spots
     #     kernel = int(mapping[index+1])
     #     padding = mapping[index+2]
@@ -132,49 +124,13 @@ if __name__ == '__main__':
     #gen = parser.dsge_create_solution()
     gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [0], []]
     print(gen)
-    fen = problem.map_v2(gen)
+    #fen = problem.map_v2(gen)
     #fen = parser.dsge_recursive_parse(gen)
+    fen = [['conv', 32, 3, 1, 'valid', 'linear'], ['conv', 64, 3, 1, 'valid', 'linear'], ['conv', 128, 3, 1, 'valid', 'linear'],['drop', 0.2],['dense', 10]]
     #print(fen)
     #fen = reshape_mapping(fen)
-    #print(fen)
+    print(fen)
 
-    #repaired = repair(parser, gen, fen, (256, 256, 1))
-    #print(repaired)
-
-    # gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [0], []]
-    # print(parser.dsge_recursive_parse(gen))
-    # gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [1], []]
-    # print(parser.dsge_recursive_parse(gen))
-    # gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [2], []]
-    # print(parser.dsge_recursive_parse(gen))
-
-    # input_shape = (256, 256, 1)
-    # repair(gen, fen, (256, 256))
     
-    # print(calculate_output_size(input_shape, 1, 'valid', 1))
-    # print(calculate_output_size(input_shape, 3, 'valid', 1))
-    # print(calculate_output_size(input_shape, 5, 'valid', 1))
-    # print(calculate_output_size(input_shape, 7, 'valid', 1))
-
-    # print(calculate_output_size(input_shape, 5, 'same', 1))
-
-    # print(calculate_output_size(input_shape, 5, 'valid', 2))
-    # print(calculate_output_size(input_shape, 5, 'same', 2))
-
-    # inputs = Input(input_shape)
-    # print(Conv2D(filters=32, kernel_size=1, strides=1, padding='valid')(inputs))
-    # print(Conv2D(filters=32, kernel_size=3, strides=1, padding='valid')(inputs))
-    # print(Conv2D(filters=32, kernel_size=5, strides=1, padding='valid')(inputs))
-    # print(Conv2D(filters=32, kernel_size=7, strides=1, padding='valid')(inputs))
-
-    # print(Conv2D(filters=32, kernel_size=5, strides=1, padding='same')(inputs))
-
-    # print(Conv2D(filters=32, kernel_size=5, strides=2, padding='valid')(inputs))
-    # print(Conv2D(filters=32, kernel_size=5, strides=2, padding='same')(inputs))
-
-    # print(calculate_output_size((4, 4), 1, 'valid', 1))
-    # print(calculate_output_size((2, 2), 3, 'valid', 1))
-    # print(calculate_output_size((1, 1), 3, 'valid', 1))
-
-    # b = built_block('conv', [])
-    # print(b)
+    repaired = repair(parser, gen, fen, (4, 4, 1))
+    print(repaired)

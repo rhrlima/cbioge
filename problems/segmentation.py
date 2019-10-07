@@ -7,7 +7,7 @@ from .problem import BaseProblem
 from datasets.dataset import DataGenerator
 
 
-class ImageSegmentationProblem(BaseProblem):
+class UNetProblem(BaseProblem):
 
     parser = None
 
@@ -28,8 +28,69 @@ class ImageSegmentationProblem(BaseProblem):
 
         self.verbose = False
 
+        self._initialize_blocks()
+
+    def _initialize_blocks(self):
+        self.blocks = {
+            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
+            'avgpool': ['AveragePolling', 'pool_size', 'padding'],
+            'maxpool': ['MaxPolling', 'pool_size', 'padding'],
+            'dropout': ['Dropout', 'rate'],
+            'upsamp': ['UpSampling2D', 'size'],
+            'concat': ['Concatenate', 'axis']
+        }
+
+    def _reshape_mapping(self, phenotype):
+
+        new_mapping = []
+
+        index = 0
+        while index < len(phenotype):
+            block = phenotype[index]
+            if block == 'conv':
+                end = index+6
+            elif block == 'avgpool' or block == 'maxpool':
+                end = index+3
+            else:
+                end = index+2
+
+            new_mapping.append(phenotype[index:end])
+            phenotype = phenotype[end:]
+
+        return new_mapping
+
+    def _build_block(self, block):
+        block_name, params = block[0], block[1:]
+
+        if block_name in self.naming:
+            self.naming[block_name] += 1
+        else:
+            self.naming[block_name] = 0
+        name = f'{block_name}_{self.naming[block_name]}'
+
+        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
+
+        base_block['class_name'] = self.blocks[block_name][0]
+        base_block['name'] = name
+        for key, value in zip(self.blocks[block_name][1:], params):
+            base_block['config'][key] = value
+
+        print(base_block)
+        return base_block
+
     def map_genotype_to_phenotype(self, genotype):
-        return None
+        self.naming = {}
+
+        print(genotype)
+
+        phenotype = self.parser.dsge_recursive_parse(genotype)
+        phenotype = self._reshape_mapping(phenotype)
+
+        print(phenotype)
+        for block in phenotype:
+            json_block = self._build_block(block)
+
+        return phenotype
 
     def evaluate(self, solution):
 

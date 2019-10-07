@@ -4,7 +4,7 @@ from problems.problem import DNNProblem
 from problems.regression import SymbolicRegressionProblem
 
 from problems.stringmatch import StringMatchProblem
-from problems.segmentation import ImageSegmentationProblem
+from problems.segmentation import UNetProblem
 
 
 __all__ = [
@@ -12,5 +12,5 @@ __all__ = [
     'DNNProblem',
     'SymbolicRegressionProblem',
     'StringMatchProblem',
-    'ImageSegmentationProblem'
+    'UNetProblem'
 ]

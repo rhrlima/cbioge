@@ -31,6 +31,7 @@ def is_valid_build(input_shape, build):
 		return False
 	return model is not None
 
+
 def json2model(in_layer):
 
 	json_model = {
@@ -51,8 +52,8 @@ def json2model(in_layer):
 					"config": {
 						"name": "conv2d_1", 
 						"filters": 32, 
-						"kernel_size": [3, 3], 
-						"strides": [1, 1], 
+						"kernel_size": 3, 
+						"strides": 1, 
 						"padding": "same", 
 					}, 
 					"inbound_nodes": [
@@ -73,9 +74,28 @@ def json2model(in_layer):
 	model = model_from_json(json.dumps(json_model))
 	print(model)
 
+def cnn1(in_layer):
+	input_layer = Input(in_layer)
+	layer = Conv2D(32, 3, 1)(input_layer)
+	layer = Conv2D(64, 3)(layer)
+	layer = Conv2D(128, 3)(layer)
+	layer = Dropout(0.2)(layer)
+	layer = Dense(10)(layer)
+	model = Model(input=input_layer, output=layer)
+	if model:
+		#print(model.to_json())
+		fen = [
+		['conv', 32, 3, 1, 'valid', 'linear'], 
+		['conv', 64, 3, 1, 'valid', 'linear'], 
+		['conv', 128, 3, 1, 'valid', 'linear'],
+		['drop', 0.2],
+		['dense', 10]
+		]
+		print()
+
 if __name__ == '__main__':
 	
-	print(is_valid_build((256, 256, 1), conv2conv))
+	#print(is_valid_build((4, 4, 1), conv2conv))
 	# print(is_valid_build((4, 4, 1), conv2conv))
 	# print(is_valid_build((3, 3, 1), conv2conv))
 
@@ -85,4 +105,5 @@ if __name__ == '__main__':
 
 	# print(is_valid_build((4, 4, 1), add))
 
-	json2model((None, 24, 24, 1))
+	#json2model((None, 24, 24, 1))
+	cnn1((4, 4, 1))
