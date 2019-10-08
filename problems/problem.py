@@ -45,11 +45,10 @@ class CNNProblem(BaseProblem):
     def __init__(self, parser_, dataset=None):
         self.parser = parser_
         if dataset:
-            self.load_dataset_from_pickle(dataset)
+            self._load_dataset_from_pickle(dataset)
         self._create_layers_base()
         
-
-    def load_dataset_from_pickle(self, pickle_file):
+    def _load_dataset_from_pickle(self, pickle_file):
         with open(pickle_file, 'rb') as f:
             temp = pickle.load(f)
 
@@ -74,6 +73,103 @@ class CNNProblem(BaseProblem):
         self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
         self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
         self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
+
+    def _create_layers_base(self):
+        self.layers = {
+            'input': ['InputLayer', 'batch_input_shape'],
+            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
+            'avgpool': ['AveragePooling2D', 'pool_size', 'padding'],
+            'maxpool': ['MaxPooling2D', 'pool_size', 'padding'],
+            'dropout': ['Dropout', 'rate'],
+            'dense': ['Dense', 'units'],
+        }
+
+    def _reshape_mapping(self, phenotype):
+
+        new_mapping = []
+
+        index = 0
+        while index < len(phenotype):
+            block = phenotype[index]
+            if block == 'conv':
+                end = index+6
+            elif block == 'avgpool' or block == 'maxpool':
+                end = index+3
+            else:
+                end = index+2
+
+            new_mapping.append(phenotype[index:end])
+            phenotype = phenotype[end:]
+
+        return new_mapping
+
+    def _is_valid_config(self, config):
+        pass
+
+    def _repair_mapping(self, phenotype, index=0, configurations=None):
+
+        if index >= len(phenotype):
+            return True
+
+        if phenotype[index][0] == 'conv':
+            this_config = tuple(phenotype[index][2:5])
+
+            if self._is_valid_config(this_config):
+
+    def _build_block(self, block_name, params):
+
+        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
+
+        if block_name in self.names:
+            self.names[block_name] += 1
+        else:
+            self.names[block_name] = 0
+        name = f'{block_name}_{self.names[block_name]}'
+
+        base_block['class_name'] = self.layers[block_name][0]
+        base_block['name'] = name
+        for name, value in zip(self.layers[block_name][1:], params):
+            base_block['config'][name] = value
+        #print(base_block)
+        return base_block
+
+    def _add_layer_to_model(self, model, layer):
+        if len(model['config']['layers']) > 0:
+            last = model['config']['layers'][-1]['name']
+            layer['inbound_nodes'].append([[last, 0, 0]])
+        model['config']['layers'].append(layer)
+        return model
+
+    def _wrap_up_model(self, model):
+        input_layer = model['config']['layers'][0]['name']
+        output_layer = model['config']['layers'][-1]['name']
+        model['config']['input_layers'].append([input_layer, 0, 0])
+        model['config']['output_layers'].append([output_layer, 0, 0])
+        return model
+
+    def map_v2(self, genotype, deriv=None):
+
+        if deriv is None:
+            deriv = self.parser.dsge_recursive_parse(genotype)
+            deriv = self._reshape_mapping(deriv)
+
+        self.names = {}
+        model = {'class_name': 'Model', 'config': {'layers': [], 'input_layers': [], 'output_layers': []}, }
+
+        input_layer = self._build_block('input', [self.input_shape])
+
+        self._add_layer_to_model(model, input_layer)
+
+        for i, layer in enumerate(deriv):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            self._add_layer_to_model(model, block)
+
+        model = self._wrap_up_model(model)
+
+        #print(model)
+
+        return json.dumps(model)
 
     def map_genotype_to_phenotype(self, genotype):
         add_input_shape = True
@@ -148,92 +244,6 @@ class CNNProblem(BaseProblem):
             model['config'].append(n)
 
         # returns the model as string
-        return json.dumps(model)
-
-    def _create_layers_base(self):
-        self.layers = {
-            'input': ['InputLayer', 'batch_input_shape'],
-            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
-            'avgpool': ['AveragePooling2D', 'pool_size', 'padding'],
-            'maxpool': ['MaxPooling2D', 'pool_size', 'padding'],
-            'dropout': ['Dropout', 'rate'],
-            'dense': ['Dense', 'units'],
-        }
-
-    def _reshape_mapping(self, phenotype):
-
-        new_mapping = []
-
-        index = 0
-        while index < len(phenotype):
-            block = phenotype[index]
-            if block == 'conv':
-                end = index+6
-            elif block == 'avgpool' or block == 'maxpool':
-                end = index+3
-            else:
-                end = index+2
-
-            new_mapping.append(phenotype[index:end])
-            phenotype = phenotype[end:]
-
-        return new_mapping
-
-    def _build_block(self, block_name, params):
-
-        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
-
-        if block_name in self.names:
-            self.names[block_name] += 1
-        else:
-            self.names[block_name] = 0
-        name = f'{block_name}_{self.names[block_name]}'
-
-        base_block['class_name'] = self.layers[block_name][0]
-        base_block['name'] = name
-        for name, value in zip(self.layers[block_name][1:], params):
-            base_block['config'][name] = value
-        #print(base_block)
-        return base_block
-
-    def _add_layer_to_model(self, model, layer):
-        if len(model['config']['layers']) > 0:
-            last = model['config']['layers'][-1]['name']
-            layer['inbound_nodes'].append([[last, 0, 0]])
-        model['config']['layers'].append(layer)
-        return model
-
-    def _wrap_up_model(self, model):
-        input_layer = model['config']['layers'][0]['name']
-        output_layer = model['config']['layers'][-1]['name']
-        model['config']['input_layers'].append([input_layer, 0, 0])
-        model['config']['output_layers'].append([output_layer, 0, 0])
-        return model
-
-    def map_v2(self, genotype):
-
-        deriv = self.parser.dsge_recursive_parse(genotype)
-
-        #print(deriv)
-        deriv = self._reshape_mapping(deriv)
-        print(deriv)
-
-        self.names = {}
-        model = {'class_name': 'Model', 'config': {'layers': [], 'input_layers': [], 'output_layers': []}, }
-
-        input_layer = self._build_block('input', [self.input_shape])
-
-        self._add_layer_to_model(model, input_layer)
-
-        for i, layer in enumerate(deriv):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            self._add_layer_to_model(model, block)
-
-        model = self._wrap_up_model(model)
-
-        #print(model)
-
         return json.dumps(model)
 
     def evaluate(self, solution, verbose=0):

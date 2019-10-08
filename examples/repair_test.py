@@ -14,12 +14,11 @@ def calculate_output_size(img_shape, k, s, p):
     p = 0 if p == 'valid' else (k-1) // 2
     ow = ((img_shape[0] - k + 2 * p) // s) + 1
     oh = ((img_shape[1] - k + 2 * p) // s) + 1
-    return ow, oh, img_shape[2]
+    return ow, oh, img_shape[1:]
 
 
 def is_valid_conv(input_shape, k, s, p):
-    output_shape = calculate_output_size(input_shape, k, s, p)
-    return (0, 0) < output_shape, output_shape
+    
 
 
 def is_valid_merge(shape_1, shape_2):
@@ -27,38 +26,55 @@ def is_valid_merge(shape_1, shape_2):
     return shape_1 == shape_2
 
  
-def get_conv_combinations(parser):
-    kernels = [int(i[0]) for i in parser.GRAMMAR['<ksize>']]
-    strides = [int(i[0]) for i in parser.GRAMMAR['<strides>']]
+def get_conv_configurations(parser, max_img_size):
+    kernels = [i[0] for i in parser.GRAMMAR['<ksize>']]
+    strides = [i[0] for i in parser.GRAMMAR['<strides>']]
     padding = [i[0] for i in parser.GRAMMAR['<padding>']]
-    return list(itertools.product(kernels, strides, padding))
+    conv_configs = list(itertools.product(kernels, strides, padding))
+    conv_valid_configs = {}
+    for img_size in range(1, max_img_size):
+        key = str(img_size)
+        conv_valid_configs[key] = conv_configs[:] #copies the configs list
+        for config in conv_configs:
+            if calculate_output_size((img_size, img_size), *config) <= (0, 0):
+                conv_valid_configs[key].remove(config)
+    return conv_valid_configs
 
-def _repair_conv(mapping, input_shape, index, depth):
-    this_config = tuple(params[1:4])
 
-    is_valid, output_shape = is_valid_conv(input_shape, *this_config)
-    if not is_valid:
-        # valid, call next node
-        #print(this_config, 'VALID')
-        combinations = get_conv_combinations(parser)
-        combinations.remove(this_config)
-        print('original', this_config)
-        for comb in combinations:
-            # tests a different config for the current block
-            # if return is TRUE, it means it reached the end, just break loop and exit
-            # it return is FALSE, try next config
-            # if there's no valid config, returns FALSE (it will go up one recursive call)
-            print(depth, 'testing combination:', comb)
-            #is_valid, output_shape = is_valid_conv(input_shape, *this_config)
-            is_valid = repair(parser, genotype, mapping, input_shape, index, depth)
-            if is_valid: break
-                # if valid, no need to test other combination
-                # if false, should test next, if no next, then return false
-            #print(comb, 'not valid')
-        # returns false only when theres no valid combination in list
-        #print('no valid combination found')
+def get_configurations_for_size(img_shape):
+    indexes = range(len(conv_configs[str(img_shape[0])]))
+    np.random.shuffle(indexes)
+    return indexes
+
+
+def _repair_conv(mapping, input_shape, index=0, depth=0, possibilities=None):
+
+    print('#'*depth, depth)
+
+    if mapping[index][0] != 'conv' or index >= len(mapping):
+        return True
+
+    this_config = tuple(mapping[index][2:5])
+
+
+    is_valid = this_config in conv_configs[str()]
+    #, output_shape = is_valid_conv(input_shape, *this_config)
     if is_valid:
-        return repair(parser, genotype, mapping, output_shape, index+1, depth+1)
+        return _repair_conv(mapping, output_shape, index+1, depth+1)
+    else:
+        
+        if possibilities is None:
+            possibilities = get_conv_configurations()
+
+        possibilities.remove(this_config)
+
+        for new_config in possibilities:
+            mapping[index][2:5] = list(new_config)
+            is_valid = _repair_conv(mapping, input_shape, index, depth, possibilities)
+            if is_valid:
+                return True
+        
+    print('#'*depth, depth)
     return False
 
 
@@ -67,48 +83,15 @@ def repair(parser, genotype, mapping, input_shape, index=0, depth=0):
     verificar shape do input com output para convoluções
     verificar compatibilidade entre junção de layers'''
 
-    print(f"### DEPTH {depth} ###")
-
     if index >= len(mapping):
-        # it only returns TRUE when reaches the end without errors
-        return True
+        return True, mapping
 
-    #print(input_shape)
-    block = mapping[index][0]
-    params = mapping[index][1:]
+    valid = False
+    if mapping[index][0] == 'conv': #consumes 6 spots
+        valid = _repair_conv(mapping, input_shape, index, depth)
 
-    if block == 'conv': #consumes 6 spots
-        this_config = tuple(params[1:4])
-
-        is_valid, output_shape = is_valid_conv(input_shape, *this_config)
-        if not is_valid:
-            # valid, call next node
-            #print(this_config, 'VALID')
-            combinations = get_conv_combinations(parser)
-            combinations.remove(this_config)
-            print('original', this_config)
-            for comb in combinations:
-                # tests a different config for the current block
-                # if return is TRUE, it means it reached the end, just break loop and exit
-                # it return is FALSE, try next config
-                # if there's no valid config, returns FALSE (it will go up one recursive call)
-                print(depth, 'testing combination:', comb)
-                is_valid, output_shape = is_valid_conv(input_shape, *this_config)
-                if is_valid:
-                    is_valid = repair(parser, genotype, mapping, input_shape, index, depth)
-                    # if valid, no need to test other combination
-                    # if false, should test next, if no next, then return false
-                #print(comb, 'not valid')
-            # returns false only when theres no valid combination in list
-            #print('no valid combination found')
-        if is_valid:
-            return repair(parser, genotype, mapping, output_shape, index+1, depth+1)
-        return False
-
-    else:
-        #print('no next SKIPPING')
-        return repair(parser, genotype, mapping, input_shape, index+1)
-
+    valid, mapping = repair(parser, genotype, mapping, input_shape, index+1, depth+1)
+    
     #print('ended')
     #return result
     # elif mapping[index] == 'avgpool': #consumes 3 spots
@@ -123,25 +106,41 @@ def repair(parser, genotype, mapping, input_shape, index=0, depth=0):
     #     index = index+2
 
     #repair(genotype, mapping, input_shape, index, depth+1)
+    return valid, mapping
+
 
 if __name__ == '__main__':
 
     #np.random.seed(0)
+    input_shape = (8, 8, 1)
 
     parser = BNFGrammar('grammars/cnn2.bnf')
     problem = CNNProblem(parser)
-    problem.input_shape = (None, 256, 256, 1)
+    problem.input_shape = (None,) + input_shape
 
-    for _ in range(10):
-        gen = parser.dsge_create_solution()
-        print(gen)
-        fen = parser.dsge_recursive_parse(gen)
-        fen = problem._reshape_mapping(fen)
-        print(fen)
-        #fen = problem.map_v2(gen)
-        #print(model_from_json(fen) != None)
+    gen = parser.dsge_create_solution()
+    fen = parser.dsge_recursive_parse(gen)
+    print(gen)
+    print(fen)
 
-        #gen = [[0], [1], [2], [1], [], [0], [0], [], [0], [1], [3], [1, 0], [0], [0], [1], [2], [0], []]
+    global conv_configs
+    conv_configs = get_conv_configurations(parser, 20)
+    # for _ in range(10):
+    #     gen = parser.dsge_create_solution()
+    #     fen = parser.dsge_recursive_parse(gen)
+    #     fen = problem._reshape_mapping(fen)
+    #     #fen = problem.map_v2(gen)
+    #     #print(model_from_json(fen) != None)
         
-        repaired = repair(parser, gen, fen, (6, 6, 1))
-        print(repaired)
+    #     copy_fen = fen
+    #     repaired, fen = repair(parser, gen, fen, input_shape)
+    #     if repaired:
+    #         model = problem.map_v2(gen, fen)
+    #         model = model_from_json(model)
+    #         if not model: print('DID NOT COMPILED')
+    #     else:
+    #         print('NOTOK')
+    #         print(gen)
+    #         print(copy_fen)
+    #         print(fen)
+    #         exit(1)
