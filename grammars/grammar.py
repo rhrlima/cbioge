@@ -46,24 +46,30 @@ class BNFGrammar:
 
             # split into key and productions
             rule, prod = line.split('::=')
+            #[p.strip().split(' ') for p in prod.split('|')]
+            self.GRAMMAR[rule.strip()] = []
+            for i, p in enumerate(prod.split('|')):
+                self.GRAMMAR[rule.strip()].append([])
+                for value in p.strip().split(' '):
+                    value = self._parse_value(value)
+                    self.GRAMMAR[rule.strip()][i].append(value)
 
-            self.GRAMMAR[rule.strip()] = [p.strip().split(' ') for p in prod.split('|')]
+            #self.GRAMMAR[rule.strip()] = [p.strip().split(' ') for p in prod.split('|')]
             self.NT.append(rule.strip())
 
     def _parse_value(self, value):
         try:
             value = value.replace(' ', '')
             m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
-            if m:
-                min_ = eval(m.group(1))
-                max_ = eval(m.group(2))
-                if type(min_) == int and type(max_) == int:
-                    return np.random.randint(min_, max_)
-                elif type(min_) == float and type(max_) == float:
-                    return np.random.uniform(min_, max_)
-                else:
-                    raise TypeError('type mismatch')
-
+            # if m:
+            #     min_ = eval(m.group(1))
+            #     max_ = eval(m.group(2))
+            #     if type(min_) == int and type(max_) == int:
+            #         return np.random.randint(min_, max_)
+            #     elif type(min_) == float and type(max_) == float:
+            #         return np.random.uniform(min_, max_)
+            #     else:
+            #         raise TypeError('type mismatch')
             return float(value) if '.' in value else int(value)
         except:
             return value
@@ -223,7 +229,7 @@ class BNFGrammar:
         for s in expansion:
             if s not in self.NT:
                 # print(symb, s)
-                prod.append(self._parse_value(s))
+                prod.append(s)
             else:
                 prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
 
