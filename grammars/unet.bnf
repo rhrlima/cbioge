@@ -16,7 +16,7 @@
 
 <upsamp> ::= upsamp 2
 
-<pool> ::= <ptype> <psize> <padding>
+<pool> ::= <ptype> <psize> <strides> <padding>
 
 <drop> ::= dropout <rate>
 

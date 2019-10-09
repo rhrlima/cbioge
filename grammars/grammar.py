@@ -60,16 +60,6 @@ class BNFGrammar:
     def _parse_value(self, value):
         try:
             value = value.replace(' ', '')
-            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
-            # if m:
-            #     min_ = eval(m.group(1))
-            #     max_ = eval(m.group(2))
-            #     if type(min_) == int and type(max_) == int:
-            #         return np.random.randint(min_, max_)
-            #     elif type(min_) == float and type(max_) == float:
-            #         return np.random.uniform(min_, max_)
-            #     else:
-            #         raise TypeError('type mismatch')
             return float(value) if '.' in value else int(value)
         except:
             return value
