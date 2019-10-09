@@ -16,7 +16,7 @@
 
 <dropout> ::= dropout <rate>
 
-<pool> ::= <pool_type> <psize> <padding>
+<pool> ::= <pool_type> <ksize> <strides> <padding>
 
 
 <pool_type> ::= maxpool | avgpool
@@ -29,9 +29,7 @@
 
 <strides> ::= 1 | 2
 
-<ksize> ::= 3 | 5 | 7
-
-<psize> ::= 2 | 4 | 6
+<ksize> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 <units> ::= 32 | 64 | 128 | 256
 
