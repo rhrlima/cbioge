@@ -32,9 +32,10 @@ class UNetProblem(BaseProblem):
 
     def _initialize_blocks(self):
         self.blocks = {
+            'input': ['InputLayer', 'batch_input_shape'],
             'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
-            'avgpool': ['AveragePolling', 'pool_size', 'padding'],
-            'maxpool': ['MaxPolling', 'pool_size', 'padding'],
+            'avgpool': ['AveragePolling', 'pool_size', 'strides', 'padding'],
+            'maxpool': ['MaxPolling', 'pool_size', 'strides', 'padding'],
             'dropout': ['Dropout', 'rate'],
             'upsamp': ['UpSampling2D', 'size'],
             'concat': ['Concatenate', 'axis']
@@ -50,7 +51,7 @@ class UNetProblem(BaseProblem):
             if block == 'conv':
                 end = index+6
             elif block == 'avgpool' or block == 'maxpool':
-                end = index+3
+                end = index+4
             else:
                 end = index+2
 
@@ -59,8 +60,9 @@ class UNetProblem(BaseProblem):
 
         return new_mapping
 
-    def _build_block(self, block):
-        block_name, params = block[0], block[1:]
+    def _build_block(self, block_name, params):
+
+        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
 
         if block_name in self.naming:
             self.naming[block_name] += 1
@@ -68,29 +70,37 @@ class UNetProblem(BaseProblem):
             self.naming[block_name] = 0
         name = f'{block_name}_{self.naming[block_name]}'
 
-        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
-
         base_block['class_name'] = self.blocks[block_name][0]
         base_block['name'] = name
         for key, value in zip(self.blocks[block_name][1:], params):
             base_block['config'][key] = value
 
-        print(base_block)
         return base_block
 
-    def map_genotype_to_phenotype(self, genotype):
+    def _map_genotype_to_phenotype(self, genotype):
+        
+        derivation = self.parser.dsge_recursive_parse(genotype)
+        derivation = self._reshape_mapping(derivation)
+        # valid = self._repair_mapping(derivation)
+
         self.naming = {}
+        model = {
+            'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
-        print(genotype)
+        input_layer = self._build_block('input', [self.dataset['input_shape']])
+        print(input_layer)
+        # self._add_layer_to_model(model, input_layer)
 
-        phenotype = self.parser.dsge_recursive_parse(genotype)
-        phenotype = self._reshape_mapping(phenotype)
+        for i, layer in enumerate(derivation):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            print(block)
+            # self._add_layer_to_model(model, block)
 
-        print(phenotype)
-        for block in phenotype:
-            json_block = self._build_block(block)
+        # model = self._wrap_up_model(model)
 
-        return phenotype
+        return {}# json.dumps(model)
 
     def evaluate(self, solution):
 
