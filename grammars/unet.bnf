@@ -1,37 +1,19 @@
-<unet> ::= <conv3> <grow> <conv3> <conv1>
-
-<grow> ::= <conv3> <grow> <conv3> | <pool> <grow> <upconv> concat 3 | <middle>
-
-<middle> ::= <middle> <middle> | <conv3> | <drop> | &
+<unet> ::= <conv> <pair_node> <output>
 
 
+<pair_node> ::= <conv> <pair_node> <conv> | <dropout> <pair_node_p> <upsamp> <concat>
 
-<conv1> ::= conv <filters> 1 <strides> <padding> <activation>
+<pair_node_p> ::= <conv> <pair_node> <conv> | <midle>
 
-<conv3> ::= conv <filters> 3 <strides> <padding> <activation>
+<midle> ::= <conv> 
 
-<upconv> ::= <conv2> <upsamp>
+<output> ::= <conv>
 
-<conv2> ::= conv <filters> 2 <strides> <padding> <activation> 
+
+<conv> ::= conv 32 3 1 valid relu
 
 <upsamp> ::= upsamp 2
 
-<pool> ::= <ptype> <psize> <strides> <padding>
+<dropout> ::= dropout 0.5
 
-<drop> ::= dropout <rate>
-
-
-
-<filters> ::= 32 | 64
-
-<strides> ::= 1 | 2
-
-<padding> ::= valid | same
-
-<activation> ::= relu | sig | tahn | linear
-
-<ptype> ::= maxpool | avgpool
-
-<psize> ::= 2 | 4
-
-<rate> ::= [0.,1.]
+<concat> ::= concat 3
