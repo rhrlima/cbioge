@@ -209,14 +209,12 @@ class CNNProblem(BaseProblem):
             last = model['config']['layers'][-1]['name']
             layer['inbound_nodes'].append([[last, 0, 0]])
         model['config']['layers'].append(layer)
-        return model
 
     def _wrap_up_model(self, model):
         input_layer = model['config']['layers'][0]['name']
         output_layer = model['config']['layers'][-1]['name']
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
-        return model
 
     def _map_genotype_to_phenotype(self, genotype):
 

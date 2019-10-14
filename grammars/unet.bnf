@@ -1,7 +1,7 @@
 <unet> ::= <conv> <pair_node> <output>
 
 
-<pair_node> ::= <conv> <pair_node> <conv> | <dropout> <pair_node_p> <upsamp> <concat>
+<pair_node> ::= <conv> <pair_node> <conv> | <pool> <pair_node_p> <upsamp> <concat>
 
 <pair_node_p> ::= <conv> <pair_node> <conv> | <midle>
 
@@ -10,10 +10,19 @@
 <output> ::= <conv>
 
 
-<conv> ::= conv 32 3 1 valid relu
+<conv> ::= conv 32 3 1 same relu
+
+<conv2> ::= conv 32 3 1 same relu
+
+<pool> ::= maxpool 2 2 valid
 
 <upsamp> ::= upsamp 2
 
 <dropout> ::= dropout 0.5
 
 <concat> ::= concat 3
+
+
+<ksize> ::= 1 | 2 | 3
+<strides> ::= 1 | 2
+<padding> ::= valid | same
