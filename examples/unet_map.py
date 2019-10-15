@@ -25,19 +25,25 @@ if __name__ == '__main__':
 	#np.random.seed(0)
 
 	dset = {
-		'input_shape': (32, 32, 1)
+		'input_shape': (256, 256, 1)
 	}
 
 	parser = BNFGrammar('grammars/unet.bnf')
 	problem = UNetProblem(parser, dset)
 
-	for _ in range(10):
+	num = 1
+	failed = 0
+	for i in range(num):
 		gen = parser.dsge_create_solution()
-		print(gen)
-		fen = parser.dsge_recursive_parse(gen)
-		print(fen)
 		model = problem._map_genotype_to_phenotype(gen)
-		model = model_from_json(model)
+		problem._map_phenotype_to_genotype(model)
+		#try:
+		#model = model_from_json(model)
+		#except:
+		#	failed += 1
+		print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
+
+	#print('failed', failed, failed/num)
 	# if model:
 	# 	model.summary()
 	# 	model.compile('adam', loss='binary_crossentropy')
