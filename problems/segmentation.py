@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import itertools
 
@@ -141,6 +142,23 @@ class UNetProblem(BaseProblem):
         # nothing to be validated, call next block
         return self._repair_mapping(phenotype, input_shape, index+1)
 
+    def _parse_value(self, value):
+        if type(value) is str:
+            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+            if m:
+                min_ = eval(m.group(1))
+                max_ = eval(m.group(2))
+                if type(min_) == int and type(max_) == int:
+                    return np.random.randint(min_, max_)
+                elif type(min_) == float and type(max_) == float:
+                    return np.random.uniform(min_, max_)
+                else:
+                    raise TypeError('type mismatch')
+            else:
+                return value
+        else:
+            return value
+
     def _build_block(self, block_name, params):
 
         base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
@@ -154,7 +172,7 @@ class UNetProblem(BaseProblem):
         base_block['class_name'] = self.blocks[block_name][0]
         base_block['name'] = name
         for key, value in zip(self.blocks[block_name][1:], params):
-            base_block['config'][key] = value
+            base_block['config'][key] = self._parse_value(value)
 
         return base_block
 
@@ -173,12 +191,18 @@ class UNetProblem(BaseProblem):
                 stack.append(layers[i])
             elif layer['class_name'] == 'Concatenate':
                 other = stack.pop()
-                layer['inbound_nodes'][0].append([other['name'], 0, 0])
+                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
 
         input_layer = model['config']['layers'][0]['name']
         output_layer = model['config']['layers'][-1]['name']
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
+
+    def _map_phenotype_to_genotype(self, phenotype):
+        model = json.loads(phenotype)
+        layers = model['config']['layers']
+        for layer in layers:
+            print(layer)
 
     def _map_genotype_to_phenotype(self, genotype):
         
@@ -206,6 +230,8 @@ class UNetProblem(BaseProblem):
             # print(block)
 
         self._wrap_up_model(model)
+
+        #valid = self.repair_json_model(model)
 
         return json.dumps(model)
 
@@ -237,3 +263,13 @@ class UNetProblem(BaseProblem):
         except Exception as e:
             print(e)
             return -1, None
+
+    def repair_json_model(self, model):
+        in_layer = model['config']['input_layers']
+        out_layer = model['config']['output_layers']
+        layers = model['config']['layers']
+
+        for layer in layers:
+            print(layer)
+
+        return True
