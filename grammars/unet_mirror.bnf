@@ -7,16 +7,16 @@
 <output> ::= conv 2 1 <strides> <padding> sigmoid
 
 
-<conv> ::= conv <filters> <ksize> <strides> <padding> <activ>
-<pool> ::= maxpool <ksize> <strides> <padding>
-<upsamp> ::= upsamp <ksize>
+<conv> ::= conv <filters> <kernel_size> <strides> <padding> <activation>
+<pool> ::= maxpool <kernel_size> <strides> <padding>
+<upsamp> ::= upsamp <kernel_size>
 <dropout> ::= dropout <rate>
 <concat> ::= concat 3
 
 
-<filters> ::= 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
-<ksize> ::= 1 | 2 | 3
+<filters> ::= 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
+<kernel_size> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7
 <strides> ::= 1 | 2
 <padding> ::= valid | same
-<activ> ::= relu | sigmoid | linear
+<activation> ::= relu | sigmoid | linear
 <rate> ::= [0.0,0.5]

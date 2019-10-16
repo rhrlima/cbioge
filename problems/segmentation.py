@@ -49,7 +49,7 @@ class UNetProblem(BaseProblem):
         }
 
     def _generate_configurations(self):
-        kernels = [i[0] for i in self.parser.GRAMMAR['<ksize>']]
+        kernels = [i[0] for i in self.parser.GRAMMAR['<kernel_size>']]
         strides = [i[0] for i in self.parser.GRAMMAR['<strides>']]
         padding = [i[0] for i in self.parser.GRAMMAR['<padding>']]
         conv_configs = list(itertools.product(kernels, strides, padding))
@@ -113,7 +113,6 @@ class UNetProblem(BaseProblem):
                 #print(this_config, 'is valid', input_shape, output_shape)
                 return self._repair_mapping(phenotype, output_shape, index+1)
             else:
-                print('not valid')
                 # if the current config is not VALID, generate a list of indexes 
                 # of the possible configurations and shuffles it
                 if configurations is None:
@@ -130,6 +129,7 @@ class UNetProblem(BaseProblem):
                 for cfg_index in configurations:
                     new_config = self.conv_valid_configs[str(img_size)][cfg_index]
                     phenotype[index][start:end] = list(new_config)
+                    print(this_config, '>>>>', new_config)
                     if self._repair_mapping(phenotype, input_shape, index, configurations):
                         return True
 
@@ -198,17 +198,41 @@ class UNetProblem(BaseProblem):
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
 
-    def _map_phenotype_to_genotype(self, phenotype):
+    def _repair_genotype(self, genotype, phenotype):
+        values = {}
         model = json.loads(phenotype)
         layers = model['config']['layers']
         for layer in layers:
             print(layer)
+            name = layer['name'].split('_')[0]
+            if not name in ['conv', 'maxpool', 'avgpool', 'upsamp']:
+                continue
+            for key in layer['config']:
+                vkey = 'kernel_size' if key in ['pool_size', 'size'] else key
+                if vkey in values:
+                    values[vkey].append(layer['config'][key])
+                else:
+                    values[vkey] = [layer['config'][key]]
+
+        for key in values:
+            #list of values, check the indexes
+            grm_options = self.parser.GRAMMAR[f'<{key}>']
+            gen_indexes = genotype[self.parser.NT.index(f'<{key}>')]
+            fen_indexes = [grm_options.index([val]) for val in values[key]]
+            print(key, values[key], grm_options, gen_indexes, fen_indexes)
+            #for val in values[key]:
+            #     print([val] in grm_options)
+            #     fen_val = grm_options.index(val)
+            #     gen_val = grm_options[gen]
+            #     print(fen_val, gen_val)
 
     def _map_genotype_to_phenotype(self, genotype):
         
         derivation = self.parser.dsge_recursive_parse(genotype)
         derivation = self._reshape_mapping(derivation)
+        print('before', derivation)
         valid = self._repair_mapping(derivation)
+        print('after', derivation)
 
         if not valid:
             return None
