@@ -22,21 +22,24 @@ def unet(input_shape):
 
 if __name__ == '__main__':
 
-	#np.random.seed(0)
+	np.random.seed(0)
 
 	dset = {
 		'input_shape': (256, 256, 1)
 	}
 
-	parser = BNFGrammar('grammars/unet.bnf')
+	parser = BNFGrammar('grammars/unet_mirror.bnf')
 	problem = UNetProblem(parser, dset)
 
 	num = 1
 	failed = 0
 	for i in range(num):
 		gen = parser.dsge_create_solution()
+		print(gen)
+		fen = parser.dsge_recursive_parse(gen)
+		print(problem._reshape_mapping(fen))
 		model = problem._map_genotype_to_phenotype(gen)
-		problem._map_phenotype_to_genotype(model)
+		problem._repair_genotype(gen, model)
 		#try:
 		#model = model_from_json(model)
 		#except:

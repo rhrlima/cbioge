@@ -15,7 +15,8 @@ class BNFGrammar:
         lines = self._read_grammar(grammar_file)
         self._build_structure(lines)
 
-        # print(self.GRAMMAR)
+        # for key in self.GRAMMAR:
+        #     print(key, self.GRAMMAR[key])
         # print(self.NT)
         # self._check_recursive_rules()
 
@@ -50,6 +51,7 @@ class BNFGrammar:
                 for value in p.strip().split(' '):
                     value = self._parse_value(value)
                     self.GRAMMAR[rule.strip()][i].append(value)
+                    #self.GRAMMAR[rule.strip()].append(value)
 
             #self.GRAMMAR[rule.strip()] = [p.strip().split(' ') for p in prod.split('|')]
             self.NT.append(rule.strip())
@@ -65,7 +67,7 @@ class BNFGrammar:
 
         prod = []
         
-        # print('symbol', symb, 'depth', depth, 'genotype', gen)
+        #print('symbol', symb, 'depth', depth, 'genotype', gen)
 
         #print(genotype[self.NT.index(symb)])
         if genotype[self.NT.index(symb)] == []:
@@ -77,11 +79,10 @@ class BNFGrammar:
 
         # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
         expansion = self.GRAMMAR[symb][value]
-        # print('###', expansion)
-
+        
+        print('###', expansion)
         for s in expansion:
             if s not in self.NT:
-                # print(symb, s)
                 prod.append(s)
             else:
                 prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
