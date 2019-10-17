@@ -1,11 +1,7 @@
-<unet> ::= <conv> <pair_node> <output>
-
-
-<pair_node> ::= <conv> <pair_node> <conv> | <pool> <pair_node_p> <upsamp> <concat>
-<pair_node_p> ::= <conv> <pair_node> <conv> | <midle>
+<unet> ::= <contract> expand <output>
+<contract> ::= <conv> | <pool> | bridge | <midle> | <contract> <contract>
 <midle> ::= <conv> | <dropout> | <midle> <midle>
 <output> ::= conv 2 1 <strides> <padding> sigmoid
-
 
 <conv> ::= conv <filters> <kernel_size> <strides> <padding> <activation>
 <pool> ::= maxpool <kernel_size> <strides> <padding>

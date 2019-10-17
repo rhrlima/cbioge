@@ -80,7 +80,7 @@ class BNFGrammar:
         # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
         expansion = self.GRAMMAR[symb][value]
         
-        print('###', expansion)
+        # print('###', expansion)
         for s in expansion:
             if s not in self.NT:
                 prod.append(s)
