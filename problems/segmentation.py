@@ -45,7 +45,8 @@ class UNetProblem(BaseProblem):
             'maxpool': ['MaxPooling2D', 'pool_size', 'strides', 'padding'],
             'dropout': ['Dropout', 'rate'],
             'upsamp': ['UpSampling2D', 'size'],
-            'concat': ['Concatenate', 'axis']
+            'concat': ['Concatenate', 'axis'],
+            'crop': ['Cropping2D', 'cropping']
         }
 
     def _generate_configurations(self):
@@ -191,7 +192,10 @@ class UNetProblem(BaseProblem):
                 stack.append(layers[i])
             elif layer['class_name'] == 'Concatenate':
                 other = stack.pop()
-                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
+                crop_layer = self._build_block('crop', [1])
+                crop_layer['inbound_nodes'].append([[other['name'], 0, 0]])
+                model['config']['layers'].append(crop_layer)
+                layer['inbound_nodes'][0].insert(0, [crop_layer['name'], 0, 0])
 
         input_layer = model['config']['layers'][0]['name']
         output_layer = model['config']['layers'][-1]['name']
@@ -199,11 +203,12 @@ class UNetProblem(BaseProblem):
         model['config']['output_layers'].append([output_layer, 0, 0])
 
     def _repair_genotype(self, genotype, phenotype):
+        print(genotype)
         values = {}
         model = json.loads(phenotype)
         layers = model['config']['layers']
         for layer in layers:
-            print(layer)
+            #print(layer)
             name = layer['name'].split('_')[0]
             if not name in ['conv', 'maxpool', 'avgpool', 'upsamp']:
                 continue
@@ -215,16 +220,19 @@ class UNetProblem(BaseProblem):
                     values[vkey] = [layer['config'][key]]
 
         for key in values:
-            #list of values, check the indexes
+            rule_index = self.parser.NT.index(f'<{key}>')
+
             grm_options = self.parser.GRAMMAR[f'<{key}>']
-            gen_indexes = genotype[self.parser.NT.index(f'<{key}>')]
+            gen_indexes = genotype[rule_index]
             fen_indexes = [grm_options.index([val]) for val in values[key]]
-            print(key, values[key], grm_options, gen_indexes, fen_indexes)
-            #for val in values[key]:
-            #     print([val] in grm_options)
-            #     fen_val = grm_options.index(val)
-            #     gen_val = grm_options[gen]
-            #     print(fen_val, gen_val)
+            print(key, values[key])
+            print(gen_indexes)
+            print(fen_indexes)
+
+            genotype[rule_index] = fen_indexes[:len(gen_indexes)]
+
+        print(genotype)
+        return genotype
 
     def _map_genotype_to_phenotype(self, genotype):
         
@@ -251,10 +259,14 @@ class UNetProblem(BaseProblem):
             block_name, params = layer[0], layer[1:]
             block = self._build_block(block_name, params)
             self._add_layer_to_model(model, block)
-            # print(block)
+            #print(block)
 
         self._wrap_up_model(model)
 
+        for layer in model['config']['layers']:
+            print(layer)
+            obj = model_from_json(json.dumps(layer))
+            print(obj.name, obj.output)
         #valid = self.repair_json_model(model)
 
         return json.dumps(model)
@@ -297,3 +309,9 @@ class UNetProblem(BaseProblem):
             print(layer)
 
         return True
+
+    def _build_keras_block(self, block_name, params):
+
+        block = Conv2D
+        for key, value in zip(self.blocks[block_name][1:], params):
+            base_block['config'][key] = self._parse_value(value)

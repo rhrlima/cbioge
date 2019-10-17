@@ -93,6 +93,11 @@ def cnn1(in_layer):
 		]
 		print()
 
+def cnn2(input_shape):
+	input_layer = Input(input_shape)
+	layer = Cropping2D(1)(input_layer)
+	print(layer)
+
 if __name__ == '__main__':
 	
 	#print(is_valid_build((4, 4, 1), conv2conv))
@@ -106,4 +111,12 @@ if __name__ == '__main__':
 	# print(is_valid_build((4, 4, 1), add))
 
 	#json2model((None, 24, 24, 1))
-	cnn1((4, 4, 1))
+	#cnn1((4, 4, 1))
+	#cnn2((4, 4, 1))
+	#cnn2((8, 8, 1))
+
+	inp = Input((8,8,1))
+	print(inp)
+	lay = Conv2D(8, 2)(inp)
+	print(lay)
+	print(lay.shape)
