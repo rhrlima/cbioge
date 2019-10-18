@@ -112,6 +112,8 @@ class UNetProblem(BaseProblem):
             if self._is_valid_config(this_config, img_size):
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
+                #print(index, output_shape)
+                print(index, output_shape)
                 return self._repair_mapping(phenotype, output_shape, index+1)
             else:
                 # if the current config is not VALID, generate a list of indexes 
@@ -137,9 +139,12 @@ class UNetProblem(BaseProblem):
             # if all possibilities are invalid or can't be used, this solutions
             # is invalid
             return False
-        #elif phenotype[index][0] == 'concat':
+        elif phenotype[index][0] == 'upsamp':
+            output_shape = (input_shape[0] * 2, input_shape[1] * 2)
+            print(index, output_shape)
+            return self._repair_mapping(phenotype, output_shape, index+1)    
 
-
+        #print(index, input_shape)
         # nothing to be validated, call next block
         return self._repair_mapping(phenotype, input_shape, index+1)
 
@@ -159,6 +164,11 @@ class UNetProblem(BaseProblem):
                 return value
         else:
             return value
+
+    def _get_output_shape(self, block_name, params, input_shape):
+        
+        if block_name in ['conv', 'avgpool', 'maxpool']:
+            return None
 
     def _build_block(self, block_name, params):
 
@@ -192,10 +202,10 @@ class UNetProblem(BaseProblem):
                 stack.append(layers[i])
             elif layer['class_name'] == 'Concatenate':
                 other = stack.pop()
-                crop_layer = self._build_block('crop', [1])
-                crop_layer['inbound_nodes'].append([[other['name'], 0, 0]])
-                model['config']['layers'].append(crop_layer)
-                layer['inbound_nodes'][0].insert(0, [crop_layer['name'], 0, 0])
+                # crop_layer = self._build_block('crop', [0]) #TIRAR
+                # crop_layer['inbound_nodes'].append([[, 0, 0]])
+                # model['config']['layers'].append(crop_layer)
+                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
 
         input_layer = model['config']['layers'][0]['name']
         output_layer = model['config']['layers'][-1]['name']
@@ -259,15 +269,11 @@ class UNetProblem(BaseProblem):
             block_name, params = layer[0], layer[1:]
             block = self._build_block(block_name, params)
             self._add_layer_to_model(model, block)
-            #print(block)
 
         self._wrap_up_model(model)
 
         for layer in model['config']['layers']:
             print(layer)
-            obj = model_from_json(json.dumps(layer))
-            print(obj.name, obj.output)
-        #valid = self.repair_json_model(model)
 
         return json.dumps(model)
 

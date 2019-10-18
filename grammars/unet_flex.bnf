@@ -1,16 +1,19 @@
-<unet> ::= <conv> <pair_node> <output>
+<unet> ::= <conv3> <pair_node> <conv3> <conv1>
 
 
-<pair_node> ::= <conv> <pair_node> <conv> | <pool> <pair_node_p> <upsamp> <concat>
-<pair_node_p> ::= <conv> <pair_node> <conv> | <midle>
-<midle> ::= <conv> | <dropout> | <midle> <midle>
-<output> ::= conv 2 1 <strides> <padding> sigmoid
+<pair_node> ::= <conv3> <pair_node> <conv3> | <pool> <pair_node_p> <upsamp> <conv2> <concat>
+<pair_node_p> ::= <conv3> <pair_node> <conv3> | <midle>
+<midle> ::= <conv3> | <dropout> | <midle> <midle>
 
 
-<conv> ::= conv <filters> <kernel_size> <strides> <padding> <activation>
-<pool> ::= maxpool <kernel_size> <strides> <padding>
-<upsamp> ::= upsamp <kernel_size>
-<dropout> ::= dropout <rate>
+<conv3> ::= conv 32 3 1 same relu
+<conv2> ::= conv 32 2 1 same relu
+<conv1> ::= conv 1 1 1 valid sigmoid
+
+
+<pool> ::= maxpool 2 2 same
+<upsamp> ::= upsamp 2
+<dropout> ::= dropout 0.5
 <concat> ::= concat 3
 
 

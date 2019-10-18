@@ -25,29 +25,41 @@ if __name__ == '__main__':
     np.random.seed(0)
 
     dset = {
-        'input_shape': (8, 8, 1)
+        'input_shape': (256, 256, 1)
     }
 
     parser = BNFGrammar('grammars/unet_flex.bnf')
     problem = UNetProblem(parser, dset)
 
-    num = 1
-    failed = 0
-    for i in range(num):
-        gen = parser.dsge_create_solution()
-        print(gen)
-        mapp = parser.dsge_recursive_parse(gen)
-        rmap = problem._reshape_mapping(mapp)
-        print(rmap)
-        # print(problem._reshape_mapping(fen))
-        # model = problem._map_genotype_to_phenotype(gen)
-        # problem._repair_genotype(gen, model)
-        # try:
-        #     model = model_from_json(model)
-        # except Exception as e:
-        #     print(e)
-        #     failed += 1
-        # print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
+    gen = [[0], [0, 1, 0, 1, 0, 1], [0, 0, 0, 1], [2, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0], [0], [0, 0], [0, 0], [], [0, 0], [], [], [], [], []]
+
+    mapp = parser.dsge_recursive_parse(gen)
+    rmap = problem._reshape_mapping(mapp)
+    print(gen)
+    print(rmap)
+    model = problem._map_genotype_to_phenotype(gen)
+    #problem._repair_genotype(gen, model)
+    try:
+        model = model_from_json(model)
+        model.summary()
+    except Exception as e:
+        print(e)
+    # num = 1
+    # failed = 0
+    # for i in range(num):
+    #     gen = parser.dsge_create_solution()
+    #     print(gen)
+    #     mapp = parser.dsge_recursive_parse(gen)
+    #     rmap = problem._reshape_mapping(mapp)
+    #     print(rmap)
+    #     model = problem._map_genotype_to_phenotype(gen)
+    #     # problem._repair_genotype(gen, model)
+    #     try:
+    #         model = model_from_json(model)
+    #     except Exception as e:
+    #         print(e)
+    #         failed += 1
+    #     print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
 
     #print('failed', failed, failed/num)
     # if model:
