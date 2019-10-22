@@ -1,7 +1,7 @@
 <unet> ::= <conv3> <pair_node> <conv3> <conv1>
 
 
-<pair_node> ::= <conv3> <pair_node> <conv3> | <pool> <pair_node_p> <upsamp> <conv2> <concat>
+<pair_node> ::= <conv3> <pair_node> <conv3> | push <pool> <pair_node_p> <upsamp> <conv2> <concat> | <pool> <pair_node_p> <upsamp> <conv2>
 <pair_node_p> ::= <conv3> <pair_node> <conv3> | <midle>
 <midle> ::= <conv3> | <dropout> | <midle> <midle>
 
