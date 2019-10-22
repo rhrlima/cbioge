@@ -31,7 +31,6 @@ def is_valid_build(input_shape, build):
 		return False
 	return model is not None
 
-
 def json2model(in_layer):
 
 	json_model = {
@@ -117,6 +116,11 @@ if __name__ == '__main__':
 
 	inp = Input((8,8,1))
 	print(inp)
-	lay = Conv2D(8, 2)(inp)
-	print(lay)
+	lay = MaxPooling2D(2, strides=2, padding='same')(inp)
+	print(lay.shape)
+	lay = MaxPooling2D(2, strides=2, padding='same')(lay)
+	print(lay.shape)
+	lay = MaxPooling2D(2, strides=2, padding='same')(lay)
+	print(lay.shape)
+	lay = MaxPooling2D(2, strides=2, padding='same')(lay)
 	print(lay.shape)
