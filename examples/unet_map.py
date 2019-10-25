@@ -10,14 +10,7 @@ from grammars import BNFGrammar
 
 def run(gen, verbose=False):    
     if verbose: print(gen)
-    fen = parser.dsge_recursive_parse(gen)
-    fen = problem._reshape_mapping(fen)
-    fen = problem._build_right_side(fen)
-    out = problem._list_layer_outputs(fen)
-    problem._non_recursive_repair(fen, out)
-    out = problem._list_layer_outputs(fen)
-    
-    model = problem._map_genotype_to_phenotype(gen, fen)
+    model = problem.map_genotype_to_phenotype(gen)
     
     try:
         model = model_from_json(model)
@@ -45,7 +38,6 @@ if __name__ == '__main__':
     num = int(sys.argv[1]) if len(sys.argv) == 2 else 0
     failed = 0
     for i in range(num):
-        gen = parser.dsge_create_solution()
-        failed += not run(gen, True)
+        failed += not run(parser.dsge_create_solution())
         print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
     print()
