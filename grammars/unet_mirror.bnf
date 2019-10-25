@@ -1,13 +1,14 @@
 <unet> ::= <conv> <next>
 
+
 <next> ::= <conv> <next> | <pool> <nextp> | bridge <pool> <nextp> | <midle>
 <nextp> ::= <conv> <next> | <midle>
 <midle> ::= <midle> <midle> | <conv> | <dropout>
 
-<conv> ::= conv 32 3 1 same relu
-<pool> ::= maxpool 2 2 same
-<upsamp> ::= upsamp 2
-<dropout> ::= dropout 0.5
+
+<conv> ::= conv <filters> <kernel_size> 1 same <activation>
+<pool> ::= maxpool 2 2 <padding>
+<dropout> ::= dropout <rate>
 
 
 <filters> ::= 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
