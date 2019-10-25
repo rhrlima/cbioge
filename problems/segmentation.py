@@ -123,7 +123,8 @@ class UNetProblem(BaseProblem):
             this_config = tuple(phenotype[index][start:end])
 
             # if the current config is VALID, calculate output and call next block
-            if self._is_valid_config(this_config, img_size):
+            #if self._is_valid_config(this_config, img_size):
+            if config in self.conv_valid_configs[str(img_size)]:
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
                 # print(index, phenotype[index], output_shape)
@@ -183,11 +184,6 @@ class UNetProblem(BaseProblem):
                 return value
         else:
             return value
-
-    def _get_output_shape(self, block_name, params, input_shape):
-        
-        if block_name in ['conv', 'avgpool', 'maxpool']:
-            return None
 
     def _build_block(self, block_name, params):
 
@@ -262,140 +258,6 @@ class UNetProblem(BaseProblem):
         print(genotype)
         return genotype
 
-    def _map_genotype_to_phenotype(self, genotype, derivation=None): #CHECK
-        
-        # derivation = self.parser.dsge_recursive_parse(genotype)
-        # derivation = self._reshape_mapping(derivation)
-        # derivation = self._test(derivation) #CHECK
-        # self._list_layer_outputs(derivation)
-        # valid = self._repair_mapping(derivation)
-
-        # if not valid:
-        #     print('NOT VALID MODEL')
-            #return None
-
-        self.naming = {}
-        self.stack = []
-        model = {'class_name': 'Model', 
-            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
-
-        #input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
-        #model['config']['layers'].append(input_layer)
-        # print(input_layer)
-
-        for i, layer in enumerate(derivation):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            model['config']['layers'].append(block)
-
-        self._wrap_up_model(model)
-
-        # for layer in model['config']['layers']:
-        #    print(layer)
-
-        return json.dumps(model)
-
-    def evaluate(self, solution):
-
-        try:
-            json_model = self._map_genotype_to_phenotype(solution.genotype)
-
-            if not json_model:
-                return -1, None
-
-            model = model_from_json(json_model)
-
-            model.compile(
-                optimizer=self.opt, 
-                loss=self.loss, 
-                metrics=self.metrics)
-
-            model.fit_generator(
-                self.train_generator, 
-                self.dataset['train_steps'], 
-                self.epochs, verbose=self.verbose)
-
-            loss, acc = model.evaluate_generator(
-                self.test_generator, 
-                self.dataset['test_steps'], verbose=self.verbose)
-
-            return acc
-        except Exception as e:
-            print(e)
-            return -1, None
-
-    def _mirror_build(self, genotype):
-        
-        derivation = self.parser.dsge_recursive_parse(genotype)
-        derivation = self._reshape_mapping(derivation)
-        valid = self._repair_mapping(derivation)
-
-        if not valid:
-            print('NOT VALID MODEL')
-            return None
-
-        self.naming = {}
-        self.stack = []
-        model = {
-            'class_name': 'Model', 
-            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
-
-        input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
-        model['config']['layers'].append(input_layer)
-
-        # parse layers and add to list
-        for i, layer in enumerate(derivation):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            model['config']['layers'].append(block)
-
-        layers = model['config']['layers']
-        size = len(layers)
-        for i in range(size-1, 0, -1):
-            print(layers[i])
-            
-            if layers[i]['class_name'] != 'MaxPooling2D':
-                continue
-            #print('---')
-
-            blocks = []
-
-            concat = False
-            if layers[i-1]['class_name'] == 'bridge':
-                concat = True
-                previous = model['config']['layers'][i-2]
-            else:
-                previous = model['config']['layers'][i-1]
-
-            block = self._build_block('upsamp', [2])
-            model['config']['layers'].append(block)
-
-            block = copy.deepcopy(previous)
-            block['name'] = self._get_name('conv')
-            block['config']['kernel_size'] = 2
-            model['config']['layers'].append(block)
-
-            if concat:
-                block = self._build_block('concat', [3])
-                model['config']['layers'].append(block)
-
-            # block = copy.deepcopy(previous)
-            # block['name'] = self._get_name('conv')
-            # model['config']['layers'].append(block)
-
-        block = self._build_block('conv', [2, 1, 1, 'valid', 'sigmoid'])
-        model['config']['layers'].append(block)
-
-        self._wrap_up_model(model)
-
-        print('----after-----')
-        for layer in model['config']['layers']:
-           print(layer)
-
-        self._validate_json_model(model)
-
-        return json.dumps(model)
-
     def _build_right_side(self, mapping):
 
         blocks = None
@@ -426,9 +288,8 @@ class UNetProblem(BaseProblem):
 
         return mapping
                 
-    def _list_layer_outputs(self, mapping):
+    def _get_layer_outputs(self, mapping):
         outputs = []
-
         depth = 0
         for i, block in enumerate(mapping):
             name, params = block[0], block[1:]
@@ -447,12 +308,12 @@ class UNetProblem(BaseProblem):
                 output_shape = (output_shape[0] * factor, output_shape[1] * factor, output_shape[2])
             elif name == 'concat':
                 output_shape = (output_shape[0], output_shape[1], output_shape[2]*2)
-
-            print('\t'*depth, i, output_shape, block)
+            # print('\t'*depth, i, output_shape, block)
             outputs.append(output_shape)
         return outputs
 
-    def _non_recursive_repair(self, mapping, outputs):
+    def _non_recursive_repair(self, mapping):
+        outputs = self._get_layer_outputs(mapping)
         stack = []
         for i, layer in enumerate(mapping):
             name, params = layer[0], layer[1:]
@@ -465,3 +326,64 @@ class UNetProblem(BaseProblem):
                     print(i, 'changing upsamp to 1x')
                 print(i, 'adjusting number of filters in layer', aux_output)
                 mapping[i+1][1] = aux_output[2]
+
+    def map_genotype_to_phenotype(self, genotype):
+        
+        mapping = self.parser.dsge_recursive_parse(genotype)
+        mapping = self._reshape_mapping(mapping)
+        mapping = self._build_right_side(mapping)
+        self._non_recursive_repair(mapping)
+
+        # if not valid:
+        #     print('NOT VALID MODEL')
+            #return None
+
+        self.naming = {}
+        self.stack = []
+        model = {'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+
+        #input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
+        #model['config']['layers'].append(input_layer)
+        # print(input_layer)
+
+        for i, layer in enumerate(mapping):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            model['config']['layers'].append(block)
+
+        self._wrap_up_model(model)
+
+        # for layer in model['config']['layers']:
+        #    print(layer)
+
+        return json.dumps(model)
+
+    def evaluate(self, solution):
+
+        try:
+            json_model = self.map_genotype_to_phenotype(solution.genotype)
+
+            if not json_model:
+                return -1, None
+
+            model = model_from_json(json_model)
+
+            model.compile(
+                optimizer=self.opt, 
+                loss=self.loss, 
+                metrics=self.metrics)
+
+            model.fit_generator(
+                self.train_generator, 
+                self.dataset['train_steps'], 
+                self.epochs, verbose=self.verbose)
+
+            loss, acc = model.evaluate_generator(
+                self.test_generator, 
+                self.dataset['test_steps'], verbose=self.verbose)
+
+            return acc
+        except Exception as e:
+            print(e)
+            return -1, None
