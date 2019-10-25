@@ -126,8 +126,11 @@ class UNetProblem(BaseProblem):
             if self._is_valid_config(this_config, img_size):
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
-                print(index, output_shape)
-                return self._repair_mapping(phenotype, output_shape, index+1)
+                # print(index, phenotype[index], output_shape)
+                if (0, 0) < output_shape <= self.input_shape:
+                    return self._repair_mapping(phenotype, output_shape, index+1)
+                else:
+                    return False
             else:
                 # if the current config is not VALID, generate a list of indexes 
                 # of the possible configurations and shuffles it
@@ -154,13 +157,11 @@ class UNetProblem(BaseProblem):
             return False
         elif phenotype[index][0] == 'upsamp':
             output_shape = (input_shape[0] * 2, input_shape[1] * 2)
-            print(index, output_shape)
+            # print(index, phenotype[index], output_shape)
             if (0, 0) < output_shape <= self.input_shape:
                 return self._repair_mapping(phenotype, output_shape, index+1)
             else:
-                print('PROBLEM')
                 return False
-
 
         #print(index, input_shape)
         # nothing to be validated, call next block
@@ -213,7 +214,6 @@ class UNetProblem(BaseProblem):
             if layer['class_name'] in ['push', 'bridge']: #CHECK
                 stack.append(layers[i-1]) #layer before (conv)
                 model['config']['layers'].remove(layers[i])
-                print('BRIDGE FOUND')
 
         for i, layer in enumerate(layers[1:]):
 
@@ -262,24 +262,25 @@ class UNetProblem(BaseProblem):
         print(genotype)
         return genotype
 
-    def _map_genotype_to_phenotype(self, genotype):
+    def _map_genotype_to_phenotype(self, genotype, derivation=None): #CHECK
         
-        derivation = self.parser.dsge_recursive_parse(genotype)
-        derivation = self._reshape_mapping(derivation)
-        valid = self._repair_mapping(derivation)
+        # derivation = self.parser.dsge_recursive_parse(genotype)
+        # derivation = self._reshape_mapping(derivation)
+        # derivation = self._test(derivation) #CHECK
+        # self._list_layer_outputs(derivation)
+        # valid = self._repair_mapping(derivation)
 
-        if not valid:
-            print('NOT VALID MODEL')
-            return None
+        # if not valid:
+        #     print('NOT VALID MODEL')
+            #return None
 
         self.naming = {}
         self.stack = []
-        model = {
-            'class_name': 'Model', 
+        model = {'class_name': 'Model', 
             'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
-        input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
-        model['config']['layers'].append(input_layer)
+        #input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
+        #model['config']['layers'].append(input_layer)
         # print(input_layer)
 
         for i, layer in enumerate(derivation):
@@ -289,8 +290,8 @@ class UNetProblem(BaseProblem):
 
         self._wrap_up_model(model)
 
-        for layer in model['config']['layers']:
-           print(layer)
+        # for layer in model['config']['layers']:
+        #    print(layer)
 
         return json.dumps(model)
 
@@ -341,7 +342,6 @@ class UNetProblem(BaseProblem):
 
         input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
         model['config']['layers'].append(input_layer)
-        # print(input_layer)
 
         # parse layers and add to list
         for i, layer in enumerate(derivation):
@@ -349,37 +349,39 @@ class UNetProblem(BaseProblem):
             block = self._build_block(block_name, params)
             model['config']['layers'].append(block)
 
-        #print(model['config']['layers'])
-        # 
-        size = len(model['config']['layers'])
-        print(size)
+        layers = model['config']['layers']
+        size = len(layers)
         for i in range(size-1, 0, -1):
-            layers = model['config']['layers']
-            #print(layers[i])
-            if layers[i]['class_name'] == 'MaxPooling2D':
+            print(layers[i])
+            
+            if layers[i]['class_name'] != 'MaxPooling2D':
+                continue
+            #print('---')
 
-                concat = False
-                if layers[i-1]['class_name'] == 'bridge':
-                    concat = True
-                    previous = model['config']['layers'][i-2]
-                else:
-                    previous = model['config']['layers'][i-1]
+            blocks = []
 
-                block = self._build_block('upsamp', [2])
+            concat = False
+            if layers[i-1]['class_name'] == 'bridge':
+                concat = True
+                previous = model['config']['layers'][i-2]
+            else:
+                previous = model['config']['layers'][i-1]
+
+            block = self._build_block('upsamp', [2])
+            model['config']['layers'].append(block)
+
+            block = copy.deepcopy(previous)
+            block['name'] = self._get_name('conv')
+            block['config']['kernel_size'] = 2
+            model['config']['layers'].append(block)
+
+            if concat:
+                block = self._build_block('concat', [3])
                 model['config']['layers'].append(block)
 
-                block = copy.deepcopy(previous)
-                block['name'] = self._get_name('conv')
-                block['config']['kernel_size'] = 2
-                model['config']['layers'].append(block)
-
-                if concat:
-                    block = self._build_block('concat', [3])
-                    model['config']['layers'].append(block)
-
-                block = copy.deepcopy(previous)
-                block['name'] = self._get_name('conv')
-                model['config']['layers'].append(block)
+            # block = copy.deepcopy(previous)
+            # block['name'] = self._get_name('conv')
+            # model['config']['layers'].append(block)
 
         block = self._build_block('conv', [2, 1, 1, 'valid', 'sigmoid'])
         model['config']['layers'].append(block)
@@ -394,24 +396,72 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def _validate_json_model(self, model):
+    def _build_right_side(self, mapping):
+
+        blocks = None
+        for block in reversed(mapping):
+            name, params = block[0], block[1:]
+            if name == 'maxpool':
+                if blocks != None:
+                    mapping.append(['upsamp', 2])
+                    mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
+                    if ['bridge'] in blocks:
+                        mapping.append(['concat', 3])
+                        blocks.remove(['bridge'])
+                    mapping.extend(blocks)
+                blocks = []
+            elif blocks != None:
+                blocks.append(block)
+        if blocks != None:
+            if blocks != None:
+                mapping.append(['upsamp', 2])
+                mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
+                if ['bridge'] in blocks:
+                    mapping.append(['concat', 3])
+                    blocks.remove(['bridge'])
+                mapping.extend(blocks)
+        
+        mapping.insert(0, ['input', (None,)+self.input_shape]) #input layer
+        mapping.append(['conv', 2, 1, 1, 'same', 'sigmoid']) #output layer
+
+        return mapping
+                
+    def _list_layer_outputs(self, mapping):
+        outputs = []
+
         depth = 0
-        layers = model['config']['layers']
-        input_shape = layers[0]['config']['batch_input_shape']
-        print(input_shape)
-        for layer in layers[1:]:
-            name = layer['class_name'] 
-            if name in ['Conv2D', 'MaxPooling2D', 'AveragePooling2D']:
-                if name in ['MaxPooling2D', 'AveragePooling2D']:
-                    depth += 1
-                    ksize = layer['config']['pool_size']
-                else:
-                    ksize = layer['config']['kernel_size']
-                strides = layer['config']['strides']
-                padding = layer['config']['padding']
-                input_shape = calculate_output_size(input_shape, ksize, strides, padding)
-            elif name in ['UpSampling2D']:
+        for i, block in enumerate(mapping):
+            name, params = block[0], block[1:]
+            if name == 'input':
+                output_shape = self.input_shape
+            elif name == 'conv':
+                output_shape = calculate_output_size(output_shape, *params[1:4])
+                output_shape += (params[0],)
+            elif name in ['maxpool', 'avgpool']:
+                depth += 1
+                temp = calculate_output_size(output_shape, *params[:3])
+                output_shape = temp + (output_shape[2],)
+            elif name == 'upsamp':
                 depth -= 1
-                size = layer['config']['size']
-                input_shape = (input_shape[0] * size, input_shape[1] * size)
-            print('\t'*depth, input_shape)
+                factor = params[0]
+                output_shape = (output_shape[0] * factor, output_shape[1] * factor, output_shape[2])
+            elif name == 'concat':
+                output_shape = (output_shape[0], output_shape[1], output_shape[2]*2)
+
+            print('\t'*depth, i, output_shape, block)
+            outputs.append(output_shape)
+        return outputs
+
+    def _non_recursive_repair(self, mapping, outputs):
+        stack = []
+        for i, layer in enumerate(mapping):
+            name, params = layer[0], layer[1:]
+            if name == 'maxpool':
+                stack.append(outputs[i-1])
+            elif name == 'upsamp' and stack != []:
+                aux_output = stack.pop()
+                if aux_output == (1, 1):
+                    mapping[i][1] = 1
+                    print(i, 'changing upsamp to 1x')
+                print(i, 'adjusting number of filters in layer', aux_output)
+                mapping[i+1][1] = aux_output[2]
