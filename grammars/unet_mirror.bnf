@@ -1,7 +1,7 @@
 <unet> ::= <conv> <next>
 
 
-<next> ::= <conv> <next> | <pool> <nextp> | bridge <pool> <nextp> | <midle>
+<next> ::= <conv> <next> | <dropout> <next> | <pool> <nextp> | bridge <pool> <nextp> | <midle>
 <nextp> ::= <conv> <next> | <midle>
 <midle> ::= <midle> <midle> | <conv> | <dropout>
 
