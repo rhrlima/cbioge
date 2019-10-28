@@ -1,16 +1,9 @@
 import glob
 import os
 
-from keras.models import *
-from keras.layers import *
-from keras.optimizers import *
-
 from datasets.dataset import DataGenerator
 
-import skimage.io as io
-
 from examples.unet_model import *
-from utils.image import *
 
 
 if __name__ == '__main__':
@@ -30,18 +23,3 @@ if __name__ == '__main__':
 
     loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)
     print('loss', loss, 'acc', acc)
-
-    # results = model.predict_generator(test_gen, 30, verbose=1)
-
-    # acc = 0.0
-    # for i, pred in enumerate(results):
-    #     io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
-        
-    #     true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
-    #     pred = normalize(pred)
-    #     pred = binarize(pred)
-    #     true = normalize(true)
-    #     true = binarize(true)
-    #     acc += iou_accuracy(true, pred)
-
-    # print('acc', acc/len(results))

@@ -31,7 +31,6 @@ class UNetProblem(BaseProblem):
 
         self.train_generator = None
         self.test_generator = None
-        self.data_augmentation = None
 
         self.verbose = False
 
@@ -284,7 +283,8 @@ class UNetProblem(BaseProblem):
                 mapping.extend(blocks)
         
         mapping.insert(0, ['input', (None,)+self.input_shape]) #input layer
-        mapping.append(['conv', 2, 1, 1, 'same', 'sigmoid']) #output layer
+        mapping.append(['conv', 2, 1, 1, 'same', 'relu']) #classification layer
+        mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) #output layer
 
         return mapping
                 
@@ -323,8 +323,8 @@ class UNetProblem(BaseProblem):
                 aux_output = stack.pop()
                 if aux_output == (1, 1):
                     mapping[i][1] = 1
-                    print(i, 'changing upsamp to 1x')
-                print(i, 'adjusting number of filters in layer', aux_output)
+                    #print(i, 'changing upsamp to 1x')
+                #print(i, 'adjusting number of filters in layer', aux_output)
                 mapping[i+1][1] = aux_output[2]
 
     def map_genotype_to_phenotype(self, genotype):
@@ -359,15 +359,15 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def evaluate(self, solution):
+    def evaluate(self, phenotype):
 
         try:
-            json_model = self.map_genotype_to_phenotype(solution.genotype)
+            #json_model = phenotype#self.map_genotype_to_phenotype(phenotype)
 
-            if not json_model:
-                return -1, None
+            # if not json_model:
+            #     return -1, None
 
-            model = model_from_json(json_model)
+            model = model_from_json(phenotype)
 
             model.compile(
                 optimizer=self.opt, 
