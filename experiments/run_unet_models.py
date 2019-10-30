@@ -87,10 +87,10 @@ if __name__ == '__main__':
 
     population = []
 
-    # for _ in range(8):
-    #     solution = GESolution(parser.dsge_create_solution())
-    #     solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-    #     population.append(solution)
+    for _ in range(8):
+        solution = GESolution(parser.dsge_create_solution())
+        solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+        population.append(solution)
 
     #UNET from genotype
     solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
@@ -105,9 +105,9 @@ if __name__ == '__main__':
     accs = []
     for s in population:
         model = model_from_json(s.phenotype)
-        model.summary()
-        acc = .5#problem.evaluate(s.phenotype)
-        print(acc)
+        #model.summary()
+        loss, acc = problem.evaluate(s.phenotype)
+        print(loss, acc)
         accs.append(acc)
 
     draw_line(range(len(accs)), accs)
