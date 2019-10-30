@@ -21,7 +21,8 @@ def draw_line(x_values, y_values):
     y_number_values = y_values#[1, 4, 9, 16, 25]
 
     # Plot the number in the list and set the line thickness.
-    plt.plot(x_number_values, y_number_values, linewidth=3)
+    #plt.plot(x_number_values, y_number_values, linewidth=3)
+    plt.scatter(x_number_values, y_number_values, s=20, edgecolors='none', c='green')
 
     # Set the line chart title and the text font size.
     plt.title("Unet model Fitnesses", fontsize=19)
@@ -35,6 +36,9 @@ def draw_line(x_values, y_values):
     # Set the x, y axis tick marks text size.
     plt.tick_params(axis='both', labelsize=9)
 
+    # Save figure
+    plt.savefig('runs.png')
+    
     # Display the plot in the matplotlib's viewer.
     plt.show()
 
@@ -49,8 +53,8 @@ if __name__ == '__main__':
         "train_ids": [f'{i}.png' for i in range(30)],
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
-        "train_steps": 1,#TODO
-        "test_steps": 1,#TODO
+        "train_steps": 300,
+        "test_steps": 30,
         "aug": dict(
             rotation_range=0.2,
             width_shift_range=0.05,
@@ -83,10 +87,10 @@ if __name__ == '__main__':
 
     population = []
 
-    for _ in range(8):
-        solution = GESolution(parser.dsge_create_solution())
-        solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-        population.append(solution)
+    # for _ in range(8):
+    #     solution = GESolution(parser.dsge_create_solution())
+    #     solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+    #     population.append(solution)
 
     #UNET from genotype
     solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
@@ -99,19 +103,11 @@ if __name__ == '__main__':
     population.append(solution)
 
     accs = []
-    for s in population[:1]:
+    for s in population:
         model = model_from_json(s.phenotype)
         model.summary()
-        acc = problem.evaluate(s.phenotype)
+        acc = .5#problem.evaluate(s.phenotype)
         print(acc)
         accs.append(acc)
 
-    draw_line(len(population), accs)
-
-    # print('FROM GENOTYPE')
-    # model = model_from_json(population[8].phenotype)
-    # model.summary()
-
-    # print('FROM ORIGINAL')
-    # model = model_from_json(population[9].phenotype)
-    # model.summary()
+    draw_line(range(len(accs)), accs)

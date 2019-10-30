@@ -60,19 +60,20 @@ class UNetProblem(BaseProblem):
         return f'{block_name}_{self.naming[block_name]}'
 
     def _generate_configurations(self):
-        kernels = [i[0] for i in self.parser.GRAMMAR['<kernel_size>']]
-        strides = [i[0] for i in self.parser.GRAMMAR['<strides>']]
-        padding = [i[0] for i in self.parser.GRAMMAR['<padding>']]
-        conv_configs = list(itertools.product(kernels, strides, padding))
-        max_img_size = self.input_shape[1]
-        self.conv_valid_configs = {}
-        for img_size in range(0, max_img_size+1):
-            key = str(img_size)
-            self.conv_valid_configs[key] = conv_configs[:] #copies the configs list
-            for config in conv_configs:
-                output_shape = calculate_output_size((img_size, img_size), *config)
-                if (0, 0) > output_shape > (img_size, img_size): # 0 < shape < img_size
-                    self.conv_valid_configs[key].remove(config)
+        if self.parser:
+            kernels = [i[0] for i in self.parser.GRAMMAR['<kernel_size>']]
+            strides = [i[0] for i in self.parser.GRAMMAR['<strides>']]
+            padding = [i[0] for i in self.parser.GRAMMAR['<padding>']]
+            conv_configs = list(itertools.product(kernels, strides, padding))
+            max_img_size = self.input_shape[1]
+            self.conv_valid_configs = {}
+            for img_size in range(0, max_img_size+1):
+                key = str(img_size)
+                self.conv_valid_configs[key] = conv_configs[:]
+                for config in conv_configs:
+                    output_shape = calculate_output_size((img_size, img_size), *config)
+                    if (0, 0) > output_shape > (img_size, img_size):
+                        self.conv_valid_configs[key].remove(config)
 
     def _reshape_mapping(self, phenotype):
 
@@ -283,7 +284,7 @@ class UNetProblem(BaseProblem):
                 mapping.extend(blocks)
         
         mapping.insert(0, ['input', (None,)+self.input_shape]) #input layer
-        mapping.append(['conv', 2, 1, 1, 'same', 'relu']) #classification layer
+        mapping.append(['conv', 2, 3, 1, 'same', 'relu']) #classification layer
         mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) #output layer
 
         return mapping
@@ -362,28 +363,22 @@ class UNetProblem(BaseProblem):
     def evaluate(self, phenotype):
 
         try:
-            #json_model = phenotype#self.map_genotype_to_phenotype(phenotype)
-
-            # if not json_model:
-            #     return -1, None
-
             model = model_from_json(phenotype)
 
-            model.compile(
-                optimizer=self.opt, 
-                loss=self.loss, 
-                metrics=self.metrics)
+            model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
             model.fit_generator(
                 self.train_generator, 
-                self.dataset['train_steps'], 
-                self.epochs, verbose=self.verbose)
+                steps_per_epoch=self.dataset['train_steps'], 
+                epochs=self.epochs, 
+                verbose=self.verbose)
 
             loss, acc = model.evaluate_generator(
                 self.test_generator, 
-                self.dataset['test_steps'], verbose=self.verbose)
+                steps=self.dataset['test_steps'], 
+                verbose=self.verbose)
 
-            return acc
+            return loss, acc
         except Exception as e:
             print(e)
             return -1, None
