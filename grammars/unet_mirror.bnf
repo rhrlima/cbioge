@@ -1,0 +1,19 @@
+<unet> ::= <conv> <next>
+
+
+<next> ::= <conv> <next> | <dropout> <next> | <pool> <nextp> | bridge <pool> <nextp>
+<nextp> ::= <conv> <next> | <midle>
+<midle> ::= <midle> <midle> | <conv> | <dropout>
+
+
+<conv> ::= conv <filters> <kernel_size> 1 same <activation>
+<pool> ::= maxpool 2 2 <padding>
+<dropout> ::= dropout <rate>
+
+
+<filters> ::= 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
+<kernel_size> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7
+<strides> ::= 1 | 2
+<padding> ::= valid | same
+<activation> ::= relu | sigmoid | linear
+<rate> ::= [0.0,0.5]

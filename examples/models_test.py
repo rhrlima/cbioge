@@ -42,7 +42,11 @@ def functional_model_from_json():
                         "units": 64, 
                         "activation": "relu", 
                     }, 
-                    "inbound_nodes": [[["input_1", 0, 0, {}]]]
+                    "inbound_nodes": [
+                        [
+                            ["input_1", 0, 0, {}]
+                        ]
+                    ]
                 }, 
                 {
                     "name": "dense_5", 

@@ -3,7 +3,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from algorithms.solutions import GESolution
 from datasets.dataset import DataGenerator
 from grammars import BNFGrammar
-from problems import ImageSegmentationProblem
+from problems import UNetProblem
 
 from examples.unet_model import *
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         "train_ids": [f'{i}.png' for i in range(30)],
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
-        "train_steps": 30,
+        "train_steps": 300,
         "test_steps": 30,
         "aug": dict(
             rotation_range=0.2,
@@ -44,15 +44,13 @@ if __name__ == '__main__':
         batch_size=1, 
         shuffle=False)
 
-    #parser = BNFGrammar('grammars/')
-    problem = ImageSegmentationProblem(None, dset_args)
+    parser = BNFGrammar('grammars/unet_mirror.bnf')
+    problem = UNetProblem(parser, dset_args)
     problem.train_generator = train_gen
     problem.test_generator = test_gen
-    problem.data_augmentation = data_aug
 
     solution = GESolution([])
-    solution.phenotype = unet(dset_args['input_shape'])
-    #solution.phenotype.summary()
+    solution.phenotype = unet(dset_args['input_shape']).to_json()
 
-    acc = problem.evaluate(solution)
+    acc = problem.evaluate(solution.phenotype)
     print(acc)

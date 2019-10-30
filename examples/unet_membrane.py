@@ -2,9 +2,6 @@ import os
 
 import numpy as np
 
-import skimage.io as io
-import skimage.transform as trans
-
 from keras.preprocessing.image import ImageDataGenerator
 
 from examples.unet_model import *
@@ -41,6 +38,7 @@ def train_generator(train_path, batch_size, aug_dict, target_size = (256, 256)):
         mask = binarize(mask)
         yield img, mask
 
+
 def test_generator(test_path, num_image = 30, target_size = (256, 256)):
     for i in range(num_image):
         img = io.imread(os.path.join(test_path, 'image', f'{i}.png'), as_gray = True)
@@ -54,6 +52,7 @@ def test_generator(test_path, num_image = 30, target_size = (256, 256)):
         img = np.reshape(img,(1,)+img.shape) # (1, 256, 256, 1)
         msk = np.reshape(msk,(1,)+msk.shape) # (1, 256, 256, 1)
         yield img, msk
+
 
 if __name__ == '__main__':
 
@@ -75,18 +74,3 @@ if __name__ == '__main__':
     
     loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)
     print('loss', loss, 'acc', acc)
-
-    #results = model.predict_generator(test_gen, 30, verbose=1)
-
-    # acc = 0.0
-    # for i, pred in enumerate(results):
-    #     io.imsave(f'datasets/membrane/test/pred/{i}.png', pred)
-        
-    #     true = io.imread(f'datasets/membrane/test/label/{i}.png', as_gray=True)
-    #     pred = normalize(pred)
-    #     pred = binarize(pred)
-    #     true = normalize(true)
-    #     true = binarize(true)
-    #     acc += iou_accuracy(true, pred)
-
-    # print('acc', acc/len(results))
