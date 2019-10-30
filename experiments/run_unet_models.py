@@ -40,7 +40,7 @@ def draw_line(x_values, y_values):
     plt.savefig('runs.png')
     
     # Display the plot in the matplotlib's viewer.
-    plt.show()
+    #plt.show()
 
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     problem = UNetProblem(parser, dset_args)
     problem.train_generator = train_gen
     problem.test_generator = test_gen
-    problem.verbose = True
+    #problem.verbose = True
 
     population = []
 
