@@ -1,16 +1,18 @@
-from problems.problem import CnnProblem
-from problems.problem import DNNProblem
+from problems.problem import BaseProblem
+
+from problems.classification import CNNProblem
+from problems.segmentation import UNetProblem
 
 from problems.regression import SymbolicRegressionProblem
-
 from problems.stringmatch import StringMatchProblem
-from problems.segmentation import ImageSegmentationProblem
 
 
 __all__ = [
-    'CnnProblem',
-    'DNNProblem',
+	'BaseProblem',
+	
+    'CNNProblem',
+    'UNetProblem',
+
     'SymbolicRegressionProblem',
     'StringMatchProblem',
-    'ImageSegmentationProblem'
 ]
