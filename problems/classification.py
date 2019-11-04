@@ -110,10 +110,6 @@ class CNNProblem(BaseProblem):
 
         return new_mapping
 
-    def _is_valid_config(self, config, img_size):
-
-        return config in self.conv_valid_configs[str(img_size)]
-
     def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
 
         #print('#'*index, index)
@@ -137,7 +133,7 @@ class CNNProblem(BaseProblem):
             this_config = tuple(phenotype[index][start:end])
 
             # if the current config is VALID, calculate output and call next block
-            if self._is_valid_config(this_config, img_size):
+            if this_config in self.conv_valid_configs[str(img_size)]
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
                 return self._repair_mapping(phenotype, output_shape, index+1)
@@ -182,10 +178,7 @@ class CNNProblem(BaseProblem):
                     return np.random.uniform(min_, max_)
                 else:
                     raise TypeError('type mismatch')
-            else:
-                return value
-        else:
-            return value
+        return value
 
     def _build_block(self, block_name, params):
 

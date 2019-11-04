@@ -21,7 +21,7 @@ class UNetProblem(BaseProblem):
     epochs = 1
 
     loss = 'binary_crossentropy'
-    opt = 'Adam'
+    opt = Adam(lr = 1e-4)#'Adam'
     metrics = ['accuracy']
 
     def __init__(self, parser, dataset):
@@ -96,10 +96,6 @@ class UNetProblem(BaseProblem):
 
         return new_mapping
 
-    def _is_valid_config(self, config, img_size):
-
-        return config in self.conv_valid_configs[str(img_size)]
-
     def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
 
         #print('#'*index, index)
@@ -124,7 +120,7 @@ class UNetProblem(BaseProblem):
 
             # if the current config is VALID, calculate output and call next block
             #if self._is_valid_config(this_config, img_size):
-            if config in self.conv_valid_configs[str(img_size)]:
+            if this_config in self.conv_valid_configs[str(img_size)]:
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
                 # print(index, phenotype[index], output_shape)
@@ -365,7 +361,10 @@ class UNetProblem(BaseProblem):
         try:
             model = model_from_json(phenotype)
 
-            model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
+            model.compile(
+                optimizer=self.opt, 
+                loss=self.loss, 
+                metrics=self.metrics)
 
             model.fit_generator(
                 self.train_generator, 
@@ -380,5 +379,5 @@ class UNetProblem(BaseProblem):
 
             return loss, acc
         except Exception as e:
-            print(e)
+            print('[evaluation]', e)
             return -1, None
