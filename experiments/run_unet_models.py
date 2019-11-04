@@ -47,31 +47,22 @@ if __name__ == '__main__':
     
     dset_args = {
         "path": "datasets/membrane",
-        "train_path": "datasets/membrane/train_posproc",
+        "train_path": "datasets/membrane/train_aug",
         "test_path": "datasets/membrane/test_posproc",
         "input_shape": (256, 256, 1),
-        "train_ids": [f'{i}.png' for i in range(30)],
+        "train_ids": [f'{i}.png' for i in range(600)],
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
         "train_steps": 300,
         "test_steps": 30,
-        "aug": dict(
-            rotation_range=0.2,
-            width_shift_range=0.05,
-            height_shift_range=0.05,
-            shear_range=0.05,
-            zoom_range=0.05,
-            horizontal_flip=True,
-            fill_mode='nearest')
+        "aug": None
     }
 
-    data_aug = ImageDataGenerator(**dset_args['aug'])
     train_gen = DataGenerator(
         dset_args['train_path'], 
         dset_args['train_ids'], 
         dset_args['input_shape'], 
-        batch_size=2, 
-        data_aug=data_aug)
+        batch_size=2)
     test_gen = DataGenerator(
         dset_args['test_path'], 
         dset_args['test_ids'], 
@@ -89,6 +80,7 @@ if __name__ == '__main__':
 
     for _ in range(8):
         solution = GESolution(parser.dsge_create_solution())
+        print(solution)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
         population.append(solution)
 
@@ -105,7 +97,7 @@ if __name__ == '__main__':
     accs = []
     for s in population:
         model = model_from_json(s.phenotype)
-        #model.summary()
+        model.summary()
         loss, acc = problem.evaluate(s.phenotype)
         print(loss, acc)
         accs.append(acc)
