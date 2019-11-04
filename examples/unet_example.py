@@ -17,8 +17,8 @@ if __name__ == '__main__':
         "train_ids": [f'{i}.png' for i in range(30)],
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
-        "train_steps": 2,
-        "test_steps": 1,
+        "train_steps": 300,
+        "test_steps": 30,
         "aug": dict(
             rotation_range=0.2,
             width_shift_range=0.05,
@@ -51,5 +51,5 @@ if __name__ == '__main__':
     solution = GESolution([])
     solution.phenotype = unet(dset_args['input_shape']).to_json()
 
-    acc = problem.evaluate(solution.phenotype)
-    print(acc)
+    loss, acc = problem.evaluate(solution.phenotype)
+    print(loss, acc)

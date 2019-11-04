@@ -5,6 +5,7 @@ import json
 import itertools
 
 import keras
+from keras.optimizers import Adam
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator
 
@@ -21,7 +22,7 @@ class UNetProblem(BaseProblem):
     epochs = 1
 
     loss = 'binary_crossentropy'
-    opt = 'Adam'
+    opt = Adam(lr = 1e-4)#'Adam'
     metrics = ['accuracy']
 
     def __init__(self, parser, dataset):
