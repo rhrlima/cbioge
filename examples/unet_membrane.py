@@ -4,6 +4,8 @@ import numpy as np
 
 from keras.preprocessing.image import ImageDataGenerator
 
+import skimage.io as io
+
 from examples.unet_model import *
 from utils.image import *
 
