@@ -1,5 +1,7 @@
 import argparse
 
+import numpy as np
+
 from keras.preprocessing.image import ImageDataGenerator
 
 from algorithms.solutions import GESolution
@@ -26,6 +28,8 @@ def get_args():
 
 if __name__ == '__main__':
     
+    np.random.seed(0)
+
     args = get_args()
 
     print(args)
@@ -35,7 +39,6 @@ if __name__ == '__main__':
         "train_path": "datasets/membrane/train_posproc",
         "test_path": "datasets/membrane/test_posproc",
         "input_shape": (256, 256, 1),
-        "valid_ids": [],
         "train_steps": args.trs,
         "test_steps": args.tes,
         "aug": dict(
@@ -49,16 +52,8 @@ if __name__ == '__main__':
     }
 
     data_aug = ImageDataGenerator(**dset_args['aug']) if args.aug > 0 else None
-    train_gen = DataGenerator(
-        dset_args['train_path'], 
-        dset_args['input_shape'], 
-        batch_size=args.b, 
-        data_aug=data_aug)
-    test_gen = DataGenerator(
-        dset_args['test_path'], 
-        dset_args['input_shape'], 
-        batch_size=args.b, 
-        shuffle=args.s)
+    train_gen = DataGenerator(dset_args['train_path'], dset_args['input_shape'], batch_size=args.b, data_aug=data_aug)
+    test_gen = DataGenerator(dset_args['test_path'], dset_args['input_shape'], batch_size=args.b, shuffle=args.s)
 
     problem = UNetProblem(None, dset_args)
     problem.train_generator = train_gen
@@ -68,5 +63,5 @@ if __name__ == '__main__':
     solution = GESolution([])
     solution.phenotype = unet(dset_args['input_shape']).to_json()
 
-    result = problem.evaluate(solution.phenotype)
+    result = problem.evaluate(solution.phenotype, predict=True)
     print(result)

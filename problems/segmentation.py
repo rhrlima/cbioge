@@ -13,6 +13,8 @@ from utils.image import *
 from problems import BaseProblem
 from datasets.dataset import DataGenerator
 
+#TEMP
+import skimage.io as io
 
 class UNetProblem(BaseProblem):
 
@@ -357,7 +359,7 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def evaluate(self, phenotype):
+    def evaluate(self, phenotype, predict=False):
 
         try:
             model = model_from_json(phenotype)
@@ -367,16 +369,14 @@ class UNetProblem(BaseProblem):
                 loss=self.loss, 
                 metrics=self.metrics)
 
-            model.fit_generator(
-                self.train_generator, 
-                steps_per_epoch=self.dataset['train_steps'], 
-                epochs=self.epochs, 
-                verbose=self.verbose)
+            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose)
 
-            loss, acc = model.evaluate_generator(
-                self.test_generator, 
-                steps=self.dataset['test_steps'], 
-                verbose=self.verbose)
+            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
+
+            if predict:
+                predictions = model.predict_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
+                for i, img in enumerate(predictions):
+                    io.imsave(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
 
             return loss, acc
         except Exception as e:
