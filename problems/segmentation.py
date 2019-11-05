@@ -7,6 +7,7 @@ import itertools
 import keras
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import *
 
 from utils.image import *
 from problems import BaseProblem
