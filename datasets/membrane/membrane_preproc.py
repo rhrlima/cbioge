@@ -31,12 +31,14 @@ def load_images(path, mask=True):
 
 
 def save_images(path, items, npy=False, force=False):
-
-    if not os.path.exists(os.path.join(base_path, path)):
-        os.makedirs(path)
+    complete_path = os.path.join(base_path, path)
+    if not os.path.exists(complete_path):
+        os.makedirs(complete_path)
 
     for i, item in enumerate(items):
-        file_name = os.path.join(base_path, path, f'{i}.npy')
+        file_type = '.npy' if npy else '.png'
+        file_name = os.path.join(complete_path, str(i)+file_type)
+        print('saving', file_name)
         if not os.path.exists(file_name) or force:
             print('saving', file_name)
             if npy:
@@ -83,17 +85,17 @@ if __name__ == '__main__':
 
     images = load_images('train/image', False)
     masks = load_images('train/label')
-    save_images('posproc/train/image', images)
-    save_images('posproc/train/label', masks)
-    save_images('npy/train/image', images, npy=True)
-    save_images('npy/train/label', masks, npy=True)
+    save_images('trainp/image', images)
+    save_images('trainp/label', masks)
+    #save_images('npy/train/image', images, npy=True)
+    #save_images('npy/train/label', masks, npy=True)
 
     images = load_images('test/image', False)
     masks = load_images('test/label')
-    save_images('posproc/test/image', images)
-    save_images('posproc/test/label', masks)
-    save_images('npy/test/image', images, npy=True)
-    save_images('npy/test/label', masks, npy=True)
+    save_images('testp/image', images)
+    save_images('testp/label', masks)
+    #save_images('npy/test/image', images, npy=True)
+    #save_images('npy/test/label', masks, npy=True)
 
     data_gen_args = dict(rotation_range=0.2,
                 width_shift_range=0.05,
@@ -103,11 +105,11 @@ if __name__ == '__main__':
                 horizontal_flip=True,
                 fill_mode='nearest')
 
-    if not os.path.exists('train/aug/image'):
-        os.makedirs('train/aug/image')
-        os.makedirs('train/aug/label')
+    if not os.path.exists('train_aug/image'):
+        os.makedirs('train_aug/image')
+        os.makedirs('train_aug/label')
 
-    aug_gen = generate_augmented_data(1, 'train', data_gen_args)
+    #aug_gen = generate_augmented_data(1, 'train', data_gen_args)
 
     #for _ in range(600):
     #    next(aug_gen)
