@@ -1,3 +1,5 @@
+import glob
+
 from keras.preprocessing.image import ImageDataGenerator
 
 from algorithms.solutions import GESolution
@@ -9,12 +11,15 @@ from examples.unet_model import *
 
 if __name__ == '__main__':
     
+    train_ids = glob.glob(os.path.join(path, 'train_aug/image', '*.png'))
+    train_ids = [os.path.basename(id) for id in train_ids]
+    
     dset_args = {
         "path": "datasets/membrane",
         "train_path": "datasets/membrane/train_aug",
         "test_path": "datasets/membrane/test_posproc",
         "input_shape": (256, 256, 1),
-        "train_ids": [f'{i}.png' for i in range(600)],
+        "train_ids": train_ids,
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
         "train_steps": 300,

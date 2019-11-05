@@ -133,7 +133,7 @@ class CNNProblem(BaseProblem):
             this_config = tuple(phenotype[index][start:end])
 
             # if the current config is VALID, calculate output and call next block
-            if this_config in self.conv_valid_configs[str(img_size)]
+            if this_config in self.conv_valid_configs[str(img_size)]:
                 output_shape = calculate_output_size(input_shape, *this_config)
                 #print(this_config, 'is valid', input_shape, output_shape)
                 return self._repair_mapping(phenotype, output_shape, index+1)
