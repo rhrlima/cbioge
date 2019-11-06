@@ -59,7 +59,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         color_mode = "grayscale",
         target_size = target_size,
         batch_size = batch_size,
-        save_to_dir = os.path.join(base_path, path, 'aug/image'),
+        save_to_dir = os.path.join(base_path, path, 'image'),
         save_prefix  = '',
         seed = seed)
     mask_gen = mask_datagen.flow_from_directory(
@@ -69,7 +69,7 @@ def generate_augmented_data(batch_size, path, aug_dict, target_size = (256, 256)
         color_mode = "grayscale",
         target_size = target_size,
         batch_size = batch_size,
-        save_to_dir = os.path.join(base_path, path, 'aug/label'),
+        save_to_dir = os.path.join(base_path, path, 'label'),
         save_prefix  = '',
         seed = seed)
 
@@ -85,15 +85,15 @@ if __name__ == '__main__':
 
     images = load_images('train/image', False)
     masks = load_images('train/label')
-    save_images('trainp/image', images)
-    save_images('trainp/label', masks)
+    save_images('train_posproc/image', images)
+    save_images('train_posproc/label', masks)
     #save_images('npy/train/image', images, npy=True)
     #save_images('npy/train/label', masks, npy=True)
 
     images = load_images('test/image', False)
     masks = load_images('test/label')
-    save_images('testp/image', images)
-    save_images('testp/label', masks)
+    save_images('test_posproc/image', images)
+    save_images('test_posproc/label', masks)
     #save_images('npy/test/image', images, npy=True)
     #save_images('npy/test/label', masks, npy=True)
 
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         os.makedirs('train_aug/image')
         os.makedirs('train_aug/label')
 
-    #aug_gen = generate_augmented_data(1, 'train', data_gen_args)
+    #aug_gen = generate_augmented_data(1, 'train_aug', data_gen_args)
 
     #for _ in range(600):
     #    next(aug_gen)

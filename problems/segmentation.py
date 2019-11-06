@@ -364,14 +364,11 @@ class UNetProblem(BaseProblem):
         try:
             model = model_from_json(phenotype)
 
-            model.compile(
-                optimizer=self.opt, 
-                loss=self.loss, 
-                metrics=self.metrics)
+            model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
-            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose)
+            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose)#, workers=5, use_multiprocessing=True)
 
-            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
+            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)#, workers=5, use_multiprocessing=True)
 
             if predict:
                 predictions = model.predict_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
