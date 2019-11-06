@@ -66,19 +66,19 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
     #CHECK
-    def _post_process(self, img, msk):
-        # normalize
-        img = normalize(img)
-        msk = normalize(msk)
+    # def _post_process(self, img, msk):
+    #     # normalize
+    #     img = normalize(img)
+    #     msk = normalize(msk)
 
-        # binarize mask
-        msk = binarize(msk)
+    #     # binarize mask
+    #     msk = binarize(msk)
 
-        # reshape to (w, h, 1)
-        img = np.reshape(img, img.shape+(1,))
-        msk = np.reshape(msk, msk.shape+(1,))
+    #     # reshape to (w, h, 1)
+    #     img = np.reshape(img, img.shape+(1,))
+    #     msk = np.reshape(msk, msk.shape+(1,))
 
-        return img, msk
+    #     return img, msk
 
     def _load_data_from_npy(self, ids):
 
@@ -116,14 +116,14 @@ class DataGenerator(keras.utils.Sequence):
             # binarize mask
             msk = binarize(msk)
 
-            # reshape to (w, h, 1)
+            # reshape to (w, h, c, 1)
             x[i,] = np.reshape(img, img.shape+(1,))
             y[i,] = np.reshape(msk, msk.shape+(1,))
 
             # print(id, x[i].shape, y[i].shape, x[i].min(), x[i].max())
 
-        if self.data_aug != None:
-            it = self.data_aug.flow(x, y, batch_size=self.batch_size)
-            return it.next()
+        # if self.data_aug != None:
+        #     it = self.data_aug.flow(x, y, batch_size=self.batch_size)
+        #     return it.next()
 
         return x, y
