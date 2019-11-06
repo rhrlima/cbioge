@@ -26,8 +26,7 @@ if __name__ == '__main__':
             shear_range=0.05,
             zoom_range=0.05,
             horizontal_flip=True,
-            fill_mode='nearest'
-        )
+            fill_mode='nearest')
     }
 
     data_aug = ImageDataGenerator(**dset_args['aug'])
