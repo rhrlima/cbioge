@@ -15,3 +15,7 @@ datasets/*
 
 # run scripts
 *.sbatch
+
+# pycharm files
+.idea/
+
