@@ -16,18 +16,17 @@ def get_args():
 
     args = argparse.ArgumentParser(prog='script.py')
 
-    args.add_argument('-trs', type=int, default=30) #train steps
-    args.add_argument('-tes', type=int, default=30) #test steos
+    args.add_argument('-trs', type=int, default=5) #train steps
+    args.add_argument('-tes', type=int, default=5) #test steos
     args.add_argument('-aug', type=int, default=0) #augmentation
-    args.add_argument('-b', type=int, default=1) #batch
+    args.add_argument('-b', type=int, default=5) #batch
     args.add_argument('-s', type=int, default=0) #shuffle
-    args.add_argument('-v', type=int, default=0) #verbose
+    args.add_argument('-v', type=int, default=1) #verbose
 
     return args.parse_args()
 
 
-if __name__ == '__main__':
-    
+def run():
     np.random.seed(0)
 
     args = get_args()
@@ -65,3 +64,7 @@ if __name__ == '__main__':
 
     loss, acc = problem.evaluate(solution.phenotype, predict=True)
     print('loss', loss, 'acc', acc)
+
+
+if __name__ == '__main__':
+    run()
