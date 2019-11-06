@@ -1,3 +1,6 @@
+import os
+import glob
+
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import model_from_json
 
@@ -45,33 +48,27 @@ def draw_line(x_values, y_values):
 
 if __name__ == '__main__':
     
+    train_ids = glob.glob(os.path.join('datasets/membrane/train_aug/image', '*.png'))
+    train_ids = [os.path.basename(id) for id in train_ids]
+    
     dset_args = {
         "path": "datasets/membrane",
-        "train_path": "datasets/membrane/train_posproc",
+        "train_path": "datasets/membrane/train_aug",
         "test_path": "datasets/membrane/test_posproc",
         "input_shape": (256, 256, 1),
-        "train_ids": [f'{i}.png' for i in range(30)],
+        "train_ids": train_ids,
         "valid_ids": [],
         "test_ids": [f'{i}.png' for i in range(30)],
         "train_steps": 300,
         "test_steps": 30,
-        "aug": dict(
-            rotation_range=0.2,
-            width_shift_range=0.05,
-            height_shift_range=0.05,
-            shear_range=0.05,
-            zoom_range=0.05,
-            horizontal_flip=True,
-            fill_mode='nearest')
+        "aug": None
     }
 
-    data_aug = ImageDataGenerator(**dset_args['aug'])
     train_gen = DataGenerator(
         dset_args['train_path'], 
         dset_args['train_ids'], 
         dset_args['input_shape'], 
-        batch_size=2, 
-        data_aug=data_aug)
+        batch_size=2)
     test_gen = DataGenerator(
         dset_args['test_path'], 
         dset_args['test_ids'], 
@@ -87,15 +84,16 @@ if __name__ == '__main__':
 
     population = []
 
-    # for _ in range(8):
-    #     solution = GESolution(parser.dsge_create_solution())
-    #     solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-    #     population.append(solution)
+    for _ in range(8):
+        solution = GESolution(parser.dsge_create_solution())
+        print(solution)
+        solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+        population.append(solution)
 
     #UNET from genotype
-    # solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
-    # solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-    # population.append(solution)
+    solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
+    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+    population.append(solution)
 
     #original UNET
     solution = GESolution([])
@@ -105,8 +103,9 @@ if __name__ == '__main__':
     accs = []
     for s in population:
         model = model_from_json(s.phenotype)
+        model.summary()
         loss, acc = problem.evaluate(s.phenotype)
         print(loss, acc)
         accs.append(acc)
 
-    #draw_line(range(len(accs)), accs)
+    draw_line(range(len(accs)), accs)

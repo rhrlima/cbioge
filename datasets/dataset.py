@@ -57,6 +57,21 @@ class DataGenerator(keras.utils.Sequence):
         if self.shuffle:
             np.random.shuffle(self.indexes)
 
+    #CHECK
+    def _post_process(self, img, msk):
+        # normalize
+        img = normalize(img)
+        msk = normalize(msk)
+
+        # binarize mask
+        msk = binarize(msk)
+
+        # reshape to (w, h, 1)
+        img = np.reshape(img, img.shape+(1,))
+        msk = np.reshape(msk, msk.shape+(1,))
+
+        return img, msk
+
     def _load_data_from_npy(self, ids):
 
         # create placeholders for data
