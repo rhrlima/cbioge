@@ -29,6 +29,6 @@ if __name__ == '__main__':
     loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)
     print('loss', loss, 'acc', acc)
 
-    results = model.predict_generator(test_gen, steps=30, verbose=1)
-    for i, img in enumerate(results):
-        io.imsave(os.path.join(path, f'test/pred/{img}.png'), img)
+    # results = model.predict_generator(test_gen, steps=30, verbose=1)
+    # for i, img in enumerate(results):
+    #     io.imsave(os.path.join(path, f'test/pred/{img}.png'), img)

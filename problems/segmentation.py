@@ -8,6 +8,7 @@ import keras
 from keras.optimizers import Adam
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import *
 
 from utils.image import *
 from problems import BaseProblem
@@ -359,7 +360,7 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def evaluate(self, phenotype):
+    def evaluate(self, phenotype, predict=False):
 
         try:
             model = model_from_json(phenotype)
@@ -370,13 +371,14 @@ class UNetProblem(BaseProblem):
             #     metrics=self.metrics)
             model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
-            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose)
+            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose, workers=5, use_multiprocessing=True)
 
-            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
+            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose, workers=5, use_multiprocessing=True)
 
-            results = model.predict_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
-            for i, img in enumerate(results):
-                io.imsave(os.path.join(path, f'test/pred/{img}.png'), img)
+            if predict:
+                predictions = model.predict_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
+                for i, img in enumerate(predictions):
+                    io.imsave(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
 
             return loss, acc
         except Exception as e:
