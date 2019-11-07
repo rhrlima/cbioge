@@ -24,16 +24,19 @@ class UNetProblem(BaseProblem):
     epochs = 1
 
     loss = 'binary_crossentropy'
-    opt = Adam(lr = 1e-4)#'Adam'
+    opt = Adam(lr = 1e-4)
     metrics = ['accuracy']
 
-    def __init__(self, parser, dataset):
+    def __init__(self, parser, dataset, train_gen, test_gen):
         self.parser = parser
         self.dataset = dataset
         self.input_shape = dataset['input_shape']
 
-        self.train_generator = None
-        self.test_generator = None
+        self.train_generator = train_gen
+        self.test_generator = test_gen
+
+        self.workers = 1
+        self.multiprocessing = False
 
         self.verbose = False
 
@@ -51,7 +54,6 @@ class UNetProblem(BaseProblem):
             'concat': ['Concatenate', 'axis'],
             'crop': ['Cropping2D', 'cropping'],
 
-            'push': ['push'], #remover
             'bridge': ['bridge'], #check
         }
 
@@ -87,9 +89,9 @@ class UNetProblem(BaseProblem):
             block = phenotype[index]
             if block == 'conv':
                 end = index+6
-            elif block == 'avgpool' or block == 'maxpool':
+            elif block in ['avgpool', 'maxpool']:
                 end = index+4
-            elif block in ['push', 'bridge']:
+            elif block == 'bridge':
                 end = index+1
             else:
                 end = index+2
@@ -99,73 +101,73 @@ class UNetProblem(BaseProblem):
 
         return new_mapping
 
-    def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
+    # def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
 
-        #print('#'*index, index)
+    #     #print('#'*index, index)
 
-        # if the mapping reached the end, without problems, return TRUE
-        if index >= len(phenotype):
-            return True
+    #     # if the mapping reached the end, without problems, return TRUE
+    #     if index >= len(phenotype):
+    #         return True
 
-        input_shape = self.input_shape if input_shape is None else input_shape
-        img_size = input_shape[1]
+    #     input_shape = self.input_shape if input_shape is None else input_shape
+    #     img_size = input_shape[1]
 
-        # the repair occurs just for convolution or pooling
-        if phenotype[index][0] in ['conv', 'maxpool', 'avgpool']:
+    #     # the repair occurs just for convolution or pooling
+    #     if phenotype[index][0] in ['conv', 'maxpool', 'avgpool']:
 
-            # get the needed parameters for each type of block (convolution or pooling)    
-            if phenotype[index][0] == 'conv':
-                start, end = 2, 5
-            if phenotype[index][0] in ['maxpool', 'avgpool']:
-                start, end = 1, 4
+    #         # get the needed parameters for each type of block (convolution or pooling)    
+    #         if phenotype[index][0] == 'conv':
+    #             start, end = 2, 5
+    #         if phenotype[index][0] in ['maxpool', 'avgpool']:
+    #             start, end = 1, 4
 
-            this_config = tuple(phenotype[index][start:end])
+    #         this_config = tuple(phenotype[index][start:end])
 
-            # if the current config is VALID, calculate output and call next block
-            #if self._is_valid_config(this_config, img_size):
-            if this_config in self.conv_valid_configs[str(img_size)]:
-                output_shape = calculate_output_size(input_shape, *this_config)
-                #print(this_config, 'is valid', input_shape, output_shape)
-                # print(index, phenotype[index], output_shape)
-                if (0, 0) < output_shape <= self.input_shape:
-                    return self._repair_mapping(phenotype, output_shape, index+1)
-                else:
-                    return False
-            else:
-                # if the current config is not VALID, generate a list of indexes 
-                # of the possible configurations and shuffles it
-                if configurations is None:
-                    configurations = np.arange(len(self.conv_valid_configs[str(img_size)]))
-                    np.random.shuffle(configurations)
+    #         # if the current config is VALID, calculate output and call next block
+    #         #if self._is_valid_config(this_config, img_size):
+    #         if this_config in self.conv_valid_configs[str(img_size)]:
+    #             output_shape = calculate_output_size(input_shape, *this_config)
+    #             #print(this_config, 'is valid', input_shape, output_shape)
+    #             # print(index, phenotype[index], output_shape)
+    #             if (0, 0) < output_shape <= self.input_shape:
+    #                 return self._repair_mapping(phenotype, output_shape, index+1)
+    #             else:
+    #                 return False
+    #         else:
+    #             # if the current config is not VALID, generate a list of indexes 
+    #             # of the possible configurations and shuffles it
+    #             if configurations is None:
+    #                 configurations = np.arange(len(self.conv_valid_configs[str(img_size)]))
+    #                 np.random.shuffle(configurations)
 
-                # if the current config is in the possibilities but can't be used
-                # remove the index corresponding to it
-                if this_config in self.conv_valid_configs[str(img_size)]:
-                    cfg_index = self.conv_valid_configs[str(img_size)].index(this_config)
-                    configurations.remove(cfg_index)
+    #             # if the current config is in the possibilities but can't be used
+    #             # remove the index corresponding to it
+    #             if this_config in self.conv_valid_configs[str(img_size)]:
+    #                 cfg_index = self.conv_valid_configs[str(img_size)].index(this_config)
+    #                 configurations.remove(cfg_index)
 
-                # for each new config, try it by calling the repair to it
-                for cfg_index in configurations:
-                    new_config = self.conv_valid_configs[str(img_size)][cfg_index]
-                    phenotype[index][start:end] = list(new_config)
-                    print(this_config, '>>>>', new_config)
-                    if self._repair_mapping(phenotype, input_shape, index, configurations):
-                        return True
+    #             # for each new config, try it by calling the repair to it
+    #             for cfg_index in configurations:
+    #                 new_config = self.conv_valid_configs[str(img_size)][cfg_index]
+    #                 phenotype[index][start:end] = list(new_config)
+    #                 print(this_config, '>>>>', new_config)
+    #                 if self._repair_mapping(phenotype, input_shape, index, configurations):
+    #                     return True
 
-            # if all possibilities are invalid or can't be used, this solutions
-            # is invalid
-            return False
-        elif phenotype[index][0] == 'upsamp':
-            output_shape = (input_shape[0] * 2, input_shape[1] * 2)
-            # print(index, phenotype[index], output_shape)
-            if (0, 0) < output_shape <= self.input_shape:
-                return self._repair_mapping(phenotype, output_shape, index+1)
-            else:
-                return False
+    #         # if all possibilities are invalid or can't be used, this solutions
+    #         # is invalid
+    #         return False
+    #     elif phenotype[index][0] == 'upsamp':
+    #         output_shape = (input_shape[0] * 2, input_shape[1] * 2)
+    #         # print(index, phenotype[index], output_shape)
+    #         if (0, 0) < output_shape <= self.input_shape:
+    #             return self._repair_mapping(phenotype, output_shape, index+1)
+    #         else:
+    #             return False
 
-        #print(index, input_shape)
-        # nothing to be validated, call next block
-        return self._repair_mapping(phenotype, input_shape, index+1)
+    #     #print(index, input_shape)
+    #     # nothing to be validated, call next block
+    #     return self._repair_mapping(phenotype, input_shape, index+1)
 
     def _parse_value(self, value):
         if type(value) is str:
@@ -359,6 +361,35 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
+    def _train_model(self, model):
+        model.fit_generator(
+            self.train_generator, 
+            steps_per_epoch=self.dataset['train_steps'], 
+            epochs=self.epochs, 
+            workers=self.workers, 
+            use_multiprocessing=self.multiprocessing, 
+            verbose=self.verbose)
+        return model
+
+    def _evaluate_model(self, model):
+        return model.evaluate_generator(
+            self.test_generator, 
+            steps=self.dataset['test_steps'], 
+            workers=self.workers, 
+            use_multiprocessing=self.multiprocessing, 
+            verbose=self.verbose)
+
+    def _predict_model(self, model):
+        predictions = model.predict_generator(
+            self.test_generator, 
+            steps=self.dataset['test_steps'], 
+            workers=self.workers, 
+            use_multiprocessing=self.multiprocessing, 
+            verbose=self.verbose)
+
+        for i, img in enumerate(predictions):
+            write_image(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
+
     def evaluate(self, phenotype, predict=False):
 
         try:
@@ -366,14 +397,10 @@ class UNetProblem(BaseProblem):
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
-            model.fit_generator(self.train_generator, steps_per_epoch=self.dataset['train_steps'], epochs=self.epochs, verbose=self.verbose)#, workers=5, use_multiprocessing=True)
-
-            loss, acc = model.evaluate_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)#, workers=5, use_multiprocessing=True)
+            loss, acc = self._evaluate_model(model)            
 
             if predict:
-                predictions = model.predict_generator(self.test_generator, steps=self.dataset['test_steps'], verbose=self.verbose)
-                for i, img in enumerate(predictions):
-                    io.imsave(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
+                self._predict_model(model)                
 
             return loss, acc
         except Exception as e:
