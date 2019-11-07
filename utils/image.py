@@ -1,5 +1,18 @@
 import numpy as np
+
+import skimage.io as io
 import skimage.transform as trans
+
+
+def load_image(path, npy=False):
+
+    return io.imread(path) if not npy else np.load(path)
+
+
+def write_image(path, img, npy=False):
+
+    io.imsave(path, img) if not npy else np.save(path, img)
+
 
 def binarize(img, threshold=0.5):
 
