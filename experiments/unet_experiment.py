@@ -29,13 +29,13 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
-    print(args)
-
     return args.parse_args()
 
 
 def run():
     args = get_args()
+
+    print(args)
 
     dset_args = json.loads(open(args.dataset, 'r').read())
     dset_args['train_steps'] = args.train
