@@ -21,6 +21,7 @@ def get_args():
 
     args = argparse.ArgumentParser(prog='script.py')
 
+    args.add_argument('name', type=str) #name
     args.add_argument('dataset', type=str) #dataset
 
     args.add_argument('-trs', '--train', type=int, default=5) #train steps
@@ -40,7 +41,7 @@ def get_args():
 
 
 # Plot a line based on the x and y axis value list.
-def draw_line(x_values, y_values):
+def draw_line(name, x_values, y_values):
 
     # List to hold x values.
     x_number_values = x_values#[1, 2, 3, 4, 5]
@@ -65,7 +66,7 @@ def draw_line(x_values, y_values):
     plt.tick_params(axis='both', labelsize=9)
 
     # Save figure
-    plt.savefig('runs.png')
+    plt.savefig(f'{name}.png')
     
     # Display the plot in the matplotlib's viewer.
     #plt.show()
