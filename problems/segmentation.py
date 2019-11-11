@@ -30,7 +30,7 @@ class UNetProblem(BaseProblem):
     def __init__(self, parser, dataset, train_gen, test_gen):
         self.parser = parser
         self.dataset = dataset
-        self.input_shape = dataset['input_shape']
+        self.input_shape = tuple(dataset['input_shape'])
 
         self.train_generator = train_gen
         self.test_generator = test_gen
@@ -397,7 +397,9 @@ class UNetProblem(BaseProblem):
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
-            loss, acc = self._evaluate_model(model)            
+            model = self._train_model(model)
+
+            loss, acc = self._evaluate_model(model)           
 
             if predict:
                 self._predict_model(model)                
