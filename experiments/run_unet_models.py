@@ -118,4 +118,4 @@ if __name__ == '__main__':
         print(loss, acc)
         accs.append(acc)
 
-    draw_line(range(len(accs)), accs)
+    draw_line(args.name, range(len(accs)), accs)

@@ -7,7 +7,7 @@
 
 
 <conv> ::= conv <filters> <kernel_size> 1 same <activation>
-<pool> ::= maxpool 2 2 <padding>
+<pool> ::= maxpool 2 2 same
 <dropout> ::= dropout <rate>
 
 
