@@ -1,3 +1,4 @@
+import argparse
 import sys
 import numpy as np
 
@@ -9,6 +10,16 @@ from algorithms import DSGECrossover, DSGEMutation
 
 from problems import UNetProblem
 from grammars import BNFGrammar
+
+
+def get_args():
+
+    args = argparse.ArgumentParser(prog='script.py')
+
+    args.add_argument('-n', '--number', type=int, default=0) #quantity
+    args.add_argument('-v', '--verbose', type=int, default=0) #verbose
+
+    return args.parse_args()
 
 
 def run(solution, verbose=False):    
@@ -25,6 +36,7 @@ def run(solution, verbose=False):
 if __name__ == '__main__':
 
     #np.random.seed(42)
+    args = get_args()
 
     dset = {
         'input_shape': (256, 256, 1)
@@ -33,37 +45,37 @@ if __name__ == '__main__':
     parser = BNFGrammar('grammars/unet_mirror.bnf')
     problem = UNetProblem(parser, dset, None, None)
 
-    failed = 0
-
-    num = int(sys.argv[1]) if len(sys.argv) == 2 else 0
-
+    print('creating population')
     pop = []
-    for i in range(num):
+    for i in range(args.number):
         gen = parser.dsge_create_solution()
         fen = problem.map_genotype_to_phenotype(gen)
         solution = GESolution(gen)
         solution.phenotype = fen
-
         pop.append(solution)
 
-    #     print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
-    # print()
-
     # print('applying crossover')
+    # cross = DSGECrossover(cross_rate=0.9)
     # for i in range(10):
-    #     cross = DSGECrossover(cross_rate=0.9)
     #     s1 = np.random.choice(pop)
     #     s2 = np.random.choice(pop)
     #     off = cross.execute([s1, s2])
-
-    #     pop += off
+    #     for s in off:
+    #         s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
+    #         pop.append(s)
 
     # print('applying mutation')
     # mut = DSGEMutation(mut_rate=0.1, parser=parser)
-    # for i, s in enumerate(pop):
+    # for i in range(10):
+    #     s = np.random.choice(pop)
     #     mut.execute(s)
-    #     fen = problem.map_genotype_to_phenotype(s.genotype)
-
+    #     s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
     #     pop.append(s)
 
-    # print(len(pop))
+    print(len(pop))
+
+    failed = 0
+    for i, s in enumerate(pop):
+        failed += not run(s, args.verbose)
+        print(f'\r\r{failed}/{i+1} {failed/(i+1)}%', end='')
+    print()
