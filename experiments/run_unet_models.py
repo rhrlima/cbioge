@@ -1,5 +1,6 @@
 import glob
 import argparse
+import json
 
 import numpy as np
 
@@ -20,6 +21,8 @@ def get_args():
 
     args = argparse.ArgumentParser(prog='script.py')
 
+    args.add_argument('dataset', type=str) #dataset
+
     args.add_argument('-trs', '--train', type=int, default=5) #train steps
     args.add_argument('-tes', '--test', type=int, default=5) #test steos
     args.add_argument('-aug', '--augment', type=int, default=0) #augmentation
@@ -30,6 +33,8 @@ def get_args():
 
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
+
+    print(args)
 
     return args.parse_args()
 
@@ -71,22 +76,9 @@ if __name__ == '__main__':
 
     args = get_args()
 
-    dset_args = {
-        "path": "datasets/membrane",
-        "train_path": "datasets/membrane/train_posproc",
-        "test_path": "datasets/membrane/test_posproc",
-        "input_shape": (256, 256, 1),
-        "train_steps": args.train,
-        "test_steps": args.test,
-        "aug": dict(
-            rotation_range=0.2,
-            width_shift_range=0.05,
-            height_shift_range=0.05,
-            shear_range=0.05,
-            zoom_range=0.05,
-            horizontal_flip=True,
-            fill_mode='nearest')
-    }
+    dset_args = json.loads(open(args.dataset, 'r').read())
+    dset_args['train_steps'] = args.train
+    dset_args['test_steps'] = args.test
 
     train_gen = DataGenerator(dset_args['train_path'], dset_args['input_shape'], batch_size=args.batch, shuffle=args.shuffle)
     test_gen = DataGenerator(dset_args['test_path'], dset_args['input_shape'], batch_size=args.batch, shuffle=args.shuffle)
