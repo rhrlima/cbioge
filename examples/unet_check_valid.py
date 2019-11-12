@@ -54,23 +54,23 @@ if __name__ == '__main__':
         solution.phenotype = fen
         pop.append(solution)
 
-    # print('applying crossover')
-    # cross = DSGECrossover(cross_rate=0.9)
-    # for i in range(10):
-    #     s1 = np.random.choice(pop)
-    #     s2 = np.random.choice(pop)
-    #     off = cross.execute([s1, s2])
-    #     for s in off:
-    #         s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
-    #         pop.append(s)
+    print('applying crossover')
+    cross = DSGECrossover(cross_rate=0.9)
+    for i in range(args.number):
+        s1 = np.random.choice(pop)
+        s2 = np.random.choice(pop)
+        off = cross.execute([s1, s2])
+        for s in off:
+            s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
+            pop.append(s)
 
-    # print('applying mutation')
-    # mut = DSGEMutation(mut_rate=0.1, parser=parser)
-    # for i in range(10):
-    #     s = np.random.choice(pop)
-    #     mut.execute(s)
-    #     s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
-    #     pop.append(s)
+    print('applying mutation')
+    mut = DSGEMutation(mut_rate=0.1, parser=parser)
+    for i in range(args.number):
+        s = np.random.choice(pop)
+        mut.execute(s)
+        s.phenotype = problem.map_genotype_to_phenotype(s.genotype)
+        pop.append(s)
 
     print(len(pop))
 
