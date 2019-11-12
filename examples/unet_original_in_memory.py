@@ -72,10 +72,10 @@ if __name__ == '__main__':
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
 
-    # model = unet(dataset['input_shape'])
+    model = unet(dataset['input_shape'])
 
-    # model.compile(optimizer=Adam(lr = 1e-4), loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(lr = 1e-4), loss='binary_crossentropy', metrics=['accuracy'])
 
-    # model.fit(x_train, y_train, batch_size=args.batch, epochs=args.epochs, verbose=args.verbose)
-    # loss, acc = model.evaluate(x_test, y_test, batch_size=args.batch, verbose=args.verbose)
-    # print('loss', loss, 'acc', acc)
+    model.fit(x_train, y_train, batch_size=args.batch, epochs=args.epochs, verbose=args.verbose)
+    loss, acc = model.evaluate(x_test, y_test, batch_size=args.batch, verbose=args.verbose)
+    print('loss', loss, 'acc', acc)
