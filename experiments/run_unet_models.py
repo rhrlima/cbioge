@@ -36,8 +36,6 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
-    print(args)
-
     return args.parse_args()
 
 
@@ -77,6 +75,8 @@ if __name__ == '__main__':
     #np.random.seed(0)
 
     args = get_args()
+
+    print(args)
 
     dset_args = json.loads(open(args.dataset, 'r').read())
     dset_args['train_steps'] = args.train
@@ -119,4 +119,4 @@ if __name__ == '__main__':
         print(loss, acc)
         accs.append(acc)
 
-    draw_line(range(len(accs)), accs)
+    draw_line(args.name, range(len(accs)), accs)
