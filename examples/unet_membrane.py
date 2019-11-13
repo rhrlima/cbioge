@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 
+from keras.optimizers import *
 from keras.preprocessing.image import ImageDataGenerator
 
 import skimage.io as io
@@ -68,10 +69,11 @@ if __name__ == '__main__':
                     horizontal_flip=True,
                     fill_mode='nearest')
 
-    train_gen = train_generator('datasets/membrane/train', 2, aug_dict=data_gen_args)
+    train_gen = train_generator('datasets/membrane/train', 1, aug_dict=data_gen_args)
     test_gen = test_generator('datasets/membrane/test')
 
     model = unet(input_shape)
+    model.compile(optimizer=Adam(lr = 1e-4), loss='binary_crossentropy', metrics=['accuracy'])
     model.fit_generator(train_gen, steps_per_epoch=300, epochs=1, verbose=1)
     
     loss, acc = model.evaluate_generator(test_gen, steps=30, verbose=1)

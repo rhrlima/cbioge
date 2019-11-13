@@ -50,10 +50,12 @@ class DataGenerator(keras.utils.Sequence):
         return self._load_data_from_image(temp_ids)
 
     def _get_ids(self):
-        file_type = '*.png' if not self.npy else '*.npy'
-        files = glob.glob(os.path.join(self.path, 'image', file_type))
+        files = glob.glob(os.path.join(self.path, 'image', '*'))
+        if len(files) == 0:
+            raise NameError('no files')
+        self.npy = True if os.path.splitext(files[0])[1] == '.npy' else False
         file_names = [os.path.basename(id) for id in files]
-        print(f'{len(file_names):6} files found')
+        print(f'{len(file_names):6} files found, NPY', self.npy)
         return file_names
 
     def on_epoch_end(self):
