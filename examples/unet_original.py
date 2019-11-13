@@ -34,7 +34,7 @@ def train_generator(train_path, batch_size, aug_dict, target_size):
         classes = ['image'],
         class_mode = None,
         color_mode = "grayscale",
-        target_size = target_size,
+        target_size = (256, 256),
         batch_size = batch_size,
         save_to_dir = None,
         save_prefix  = 'image',
@@ -44,7 +44,7 @@ def train_generator(train_path, batch_size, aug_dict, target_size):
         classes = ['label'],
         class_mode = None,
         color_mode = "grayscale",
-        target_size = target_size,
+        target_size = (256, 256),
         batch_size = batch_size,
         save_to_dir = None,
         save_prefix  = 'mask',
@@ -84,31 +84,15 @@ if __name__ == '__main__':
     if not args.test is None:
         dataset['test_steps'] = args.test
 
-    train_gen = train_generator(
-        dataset['train_path'], 
-        args.batch, 
-        dataset['aug'], 
-        dataset['input_shape'])
-    test_gen = test_generator(
-        dataset['test_path'], 
-        dataset['input_shape'])
+    train_gen = train_generator(dataset['train_path'], args.batch, dataset['aug'], dataset['input_shape'])
+    test_gen = test_generator(dataset['test_path'], dataset['input_shape'])
 
-    model = unet(tuple(dataset['input_shape'])+(1,))
+    model = unet(dataset['input_shape'])
 
-    model.compile(
-        optimizer=Adam(lr = 1e-4), 
-        loss='binary_crossentropy', 
-        metrics=['accuracy'])
+    model.compile(optimizer=Adam(lr = 1e-4), loss='binary_crossentropy', metrics=['accuracy'])
 
-    model.fit_generator(
-        train_gen, 
-        steps_per_epoch=dataset['train_steps'], 
-        epochs=args.epochs, 
-        verbose=args.verbose)
+    model.fit_generator(train_gen, steps_per_epoch=dataset['train_steps'], epochs=args.epochs, verbose=args.verbose)
     
-    loss, acc = model.evaluate_generator(
-        test_gen, 
-        steps=dataset['test_steps'], 
-        verbose=args.verbose)
+    loss, acc = model.evaluate_generator(test_gen, steps=dataset['test_steps'], verbose=args.verbose)
 
     print('loss', loss, 'acc', acc)
