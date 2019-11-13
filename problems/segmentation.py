@@ -14,19 +14,17 @@ from utils.image import *
 from problems import BaseProblem
 from datasets.dataset import DataGenerator
 
-#TEMP
-import skimage.io as io
 
 class UNetProblem(BaseProblem):
 
-    batch_size = 1
-    epochs = 1
-
-    loss = 'binary_crossentropy'
-    opt = Adam(lr = 1e-4)
-    metrics = ['accuracy']
-
     def __init__(self, parser):
+        self.batch_size = 1
+        self.epochs = 1
+
+        self.loss = 'binary_crossentropy'
+        self.opt = Adam(lr = 1e-4)
+        self.metrics = ['accuracy']
+
         self.parser = parser     
 
         self.workers = 1
@@ -324,7 +322,7 @@ class UNetProblem(BaseProblem):
         for i, img in enumerate(predictions):
             write_image(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
 
-    def evaluate(self, phenotype, predict=False):
+    def evaluate_generator(self, phenotype, predict=False):
         try:
             model = model_from_json(phenotype)
 
@@ -342,14 +340,14 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate2(self, phenotype, predict=False):
+    def evaluate(self, phenotype, predict=False):
         try:
             model = model_from_json(phenotype)
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
-            model.fit(self.x_train[:10], self.y_train[:10], batch_size=1, epochs=1, verbose=1)
-            loss, acc = model.evaluate(self.x_test, self.y_test, batch_size=1, verbose=1)
+            model.fit(self.x_train, self.y_train, batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose)
+            loss, acc = model.evaluate(self.x_test, self.y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             return loss, acc
         except Exception as e:

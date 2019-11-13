@@ -13,7 +13,11 @@ class DataGenerator(keras.utils.Sequence):
     '''The dataset should be organized as:
         --path/
         ----image/
+        ------file0
+        ------file1
         ----label/
+        ------file0
+        ------file1
     '''
 
     def __init__(self, path, input_shape, batch_size=32, data_aug=None, shuffle=True):
@@ -45,18 +49,19 @@ class DataGenerator(keras.utils.Sequence):
         return self._load_data_from_image(temp_ids)
 
     def _get_ids(self):
-        files = glob.glob(os.path.join(self.path, 'image', '*'))
+        
+        # list and get name of files inside path
+        complete_path = os.path.join(self.path, 'image', '*')
+        files = glob.glob(complete_path)
 
         if len(files) == 0:
-            raise NameError('no files')
+            raise NameError('No files found in', complete_path)
 
         self.npy = True if os.path.splitext(files[0])[1] == '.npy' else False
-        file_names = [os.path.basename(id) for id in files]
+        
+        print(f'{len(files):6} files found, NPY', self.npy)
 
-        print(f'{len(file_names):6} files found, NPY', self.npy)
-        file_names.sort(key=lambda x: int(x.split('.')[0]))
-
-        return file_names
+        return [os.path.basename(id) for id in files]
 
     def on_epoch_end(self):
 
