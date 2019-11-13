@@ -228,6 +228,9 @@ class UNetProblem(BaseProblem):
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
 
+        # for l in layers:
+        #     print(l)
+
     def _repair_genotype(self, genotype, phenotype):
         print(genotype)
         values = {}
@@ -324,7 +327,7 @@ class UNetProblem(BaseProblem):
                 stack.append(outputs[i-1])
             elif name == 'upsamp' and stack != []:
                 aux_output = stack.pop()
-                if aux_output == (1, 1):
+                if aux_output[:-1] == (1, 1):
                     mapping[i][1] = 1
                     #print(i, 'changing upsamp to 1x')
                 #print(i, 'adjusting number of filters in layer', aux_output)

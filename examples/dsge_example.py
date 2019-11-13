@@ -16,8 +16,8 @@ from problems import DNNProblem
 
 if __name__ == '__main__':
 
-    parser = BNFGrammar('../grammars/reg2.bnf')
-    # problem = DNNProblem(parser, '../datasets/mnist.pickle')
+    parser = BNFGrammar('grammars/unet_mirror.bnf')
+    problem = DNNProblem(parser, '../datasets/mnist.pickle')
 
     s = [[0], [1, 0], [2, 0, 3], [1, 1, 0, 0]]
     p = parser.dsge_recursive_parse(s)

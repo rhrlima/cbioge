@@ -10,24 +10,19 @@ from utils.image import *
 
 class DataGenerator(keras.utils.Sequence):
 
-    '''https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
-    The dataset should be organized as:
-        dataset/
-        --train/
-        ----image/
-        ----label/
-        --test/
+    '''The dataset should be organized as:
+        --path/
         ----image/
         ----label/
     '''
 
-    def __init__(self, path, input_shape, batch_size=32, data_aug=None, shuffle=True, npy=False):
+    def __init__(self, path, input_shape, batch_size=32, data_aug=None, shuffle=True):
         self.path = path
         self.input_shape = input_shape
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.data_aug = data_aug
-        self.npy = npy
+
         self.ids = self._get_ids()
         self.on_epoch_end()
 
@@ -67,21 +62,6 @@ class DataGenerator(keras.utils.Sequence):
         if self.shuffle:
             np.random.shuffle(self.indexes)
 
-    #CHECK
-    # def _post_process(self, img, msk):
-    #     # normalize
-    #     img = normalize(img)
-    #     msk = normalize(msk)
-
-    #     # binarize mask
-    #     msk = binarize(msk)
-
-    #     # reshape to (w, h, 1)
-    #     img = np.reshape(img, img.shape+(1,))
-    #     msk = np.reshape(msk, msk.shape+(1,))
-
-    #     return img, msk
-
     def _load_data_from_npy(self, ids):
 
         # create placeholders for data
@@ -111,21 +91,28 @@ class DataGenerator(keras.utils.Sequence):
             img = io.imread(os.path.join(self.path, 'image', id), as_gray=True)
             msk = io.imread(os.path.join(self.path, 'label', id), as_gray=True)
 
-            # normalize
-            img = normalize(img)
-            msk = normalize(msk)
-
-            # binarize mask
-            msk = binarize(msk)
+            print(id, img.shape, msk.shape, img.min(), img.max(), 'loaded')
 
             # reshape to (w, h, c, 1)
             x[i,] = np.reshape(img, img.shape+(1,))
             y[i,] = np.reshape(msk, msk.shape+(1,))
 
-            # print(id, x[i].shape, y[i].shape, x[i].min(), x[i].max())
+        # create augmentation if applicable
+        if self.data_aug != None:
+            it = self.data_aug.flow(x, y, batch_size=self.batch_size, shuffle=self.shuffle)
+            x, y = it.next()
 
-        # if self.data_aug != None:
-        #     it = self.data_aug.flow(x, y, batch_size=self.batch_size)
-        #     return it.next()
+        for i in range(self.batch_size):
+            # normalize
+            img = normalize(x[i])
+            msk = normalize(y[i])
+
+            # binarize mask
+            msk = binarize(msk)
+
+            x[i] = img
+            y[i] = msk
+
+            print(i, x[i].shape, y[i].shape, x[i].min(), x[i].max(), 'processed')
 
         return x, y
