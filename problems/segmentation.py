@@ -2,6 +2,7 @@ import os
 import re
 import copy
 import json
+import pickle
 import itertools
 
 import keras
@@ -19,8 +20,6 @@ import skimage.io as io
 
 class UNetProblem(BaseProblem):
 
-    parser = None
-
     batch_size = 1
     epochs = 1
 
@@ -28,13 +27,8 @@ class UNetProblem(BaseProblem):
     opt = Adam(lr = 1e-4)
     metrics = ['accuracy']
 
-    def __init__(self, parser, dataset, train_gen, test_gen):
-        self.parser = parser
-        self.dataset = dataset
-        self.input_shape = tuple(dataset['input_shape'])
-
-        self.train_generator = train_gen
-        self.test_generator = test_gen
+    def __init__(self, parser):
+        self.parser = parser     
 
         self.workers = 1
         self.multiprocessing = False
@@ -43,6 +37,28 @@ class UNetProblem(BaseProblem):
 
         self._initialize_blocks()
         self._generate_configurations()
+
+    def read_dataset_from_pickle(self, pickle_file):
+        with open(pickle_file, 'rb') as f:
+            temp = pickle.load(f)
+
+            self.x_train = temp['train_dataset']
+            self.y_train = temp['train_labels']
+
+            self.x_valid = temp['valid_dataset']
+            self.y_valid = temp['valid_labels']
+
+            self.x_test = temp['test_dataset']
+            self.y_test = temp['test_labels']
+
+            self.input_shape = temp['input_shape']
+
+            del temp
+
+    def read_dataset_from_generator(self, dataset, train_gen, test_gen):
+        self.train_generator = train_gen
+        self.test_generator = test_gen
+        self.input_shape = tuple(dataset['input_shape'])
 
     def _initialize_blocks(self):
         self.blocks = {
@@ -57,13 +73,6 @@ class UNetProblem(BaseProblem):
 
             'bridge': ['bridge'], #check
         }
-
-    def _get_name(self, block_name):
-        if block_name in self.naming:
-            self.naming[block_name] += 1
-        else:
-            self.naming[block_name] = 0
-        return f'{block_name}_{self.naming[block_name]}'
 
     def _generate_configurations(self):
         if self.parser:
@@ -101,74 +110,6 @@ class UNetProblem(BaseProblem):
             phenotype = phenotype[end:]
 
         return new_mapping
-
-    # def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
-
-    #     #print('#'*index, index)
-
-    #     # if the mapping reached the end, without problems, return TRUE
-    #     if index >= len(phenotype):
-    #         return True
-
-    #     input_shape = self.input_shape if input_shape is None else input_shape
-    #     img_size = input_shape[1]
-
-    #     # the repair occurs just for convolution or pooling
-    #     if phenotype[index][0] in ['conv', 'maxpool', 'avgpool']:
-
-    #         # get the needed parameters for each type of block (convolution or pooling)    
-    #         if phenotype[index][0] == 'conv':
-    #             start, end = 2, 5
-    #         if phenotype[index][0] in ['maxpool', 'avgpool']:
-    #             start, end = 1, 4
-
-    #         this_config = tuple(phenotype[index][start:end])
-
-    #         # if the current config is VALID, calculate output and call next block
-    #         #if self._is_valid_config(this_config, img_size):
-    #         if this_config in self.conv_valid_configs[str(img_size)]:
-    #             output_shape = calculate_output_size(input_shape, *this_config)
-    #             #print(this_config, 'is valid', input_shape, output_shape)
-    #             # print(index, phenotype[index], output_shape)
-    #             if (0, 0) < output_shape <= self.input_shape:
-    #                 return self._repair_mapping(phenotype, output_shape, index+1)
-    #             else:
-    #                 return False
-    #         else:
-    #             # if the current config is not VALID, generate a list of indexes 
-    #             # of the possible configurations and shuffles it
-    #             if configurations is None:
-    #                 configurations = np.arange(len(self.conv_valid_configs[str(img_size)]))
-    #                 np.random.shuffle(configurations)
-
-    #             # if the current config is in the possibilities but can't be used
-    #             # remove the index corresponding to it
-    #             if this_config in self.conv_valid_configs[str(img_size)]:
-    #                 cfg_index = self.conv_valid_configs[str(img_size)].index(this_config)
-    #                 configurations.remove(cfg_index)
-
-    #             # for each new config, try it by calling the repair to it
-    #             for cfg_index in configurations:
-    #                 new_config = self.conv_valid_configs[str(img_size)][cfg_index]
-    #                 phenotype[index][start:end] = list(new_config)
-    #                 print(this_config, '>>>>', new_config)
-    #                 if self._repair_mapping(phenotype, input_shape, index, configurations):
-    #                     return True
-
-    #         # if all possibilities are invalid or can't be used, this solutions
-    #         # is invalid
-    #         return False
-    #     elif phenotype[index][0] == 'upsamp':
-    #         output_shape = (input_shape[0] * 2, input_shape[1] * 2)
-    #         # print(index, phenotype[index], output_shape)
-    #         if (0, 0) < output_shape <= self.input_shape:
-    #             return self._repair_mapping(phenotype, output_shape, index+1)
-    #         else:
-    #             return False
-
-    #     #print(index, input_shape)
-    #     # nothing to be validated, call next block
-    #     return self._repair_mapping(phenotype, input_shape, index+1)
 
     def _parse_value(self, value):
         if type(value) is str:
@@ -335,23 +276,16 @@ class UNetProblem(BaseProblem):
 
     def map_genotype_to_phenotype(self, genotype):
         
+        self.naming = {}
+        self.stack = []
+
         mapping = self.parser.dsge_recursive_parse(genotype)
         mapping = self._reshape_mapping(mapping)
         mapping = self._build_right_side(mapping)
         self._non_recursive_repair(mapping)
 
-        # if not valid:
-        #     print('NOT VALID MODEL')
-            #return None
-
-        self.naming = {}
-        self.stack = []
         model = {'class_name': 'Model', 
             'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
-
-        #input_layer = self._build_block('input', [(None,)+self.dataset['input_shape']])
-        #model['config']['layers'].append(input_layer)
-        # print(input_layer)
 
         for i, layer in enumerate(mapping):
             block_name, params = layer[0], layer[1:]
@@ -359,9 +293,6 @@ class UNetProblem(BaseProblem):
             model['config']['layers'].append(block)
 
         self._wrap_up_model(model)
-
-        # for layer in model['config']['layers']:
-        #    print(layer)
 
         return json.dumps(model)
 
@@ -395,7 +326,6 @@ class UNetProblem(BaseProblem):
             write_image(os.path.join(self.dataset['path'], f'test/pred/{i}.png'), img)
 
     def evaluate(self, phenotype, predict=False):
-
         try:
             model = model_from_json(phenotype)
 
@@ -407,6 +337,20 @@ class UNetProblem(BaseProblem):
 
             if predict:
                 self._predict_model(model)
+
+            return loss, acc
+        except Exception as e:
+            print('[evaluation]', e)
+            return -1, None
+
+    def evaluate2(self, phenotype, predict=False):
+        try:
+            model = model_from_json(phenotype)
+
+            model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
+
+            model.fit(self.x_train, self.y_train, batch_size=1, epochs=1, verbose=1)
+            loss, acc = model.evaluate(self.x_test, self.y_test, batch_size=1, verbose=1)
 
             return loss, acc
         except Exception as e:
