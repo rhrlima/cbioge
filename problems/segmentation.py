@@ -33,7 +33,7 @@ class UNetProblem(BaseProblem):
         self.verbose = False
 
         self._initialize_blocks()
-        self._generate_configurations()
+        #self._generate_configurations()
 
     def read_dataset_from_pickle(self, pickle_file):
         with open(pickle_file, 'rb') as f:
@@ -50,7 +50,11 @@ class UNetProblem(BaseProblem):
 
             self.input_shape = temp['input_shape']
 
+            self.train_size = len(self.x_train)
+            self.valid_size = len(self.x_valid)
+            self.test_size = len(self.x_test)
             del temp
+
 
     def read_dataset_from_generator(self, dataset, train_gen, test_gen):
         self.train_generator = train_gen
