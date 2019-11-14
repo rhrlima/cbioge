@@ -83,28 +83,29 @@ if __name__ == '__main__':
     test_gen = DataGenerator(dset_args['test_path'], dset_args['input_shape'], batch_size=args.batch, shuffle=args.shuffle)
 
     parser = BNFGrammar('grammars/unet_mirror.bnf')
-    problem = UNetProblem(parser, dset_args, train_gen, test_gen)
+    problem = UNetProblem(parser)
+    problem.read_dataset_from_generator(dset_args, train_gen, test_gen)
     problem.verbose = args.verbose
     problem.workers = args.workers
     problem.multiprocessing = args.multip
 
     population = []
 
-    for _ in range(8):
+    for _ in range(1):
         solution = GESolution(parser.dsge_create_solution())
         print(solution)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
         population.append(solution)
 
-    #UNET from genotype
-    solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
-    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-    population.append(solution)
+    # #UNET from genotype
+    # solution = GESolution([[0], [0, 3, 0, 3, 0, 3, 0, 1, 3], [0, 0, 0, 1], [0, 0, 1, 1, 2], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0], [0], [5, 5, 6, 6, 7, 7, 8, 8, 9, 9], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [], [1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0]])
+    # solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+    # population.append(solution)
 
-    #original UNET
-    solution = GESolution([])
-    solution.phenotype = unet(dset_args['input_shape']).to_json()
-    population.append(solution)
+    # #original UNET
+    # solution = GESolution([])
+    # solution.phenotype = unet(dset_args['input_shape']).to_json()
+    # population.append(solution)
 
     print(args)
 
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     for s in population:
         model = model_from_json(s.phenotype)
         #model.summary()
-        loss, acc = problem.evaluate(s.phenotype, predict=args.predict)
+        loss, acc = problem.evaluate_generator(s.phenotype, predict=args.predict)
         print(loss, acc)
         accs.append(acc)
 

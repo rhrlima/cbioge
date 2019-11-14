@@ -57,6 +57,7 @@ class UNetProblem(BaseProblem):
 
 
     def read_dataset_from_generator(self, dataset, train_gen, test_gen):
+        self.dataset = dataset
         self.train_generator = train_gen
         self.test_generator = test_gen
         self.input_shape = tuple(dataset['input_shape'])
