@@ -100,7 +100,7 @@ class DataGenerator(keras.utils.Sequence):
             img = io.imread(os.path.join(self.path, 'image', id), as_gray=True)
             msk = io.imread(os.path.join(self.path, 'label', id), as_gray=True)
 
-            print(id, img.shape, msk.shape, img.min(), img.max(), 'loaded')
+            #print(id, img.shape, msk.shape, img.min(), img.max(), 'loaded')
 
             # reshape to (w, h, c, 1)
             x[i,] = np.reshape(img, img.shape+(1,))
@@ -122,6 +122,6 @@ class DataGenerator(keras.utils.Sequence):
             x[i] = img
             y[i] = msk
 
-            print(i, x[i].shape, y[i].shape, x[i].min(), x[i].max(), 'processed')
+            #print(i, x[i].shape, y[i].shape, x[i].min(), x[i].max(), 'processed')
 
         return x, y
