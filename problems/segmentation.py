@@ -9,8 +9,11 @@ import keras
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import *
+from keras.callbacks import *
 
 from utils.image import *
+from utils.model import TimedStopping
+
 from problems import BaseProblem
 from datasets.dataset import DataGenerator
 
@@ -54,7 +57,6 @@ class UNetProblem(BaseProblem):
             self.valid_size = len(self.x_valid)
             self.test_size = len(self.x_test)
             del temp
-
 
     def read_dataset_from_generator(self, dataset, train_gen, test_gen):
         self.dataset = dataset
@@ -351,8 +353,16 @@ class UNetProblem(BaseProblem):
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
-            model.fit(self.x_train, self.y_train, batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose)
+            es = EarlyStopping(monitor='val_loss', min_delta=1e-4, patience=int(self.batch_size * 0.2))
+            ts = TimedStopping(seconds=60, verbose=True) # 1 min
+
+            callb_list = [es, ts]
+
+            model.fit(self.x_train, self.y_train, validation_data=(self.x_valid, self.y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
             loss, acc = model.evaluate(self.x_test, self.y_test, batch_size=self.batch_size, verbose=self.verbose)
+
+            if self.verbose:
+                print('loss', loss, 'acc', acc)
 
             return loss, acc
         except Exception as e:

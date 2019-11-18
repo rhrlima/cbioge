@@ -1,3 +1,7 @@
+import time
+
+from keras.callbacks import Callback
+
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -51,6 +55,25 @@ def unet(input_size):
 
     return model
 
-if __name__ == '__main__':
-    
-    print(unet((256, 256, 1)).to_json())
+
+class TimedStopping(Callback):
+    '''Stop training when enough time has passed.
+    # Arguments
+        seconds: maximum time before stopping.
+        verbose: verbosity mode.
+    '''
+    def __init__(self, seconds=None, verbose=0):
+        super(Callback, self).__init__()
+
+        self.start_time = 0
+        self.seconds = seconds
+        self.verbose = verbose
+
+    def on_train_begin(self, logs={}):
+        self.start_time = time.time()
+
+    def on_epoch_end(self, epoch, logs={}):
+        if time.time() - self.start_time > self.seconds:
+            self.model.stop_training = True
+            if self.verbose:
+                print('Stopping after %s seconds.' % self.seconds)
