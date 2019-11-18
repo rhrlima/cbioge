@@ -13,8 +13,6 @@ from datasets.dataset import DataGenerator
 from grammars import BNFGrammar
 from problems import UNetProblem
 
-from utils.unet_model import *
-
 import matplotlib.pyplot as plt
 
 
