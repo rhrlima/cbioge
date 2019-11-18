@@ -119,8 +119,8 @@ class DataGenerator(keras.utils.Sequence):
             # binarize mask
             msk = binarize(msk)
 
-            x[i] = img
-            y[i] = msk
+            x[i,] = img
+            y[i,] = msk
 
             #print(i, x[i].shape, y[i].shape, x[i].min(), x[i].max(), 'processed')
 

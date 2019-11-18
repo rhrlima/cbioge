@@ -93,8 +93,8 @@ class DSGECrossover(GeneticOperator):
             min_len = min(len(p1), len(p2))
             cut = np.random.randint(0, min_len)
             off1.genotype = p1[:cut] + p2[cut:]
-            off2.genotype = p2[:cut] + p1[cut:]
-        return [off1, off2]
+            #off2.genotype = p2[:cut] + p1[cut:]
+        return off1#[off1, off2]
 
     def __str__(self):
         return 'DSGE Crossover'
