@@ -10,7 +10,7 @@ from datasets.dataset import DataGenerator
 from grammars import BNFGrammar
 from problems import UNetProblem
 
-from examples.unet_model import *
+from utils.model import *
 
 def get_args():
 
@@ -18,8 +18,9 @@ def get_args():
 
     args.add_argument('dataset', type=str) #dataset
 
-    args.add_argument('-tr', '--train', type=int, default=5) #train steps
-    args.add_argument('-te', '--test', type=int, default=5) #test steos
+    args.add_argument('-tr', '--train', type=int, default=None) #train size
+    args.add_argument('-va', '--valid', type=int, default=None) #valid size
+    args.add_argument('-te', '--test', type=int, default=None) #test size
 
     args.add_argument('-p', '--predict', type=int, default=0) #predict
     args.add_argument('-b', '--batch', type=int, default=1) #batch
@@ -39,12 +40,20 @@ def run():
 
     problem = UNetProblem(None)
     problem.read_dataset_from_pickle(args.dataset)
+
+    if not args.train is None:
+        problem.train_size = args.train
+    if not args.valid is None:
+        problem.valid_size = args.valid
+    if not args.test is None:
+        problem.test_size = args.test
+
     problem.verbose = args.verbose
     problem.workers = args.workers
     problem.multiprocessing = args.multip
 
     solution = GESolution([])
-    solution.phenotype = unet((256, 256, 1)).to_json()
+    solution.phenotype = unet(problem.input_shape).to_json()
 
     result = problem.evaluate2(solution.phenotype)
     print(result)
