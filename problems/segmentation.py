@@ -301,24 +301,6 @@ class UNetProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def _train_model(self, model):
-        model.fit_generator(
-            self.train_generator, 
-            steps_per_epoch=self.dataset['train_steps'], 
-            epochs=self.epochs, 
-            workers=self.workers, 
-            use_multiprocessing=self.multiprocessing, 
-            verbose=self.verbose)
-        return model
-
-    def _evaluate_model(self, model):
-        return model.evaluate_generator(
-            self.test_generator, 
-            steps=self.dataset['test_steps'], 
-            workers=self.workers, 
-            use_multiprocessing=self.multiprocessing, 
-            verbose=self.verbose)
-
     def _predict_model(self, model):
         predictions = model.predict_generator(
             self.test_generator, 
@@ -354,16 +336,29 @@ class UNetProblem(BaseProblem):
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
+            x_train = self.x_train[:self.train_size]
+            y_train = self.y_train[:self.train_size]
+            x_valid = self.x_valid[:self.valid_size]
+            y_valid = self.y_valid[:self.valid_size]
+            x_test = self.x_test[:self.test_size]
+            y_test = self.y_test[:self.test_size]
+
             es = EarlyStopping(monitor='val_loss', min_delta=1e-4, patience=int(self.batch_size * 0.2))
             ts = TimedStopping(seconds=60, verbose=True) # 1 min
 
             callb_list = [es, ts]
 
-            model.fit(self.x_train, self.y_train, validation_data=(self.x_valid, self.y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
-            loss, acc = model.evaluate(self.x_test, self.y_test, batch_size=self.batch_size, verbose=self.verbose)
+            model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
+            loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
                 print('loss', loss, 'acc', acc)
+
+            if predict:
+                predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
+
+                for i, img in enumerate(predictions):
+                    write_image(os.path.join('preds', f'{i}.png'), img)
 
             return loss, acc
         except Exception as e:
