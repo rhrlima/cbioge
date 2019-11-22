@@ -82,12 +82,15 @@ class DSGECrossover(GeneticOperator):
     def __init__(self, cross_rate):
         self.cross_rate = cross_rate
 
+    def __str__(self):
+        return 'DSGE Crossover'
+
     def execute(self, parents):
         off1 = parents[0].copy()
         off2 = parents[1].copy()
 
         if np.random.rand() < self.cross_rate:
-            print('CRUZOU')
+            #print('CRUZOU')
             p1 = off1.genotype[:]
             p2 = off2.genotype[:]
             min_len = min(len(p1), len(p2))
@@ -96,10 +99,7 @@ class DSGECrossover(GeneticOperator):
             #off2.genotype = p2[:cut] + p1[cut:]
         return off1#[off1, off2]
 
-    def __str__(self):
-        return 'DSGE Crossover'
-
-
+    
 # Mutation
 
 class PointMutation(GeneticOperator):
@@ -136,6 +136,7 @@ class DSGEMutation(GeneticOperator):
         self.parser = parser
 
     def __str__(self):
+
         return 'DSGE Point Mutation'
 
     def execute(self, solution):
@@ -144,8 +145,12 @@ class DSGEMutation(GeneticOperator):
             max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
             for i, _ in enumerate(genes):
                 if np.random.rand() < self.mut_rate:
-                    new_val = np.random.randint(0, max_value)
-                    print('MUTOU', _, 'to', new_val, 'out of', max_value)
+                    new_val = genes[i]
+                    while new_val == genes[i] and max_value > 1:
+                        new_val = np.random.randint(0, max_value)
+                    # if max_value == 1:
+                    #     print('only one option', genes[i])
+                    # print('MUTOU', _, 'to', new_val, 'out of', max_value)
                     genes[i] = new_val
 
 

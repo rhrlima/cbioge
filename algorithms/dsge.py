@@ -1,9 +1,12 @@
 import os
 import glob
 import time
+
 from multiprocessing import Pool
+
 import numpy as np
-from utils import checkpoint
+
+from utils import checkpoint as ckpt
 from .solutions import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
@@ -41,7 +44,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             solution = self.create_solution()
             solution.id = i
             population.append(solution)
-            #self.save_solution(solution)
+            ckpt.save_solution(solution)
         return population
 
     def evaluate_solution(self, solution):
@@ -52,18 +55,20 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             if self.verbose:
                 print(f'<{curr_time}> [eval] solution {solution.id} started')
+                print('genotype:', solution.genotype)
 
             phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-            loss, acc = self.problem.evaluate(phenotype)
+            loss, acc = 0, 1 #self.problem.evaluate(phenotype)
 
             # local changes for checkpoint
             solution.fitness = acc
             solution.phenotype = phenotype
             solution.evaluated = True
 
-            self.save_solution(solution)
+            ckpt.save_solution(solution)
 
             if self.verbose:
+                print('fitness:', solution.fitness)
                 print(f'<{curr_time}> [eval] solution {solution.id} ended')
 
             return acc
@@ -93,14 +98,12 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         if not self.population or not self.evals:
             self.population = self.create_population(self.pop_size)
             self.evaluate_population(self.population)
-
             self.evals = len(self.population)
-
             self.save_state()
 
         self.print_progress()
 
-        offspring_pop = self.load_solutions()
+        offspring_pop = ckpt.load_solutions()
         while self.evals < self.max_evals:
 
             if offspring_pop == []:
@@ -112,20 +115,19 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     self.mutation.execute(offspring)
                     offspring_pop.append(offspring)
 
-                    self.save_solution(offspring)
+                    ckpt.save_solution(offspring)
 
             self.evaluate_population(offspring_pop)
-            self.replace(self.population, offspring_pop)
+            #self.replace(self.population, offspring_pop)
+            self.replace.execute(self.population, offspring_pop)
 
             self.evals += len(offspring_pop)
-
             offspring_pop = []
 
             self.print_progress()
-
             self.save_state()
 
-        return self.population[0]
+        return self.population
 
     def save_state(self):
 
@@ -134,23 +136,23 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             'population': self.population,
             'selection': self.selection,
             'crossover': self.crossover,
-            'mutation': self.mutation,
-        }
+            'mutation': self.mutation}
 
-        folder = checkpoint.ckpt_folder
+        folder = ckpt.ckpt_folder
         if not os.path.exists(folder):
             os.mkdir(folder)
 
         filename = f'data_{self.evals}.ckpt'
-        checkpoint.save_data(data, os.path.join(folder, filename))
+        ckpt.save_data(data, os.path.join(folder, filename))
 
-        # remove solution files already evaluated
-        solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
-        [os.remove(file) for file in solution_files]
+        # remove solution files already evaluated if data ckpt exists
+        if os.path.exists(os.path.join(folder, filename)):
+            solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
+            [os.remove(file) for file in solution_files]
 
     def load_state(self):
 
-        folder = checkpoint.ckpt_folder
+        folder = ckpt.ckpt_folder
 
         data_files = glob.glob(os.path.join(folder, 'data_*.ckpt'))
         if data_files == []:
@@ -159,8 +161,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.population = None
             return
 
-        data_files.sort(key=lambda x: checkpoint.natural_key(x), reverse=True)
-        data = checkpoint.load_data(data_files[0])
+        data_files.sort(key=lambda x: ckpt.natural_key(x), reverse=True)
+        data = ckpt.load_data(data_files[0])
 
         print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
         self.evals = data['evals']
@@ -168,23 +170,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.selection = data['selection']
         self.crossover = data['crossover']
         self.mutation = data['mutation']
-
-    def save_solution(self, solution):
-
-        folder = checkpoint.ckpt_folder
-        if not os.path.exists(folder):
-            os.mkdir(folder)
-
-        filename = f'solution{solution.id}.ckpt'
-
-        checkpoint.save_data(solution, os.path.join(folder, filename))
-
-    def load_solutions(self):
-
-        folder = checkpoint.ckpt_folder
-
-        solution_files = glob.glob(os.path.join(folder, 'solution*.ckpt'))
-        return [checkpoint.load_data(file) for file in solution_files]
 
     def print_progress(self):
         curr_time = time.strftime('%x %X')
