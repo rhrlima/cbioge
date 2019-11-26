@@ -3,6 +3,8 @@ import numpy as np
 import skimage.io as io
 import skimage.transform as trans
 
+import matplotlib.pyplot as plt
+
 
 def load_image(path, npy=False):
 
@@ -47,3 +49,11 @@ def calculate_output_size(img_shape, k, s, p):
     ow = ((w - k + 2 * p) // s) + 1
     oh = ((h - k + 2 * p) // s) + 1
     return (int(ow), int(oh))
+
+
+def plot(imgs):
+    items = len(imgs)
+    for i in range(items):
+        plt.subplot(1, items, i+1)
+        plt.imshow(imgs[i])
+    plt.show()

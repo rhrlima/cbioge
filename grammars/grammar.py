@@ -72,7 +72,7 @@ class BNFGrammar:
         #print(genotype[self.NT.index(symb)])
         if genotype[self.NT.index(symb)] == []:
             value = np.random.randint(0, len(self.GRAMMAR[symb]))
-            print('pop from empty list, added:', value, 'to', symb)
+            # print('pop from empty list, added:', value, 'to', symb)
             new_gen[self.NT.index(symb)].append(value)
         else:
             value = genotype[self.NT.index(symb)].pop(0)
