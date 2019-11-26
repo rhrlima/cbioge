@@ -25,7 +25,7 @@ def get_args():
     args.add_argument('-p', '--predict', type=int, default=0) #predict
     args.add_argument('-b', '--batch', type=int, default=1) #batch
 
-    args.add_argument('-v', '--verbose', type=int, default=1) #verbose
+    args.add_argument('-v', '--verbose', type=int, default=1) #verbose 
 
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
@@ -34,6 +34,9 @@ def get_args():
 
 
 def run():
+
+    np.random.seed(0)
+
     args = get_args()
 
     print(args)
@@ -55,7 +58,7 @@ def run():
     solution = GESolution([])
     solution.phenotype = unet(problem.input_shape).to_json()
 
-    result = problem.evaluate2(solution.phenotype)
+    result = problem.evaluate(solution.phenotype)
     print(result)
 
 
