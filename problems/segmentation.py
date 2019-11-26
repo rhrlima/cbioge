@@ -42,14 +42,14 @@ class UNetProblem(BaseProblem):
         with open(pickle_file, 'rb') as f:
             temp = pickle.load(f)
 
-            self.x_train = temp['train_dataset']
-            self.y_train = temp['train_labels']
+            self.x_train = temp['x_train']
+            self.y_train = temp['y_train']
 
-            self.x_valid = temp['valid_dataset']
-            self.y_valid = temp['valid_labels']
+            self.x_valid = temp['x_valid']
+            self.y_valid = temp['y_valid']
 
-            self.x_test = temp['test_dataset']
-            self.y_test = temp['test_labels']
+            self.x_test = temp['x_test']
+            self.y_test = temp['y_test']
 
             self.input_shape = temp['input_shape']
 
@@ -329,7 +329,7 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate(self, phenotype, predict=False):
+    def evaluate(self, phenotype, train=True, predict=False):
         try:
             model = model_from_json(phenotype)
 
@@ -347,7 +347,8 @@ class UNetProblem(BaseProblem):
 
             callb_list = [es, ts]
 
-            model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
+            if train:
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
             loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
