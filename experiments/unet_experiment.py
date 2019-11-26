@@ -34,6 +34,9 @@ def get_args():
 
 
 def run():
+
+    #np.random.seed(0)
+
     args = get_args()
 
     print(args)
@@ -55,8 +58,9 @@ def run():
     solution = GESolution([])
     solution.phenotype = unet(problem.input_shape).to_json()
 
-    result = problem.evaluate2(solution.phenotype)
-    print(result)
+    for _ in range(5):
+        result = problem.evaluate(solution.phenotype, args.predict)
+        print(result)
 
 
 if __name__ == '__main__':

@@ -23,8 +23,8 @@ def get_args():
     #args.add_argument('name', type=str) #name
     args.add_argument('dataset', type=str) #dataset
 
-    args.add_argument('-trs', '--train', type=int, default=None) #train steps
-    args.add_argument('-tes', '--test', type=int, default=None) #test steos
+    args.add_argument('-tr', '--train', type=int, default=None) #train steps
+    args.add_argument('-te', '--test', type=int, default=None) #test steos
 
     args.add_argument('-b', '--batch', type=int, default=1) #batch
     args.add_argument('-s', '--shuffle', type=int, default=0) #shuffle
@@ -32,6 +32,9 @@ def get_args():
 
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
+
+    args.add_argument('-ps', '--pop', type=int, default=5) #pop
+    args.add_argument('-ev', '--evals', type=int, default=10) #evals
 
     return args.parse_args()
 
@@ -84,9 +87,11 @@ if __name__ == '__main__':
     mutation = DSGEMutation(mut_rate=0.01, parser=parser)
 
     algorithm = GrammaticalEvolution(problem, parser)
+    algorithm.pop_size = args.pop
+    algorithm.max_evals = args.evals
     algorithm.selection = selection
     algorithm.crossover = crossover
     algorithm.mutation = mutation
-    algorithm.verbose = args.verbose
+    algorithm.verbose = True
 
     algorithm.execute()
