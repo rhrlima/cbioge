@@ -330,7 +330,7 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate(self, phenotype, predict=False):
+    def evaluate(self, phenotype, train=True, predict=False):
         try:
             model = model_from_json(phenotype)
 
@@ -348,8 +348,9 @@ class UNetProblem(BaseProblem):
 
             callb_list = [es, ts]
 
-            #model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=(self.verbose>1), callbacks=callb_list)
-            loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=(self.verbose>1))
+            if train:
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
+            loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
                 print('loss', loss, 'acc', acc)
