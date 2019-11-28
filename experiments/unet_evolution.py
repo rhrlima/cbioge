@@ -27,6 +27,7 @@ def get_args():
     args.add_argument('-va', '--valid', type=int, default=None) #valid size
     args.add_argument('-tes', '--test', type=int, default=None) #test steos
 
+    args.add_argument('-e', '--epochs', type=int, default=1) #epochs
     args.add_argument('-b', '--batch', type=int, default=1) #batch
     args.add_argument('-s', '--shuffle', type=int, default=0) #shuffle
 
@@ -76,6 +77,7 @@ if __name__ == '__main__':
     problem.read_dataset_from_pickle(args.dataset)
 
     problem.verbose = (args.verbose>1) # verbose 2 or higher
+    problem.epochs = args.epochs
     problem.workers = args.workers
     problem.multiprocessing = args.multip
 
@@ -103,4 +105,7 @@ if __name__ == '__main__':
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
 
-    algorithm.execute()
+    population = algorithm.execute()
+
+    for s in population:
+        print(s.fitness, s)
