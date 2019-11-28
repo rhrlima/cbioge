@@ -22,8 +22,9 @@ def get_args():
     args.add_argument('-va', '--valid', type=int, default=None) #valid size
     args.add_argument('-te', '--test', type=int, default=None) #test size
 
-    args.add_argument('-p', '--predict', type=int, default=0) #predict
+    args.add_argument('-e', '--epochs', type=int, default=1) #epochs
     args.add_argument('-b', '--batch', type=int, default=1) #batch
+    args.add_argument('-p', '--predict', type=int, default=0) #predict
 
     args.add_argument('-v', '--verbose', type=int, default=1) #verbose 
 
