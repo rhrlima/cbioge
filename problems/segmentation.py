@@ -344,9 +344,9 @@ class UNetProblem(BaseProblem):
             y_test = self.y_test[:self.test_size]
 
             es = EarlyStopping(monitor='val_loss', min_delta=1e-4, patience=int(self.batch_size * 0.2))
-            ts = TimedStopping(seconds=60, verbose=(self.verbose>1)) # 1 min
+            #ts = TimedStopping(seconds=60, verbose=self.verbose>) # 1 min
 
-            callb_list = [es, ts]
+            callb_list = [es]#, ts]
 
             if train:
                 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
@@ -356,7 +356,7 @@ class UNetProblem(BaseProblem):
                 print('loss', loss, 'acc', acc)
 
             if predict:
-                predictions = model.predict(x_test, batch_size=self.batch_size, verbose=(self.verbose>1))
+                predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
                 if not os.path.exists('preds'):
                     os.mkdir('preds')
 
