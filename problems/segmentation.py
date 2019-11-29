@@ -349,7 +349,7 @@ class UNetProblem(BaseProblem):
             callb_list = [es]#, ts]
 
             if train:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=None, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list, steps_per_epoch=1, validation_steps=1)
             loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:

@@ -72,8 +72,13 @@ if __name__ == '__main__':
 
     print(args)
 
+    print('load grammar')
     parser = BNFGrammar('grammars/unet_mirror.bnf')
+    
+    print('create problem')
     problem = UNetProblem(parser)
+
+    print('load dataset')
     problem.read_dataset_from_pickle(args.dataset)
 
     problem.verbose = (args.verbose>1) # verbose 2 or higher
@@ -93,6 +98,7 @@ if __name__ == '__main__':
     mutation = DSGEMutation(mut_rate=0.01, parser=parser)
     replace = ReplaceWorst(maximize=True)
 
+    print('create algorithm')
     algorithm = GrammaticalEvolution(problem, parser)
 
     algorithm.pop_size = args.pop
@@ -105,6 +111,7 @@ if __name__ == '__main__':
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
 
+    print('execute algorithm')
     population = algorithm.execute()
 
     for s in population:
