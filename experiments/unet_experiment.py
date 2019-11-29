@@ -59,7 +59,7 @@ def run():
     solution = GESolution([])
     solution.phenotype = unet(problem.input_shape).to_json()
 
-    result = problem.evaluate(solution.phenotype)
+    result = problem.evaluate(solution.phenotype, train=False)
     print(result)
 
 
