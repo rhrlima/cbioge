@@ -1,11 +1,15 @@
+import os
+
+print('before import')
+
 import tensorflow as tf
 
-op = tf.add(2, 2)
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
-print(op)
+print('after import')
 
-with tf.Session() as sess:
-	result = sess.run(op)
-	print(result)
+a = tf.constant("Hello World")
+session = tf.Session()
+output = session.run(a)
 
-print('end')
+print('end', str(output))
