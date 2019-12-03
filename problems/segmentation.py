@@ -332,6 +332,7 @@ class UNetProblem(BaseProblem):
     def evaluate(self, phenotype, train=True, predict=False):
         try:
             model = model_from_json(phenotype)
+            model.summary()
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
