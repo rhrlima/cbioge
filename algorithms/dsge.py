@@ -58,7 +58,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 print('genotype:', solution.genotype)
 
             phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-            loss, acc = self.problem.evaluate(phenotype, train=False) #TEST
+            loss, acc = 0, np.random.uniform()#self.problem.evaluate(phenotype, train=False) #TEST
 
             # local changes for checkpoint
             solution.fitness = acc
@@ -74,7 +74,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             return acc
         else:
             if self.verbose:
-                print(f'<{curr_time}> [eval] skipping solution {solution.id}')
+                print(f'<{curr_time}> [eval] skipping solution {solution.id}. Already evaluated')
 
             return solution.fitness
 
@@ -111,15 +111,14 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     parents = self.selection.execute(self.population)
                     offspring = self.crossover.execute(parents)
 
-                    offspring.id = self.evals + index  # check
+                    offspring.id = self.evals + index # check
                     self.mutation.execute(offspring)
                     offspring_pop.append(offspring)
 
                     ckpt.save_solution(offspring)
 
             self.evaluate_population(offspring_pop)
-            #self.replace(self.population, offspring_pop)
-            self.replace.execute(self.population, offspring_pop)
+            self.population = self.replace.execute(self.population, offspring_pop)
 
             self.evals += len(offspring_pop)
             offspring_pop = []
@@ -136,7 +135,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             'population': self.population,
             'selection': self.selection,
             'crossover': self.crossover,
-            'mutation': self.mutation}
+            'mutation': self.mutation,
+            'replacement': self.replace}
 
         folder = ckpt.ckpt_folder
         if not os.path.exists(folder):
@@ -170,6 +170,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.selection = data['selection']
         self.crossover = data['crossover']
         self.mutation = data['mutation']
+        self.replace = data['replacement']
 
     def print_progress(self):
         curr_time = time.strftime('%x %X')

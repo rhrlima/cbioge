@@ -164,7 +164,7 @@ class ReplaceWorst(GeneticOperator):
     def execute(self, population, offspring):
         population += offspring
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
-        population = population[:len(offspring)]
+        return population[:len(offspring)]
 
 
 class ElitistReplacement(GeneticOperator):
