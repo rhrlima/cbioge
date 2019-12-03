@@ -3,10 +3,7 @@ import argparse
 
 import numpy as np
 
-from keras.preprocessing.image import ImageDataGenerator
-
 from algorithms.solutions import GESolution
-from datasets.dataset import DataGenerator
 from grammars import BNFGrammar
 from problems import UNetProblem
 
@@ -42,7 +39,8 @@ def run():
 
     print(args)
 
-    problem = UNetProblem(None)
+    parser = BNFGrammar('grammars/unet_mirror.bnf')
+    problem = UNetProblem(parser)
     problem.read_dataset_from_pickle(args.dataset)
 
     if not args.train is None:
@@ -56,10 +54,12 @@ def run():
     problem.workers = args.workers
     problem.multiprocessing = args.multip
 
-    solution = GESolution([])
-    solution.phenotype = unet(problem.input_shape).to_json()
+    #solution = GESolution([])
+    #solution.phenotype = unet(problem.input_shape).to_json()
+    solution = GESolution([[0], [1, 1, 2], [0, 1], [2], [0, 0], [0, 0], [0, 0, 0], [7, 0], [6, 5], [], [], [1, 1, 1, 1], [0]])
+    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    result = problem.evaluate(solution.phenotype, train=False)
+    result = problem.evaluate(solution.phenotype, train=False, predict=args.predict)
     print(result)
 
 
