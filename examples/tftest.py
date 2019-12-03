@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 
 print('before import')
@@ -13,4 +12,4 @@ a = tf.constant("Hello World")
 session = tf.Session()
 output = session.run(a)
 
-print('end', a)
+print('end', str(output))
