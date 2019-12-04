@@ -58,7 +58,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 print('genotype:', solution.genotype)
 
             phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-            loss, acc = 0, np.random.uniform()#self.problem.evaluate(phenotype, train=False) #TEST
+            loss, acc = self.problem.evaluate(phenotype, train=False) #TEST
 
             # local changes for checkpoint
             solution.fitness = acc
