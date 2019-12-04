@@ -9,12 +9,17 @@ from problems import UNetProblem
 
 from utils.model import *
 
+from keras.models import model_from_json
+
 def get_args():
 
     args = argparse.ArgumentParser(prog='script.py')
 
     args.add_argument('dataset', type=str) #dataset
 
+    args.add_argument('-s', '--solution', type=str, default='[]') #dataset
+
+    args.add_argument('-t', '--training', type=int, default=1) #apply training
     args.add_argument('-tr', '--train', type=int, default=None) #train size
     args.add_argument('-va', '--valid', type=int, default=None) #valid size
     args.add_argument('-te', '--test', type=int, default=None) #test size
@@ -54,12 +59,17 @@ def run():
     problem.workers = args.workers
     problem.multiprocessing = args.multip
 
-    #solution = GESolution([])
-    #solution.phenotype = unet(problem.input_shape).to_json()
-    solution = GESolution([[0], [1, 1, 2], [0, 1], [2], [0, 0], [0, 0], [0, 0, 0], [7, 0], [6, 5], [], [], [1, 1, 1, 1], [0]])
-    solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+    s_values = eval(args.solution)
+    if s_values == []:
+        print('Empty solution. Running original UNET')
+        solution = GESolution([])
+        solution.phenotype = unet(problem.input_shape).to_json()
+    else:
+        print('Running solution', s_values)
+        solution = GESolution(s_values)
+        solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    result = problem.evaluate(solution.phenotype, train=False, predict=args.predict)
+    result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
     print(result)
 
 

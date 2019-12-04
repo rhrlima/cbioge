@@ -346,11 +346,11 @@ class UNetProblem(BaseProblem):
             es = EarlyStopping(monitor='val_loss', min_delta=1e-4, patience=int(self.batch_size * 0.2))
             #ts = TimedStopping(seconds=60, verbose=self.verbose>) # 1 min
 
-            callb_list = [es]#, ts]
+            callb_list = [es]
 
             if train:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=None, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list, steps_per_epoch=1, validation_steps=1)
-            
+                #model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=None, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list, steps_per_epoch=1, validation_steps=1)
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
             loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
