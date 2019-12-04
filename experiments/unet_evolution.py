@@ -42,30 +42,6 @@ def get_args():
     return args.parse_args()
 
 
-# Plot a line based on the x and y axis value list.
-def draw_line(name, x_values, y_values):
-
-    # Plot the number in the list and set the line thickness.
-    plt.scatter(x_values, y_values, s=20, edgecolors='none', c='green')
-
-    # Set the line chart title and the text font size.
-    plt.title("Unet model Fitnesses", fontsize=19)
-
-    # Set x axes label.
-    plt.xlabel("Models", fontsize=10)
-
-    # Set y axes label.
-    plt.ylabel("Fitness", fontsize=10)
-
-    # Set the x, y axis tick marks text size.
-    plt.tick_params(axis='both', labelsize=9)
-
-    # Save figure
-    plt.savefig(f'{name}.png')
-    
-    # Display the plot in the matplotlib's viewer.
-    #plt.show()
-
 if __name__ == '__main__':
 
     args = get_args()
@@ -103,7 +79,7 @@ if __name__ == '__main__':
     algorithm.selection = selection
     algorithm.crossover = crossover
     algorithm.mutation = mutation
-    algorithm.replace = replace
+    algorithm.replacement = replace
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
 
