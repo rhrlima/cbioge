@@ -45,7 +45,7 @@ def run():
 
     np.random.seed(args.seed)
 
-    parser = BNFGrammar('grammars/unet_mirror.bnf')
+    parser = BNFGrammar('grammars/unet_mirror2.bnf')
     problem = UNetProblem(parser)
     problem.read_dataset_from_pickle(args.dataset)
 
