@@ -33,16 +33,17 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
+    args.add_argument('-rs', '--seed', type=int, default=None)
+
     return args.parse_args()
 
 
 def run():
 
-    #np.random.seed(0)
-
     args = get_args()
-
     print(args)
+
+    np.random.seed(args.seed)
 
     parser = BNFGrammar('grammars/unet_mirror.bnf')
     problem = UNetProblem(parser)
@@ -58,6 +59,9 @@ def run():
     problem.verbose = args.verbose
     problem.workers = args.workers
     problem.multiprocessing = args.multip
+
+    problem.loss = weighted_measures_loss
+    problem.metrics = [weighted_measures]
 
     s_values = eval(args.solution)
     if s_values == []:

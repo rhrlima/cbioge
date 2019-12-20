@@ -23,6 +23,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.pop_size = 5
         self.max_evals = 100
+        self.training = True
 
         self.selection = None
         self.crossover = None
@@ -57,7 +58,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 print('genotype:', solution.genotype)
 
             phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-            loss, acc = self.problem.evaluate(phenotype, train=False) #TEST
+            loss, acc = self.problem.evaluate(phenotype, train=self.training)
 
             # local changes for checkpoint
             solution.fitness = acc
