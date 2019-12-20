@@ -39,16 +39,19 @@ def get_args():
 
     args.add_argument('-v', '--verbose', type=int, default=1) #verbose (1 - evolution, 2 - problem)
 
+    args.add_argument('-rs', '--seed', type=int, default=None)
+
     return args.parse_args()
 
 
 if __name__ == '__main__':
 
     args = get_args()
-
     print(args)
 
-    parser = BNFGrammar('grammars/unet_mirror.bnf')
+    np.random.seed(args.seed)
+
+    parser = BNFGrammar('grammars/unet_mirror2.bnf')
     
     problem = UNetProblem(parser)
 
@@ -58,6 +61,9 @@ if __name__ == '__main__':
     problem.epochs = args.epochs
     problem.workers = args.workers
     problem.multiprocessing = args.multip
+
+    problem.loss = weighted_measures_loss
+    problem.metrics = [weighted_measures]
 
     if not args.train is None:
         problem.train_size = args.train
