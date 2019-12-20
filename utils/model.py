@@ -5,6 +5,7 @@ from keras.callbacks import Callback
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
+from keras import backend as K
 
 
 def unet(input_size):
@@ -72,7 +73,7 @@ class TimedStopping(Callback):
     def on_train_begin(self, logs={}):
         self.start_time = time.time()
 
-    def on_epoch_end(self, epoch, logs={}):
+    def on_batch_end(self, epoch, logs=None):
         if time.time() - self.start_time > self.seconds:
             self.model.stop_training = True
             if self.verbose:
