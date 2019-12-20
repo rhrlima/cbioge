@@ -332,7 +332,6 @@ class UNetProblem(BaseProblem):
     def evaluate(self, phenotype, train=True, predict=False):
         try:
             model = model_from_json(phenotype)
-            model.summary()
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
@@ -343,13 +342,11 @@ class UNetProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
-            es = EarlyStopping(monitor='val_loss', min_delta=1e-4, patience=int(self.batch_size * 0.2))
-            ts = TimedStopping(seconds=60000, verbose=True) # 1 min
+            ts = TimedStopping(seconds=3600, verbose=True) #1h
 
-            callb_list = [es, ts]
+            callb_list = [ts]
 
             if train:
-                #model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=None, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list, steps_per_epoch=1, validation_steps=1)
                 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
             loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
