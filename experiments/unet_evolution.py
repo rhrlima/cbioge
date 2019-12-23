@@ -13,7 +13,7 @@ from datasets.dataset import DataGenerator
 from grammars import BNFGrammar
 from problems import UNetProblem
 
-import matplotlib.pyplot as plt
+from utils.model import *
 
 
 def get_args():
