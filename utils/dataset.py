@@ -23,6 +23,9 @@ def read_dataset_from_directory(path, npy=False):
 		print(img.shape, img.min(), img.max(), msk.shape, msk.min(), msk.max())
 
 
+
+
+
 if __name__ == '__main__':
 
 	if len(sys.argv) == 2:

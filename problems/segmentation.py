@@ -11,6 +11,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import *
 from keras.callbacks import *
 
+from utils import checkpoint as ckpt
 from utils.image import *
 from utils.model import TimedStopping
 
@@ -355,11 +356,11 @@ class UNetProblem(BaseProblem):
 
             if predict:
                 predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
-                if not os.path.exists('preds'):
-                    os.mkdir('preds')
+                if not os.path.exists(ckpt.ckpt_folder):
+                    os.mkdir(ckpt.ckpt_folder)
                 
                 for i, img in enumerate(predictions):
-                    write_image(os.path.join('preds', f'{i}.png'), img)
+                    write_image(os.path.join(ckpt.ckpt_folder, f'{i}.png'), img)
 
             return loss, acc
         except Exception as e:

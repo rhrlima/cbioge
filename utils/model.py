@@ -140,13 +140,13 @@ def dice_coef_loss(y_true, y_pred):
 #composed measure
 def weighted_measures(y_true, y_pred, w1=.2, w2=.2, w3=.2, w4=.2, w5=.2):
 
-    m1 = w1 * iou_accuracy(y_true, y_pred)
+    #m1 = w1 * iou_accuracy(y_true, y_pred)
     m2 = w2 * (1 - jaccard_distance(y_true, y_pred))
     m3 = w3 * specificity(y_true, y_pred)
     m4 = w4 * sensitivity(y_true, y_pred)
     m5 = w5 * dice_coef(y_true, y_pred)
 
-    return m1 + m2 + m3 + m4 + m5
+    return m2 + m3 + m4 + m5
 
 
 def weighted_measures_loss(y_true, y_pred, w1=.2, w2=.2, w3=.2, w4=.2, w5=.2):
