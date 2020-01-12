@@ -1,26 +1,33 @@
 import glob
+import json
 import os
 import re
 import pickle
 
+from algorithms.solutions import GESolution
 
 ckpt_folder = 'checkpoints'
 
 
 def save_solution(solution):
 
+    json_solution = solution.to_json()
+
     if not os.path.exists(ckpt_folder):
         os.mkdir(ckpt_folder)
 
     filename = f'solution{solution.id}.ckpt'
 
-    save_data(solution, os.path.join(ckpt_folder, filename))
+    save_data(json_solution, os.path.join(ckpt_folder, filename))
 
 
 def load_solutions():
 
     solution_files = glob.glob(os.path.join(ckpt_folder, 'solution*.ckpt'))
-    return [load_data(file) for file in solution_files]
+
+    solutions = [GESolution([]).from_json(s) for s in solution_files]
+
+    return solutions
 
 
 def save_data(data, filename='data.ckpt'):
