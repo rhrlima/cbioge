@@ -349,10 +349,10 @@ class UNetProblem(BaseProblem):
 
             if train:
                 model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
-            loss, acc = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
+            scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
-                print('loss', loss, 'acc', acc)
+                print('scores', scores)
 
             if predict:
                 predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
@@ -362,7 +362,7 @@ class UNetProblem(BaseProblem):
                 for i, img in enumerate(predictions):
                     write_image(os.path.join(ckpt.ckpt_folder, f'{i}.png'), img)
 
-            return loss, acc
+            return scores, model.count_params()
         except Exception as e:
             print('[evaluation]', e)
-            return -1, None
+            return -1, None, 0
