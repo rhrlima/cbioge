@@ -63,7 +63,7 @@ if __name__ == '__main__':
     problem.multiprocessing = args.multip
 
     problem.loss = weighted_measures_loss
-    problem.metrics = [weighted_measures]
+    problem.metrics = ['accuracy', weighted_measures, jaccard_distance, specificity, sensitivity, dice_coef]
 
     if not args.train is None:
         problem.train_size = args.train
