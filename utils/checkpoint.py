@@ -3,29 +3,40 @@ import os
 import re
 import pickle
 
+from algorithms.solutions import GESolution
+
 
 ckpt_folder = 'checkpoints'
 
 
 def save_solution(solution):
 
-    if not os.path.exists(ckpt_folder):
-        os.mkdir(ckpt_folder)
-
+    json_solution = solution.to_json()
     filename = f'solution{solution.id}.ckpt'
 
-    save_data(solution, os.path.join(ckpt_folder, filename))
+    save_data(json_solution, filename)
 
 
 def load_solutions():
 
     solution_files = glob.glob(os.path.join(ckpt_folder, 'solution*.ckpt'))
-    return [load_data(file) for file in solution_files]
+
+    solutions = []
+    for file in solution_files:
+        data = load_data(file)
+        solutions.append(GESolution(json_data=data))
+
+    return solutions
 
 
-def save_data(data, filename='data.ckpt'):
+def save_data(data, filename):
 
-    with open(filename, 'wb') as f:
+    if not os.path.exists(ckpt_folder):
+        os.mkdir(ckpt_folder)
+
+    complete_path = os.path.join(ckpt_folder, filename)
+
+    with open(complete_path, 'wb') as f:
         pickle.dump(data, f)
 
 
