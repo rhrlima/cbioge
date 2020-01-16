@@ -1,6 +1,7 @@
 import os
 import glob
 import time
+import datetime as dt
 
 from multiprocessing import Pool
 
@@ -20,6 +21,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.seed = None
         self.verbose = False
+        self.training = True
 
         self.pop_size = 5
         self.max_evals = 100
@@ -51,27 +53,34 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         if not solution.evaluated:
 
+            start_time = dt.datetime.today()
+
             if self.verbose:
-                curr_time = time.strftime('%x %X')
+                curr_time = start_time.strftime('%x %X')
                 print(f'<{curr_time}> [eval] solution {solution.id} started')
                 print('genotype:', solution.genotype)
 
             phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-            loss, acc = self.problem.evaluate(phenotype, train=False) #TEST
+            scores, params = self.problem.evaluate(phenotype, train=self.training) #TEST
+            fitness = scores[-1]
+
+            end_time = dt.datetime.today()
 
             # local changes for checkpoint
-            solution.fitness = acc
+            solution.fitness = fitness
             solution.phenotype = phenotype
             solution.evaluated = True
+            solution.time = end_time - start_time
+            solution.params = params
 
             ckpt.save_solution(solution)
 
             if self.verbose:
-                curr_time = time.strftime('%x %X')
+                curr_time = end_time.strftime('%x %X')
                 print('fitness:', solution.fitness)
                 print(f'<{curr_time}> [eval] solution {solution.id} ended')
 
-            return acc
+            return fitness
         else:
             if self.verbose:
                 curr_time = time.strftime('%x %X')
@@ -126,18 +135,14 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         data = {
             'evals': self.evals,
-            'population': self.population,
+            'population': [s.to_json() for s in self.population],
             'selection': self.selection,
             'crossover': self.crossover,
             'mutation': self.mutation,
             'replacement': self.replacement}
 
-        folder = ckpt.ckpt_folder
-        if not os.path.exists(folder):
-            os.mkdir(folder)
-
         filename = f'data_{self.evals}.ckpt'
-        ckpt.save_data(data, os.path.join(folder, filename))
+        ckpt.save_data(data, filename)
 
         # remove solution files already evaluated if data ckpt exists
         if os.path.exists(os.path.join(folder, filename)):
@@ -160,7 +165,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
         self.evals = data['evals']
-        self.population = data['population']
+        self.population = [GESolution(json_data=json_data) for json_data in data['population']]
         self.selection = data['selection']
         self.crossover = data['crossover']
         self.mutation = data['mutation']
