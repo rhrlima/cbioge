@@ -32,7 +32,7 @@ def load_predictions(folder):
 
 def apply_measures(labels, preds, name='plot.png'):
     measures = {
-        'iou': [],
+        #'iou': [],
         'jac': [],
         'spc': [],
         'sen': [],
@@ -41,40 +41,51 @@ def apply_measures(labels, preds, name='plot.png'):
     }
 
     for l, p in zip(labels, preds):
+
+        #p = 1 - p
+
         p = normalize(p)
         l = normalize(l)
 
         p = binarize(p)
         l = binarize(l)
 
-        measures['iou'].append(iou_accuracy(l, p))
+        #measures['iou'].append(iou_accuracy(l, p))
         measures['jac'].append(1-jaccard_distance(l, p))
         measures['spc'].append(specificity(l, p))
         measures['sen'].append(sensitivity(l, p))
         measures['dic'].append(dice_coef(l, p))
-        measures['all'].append(weighted_measures(l, p))
+        measures['all'].append(weighted_measures(l, p, *[.45, .05, .25, .25]))
 
-    for key in measures:
-        print(np.mean(measures[key]))
-        plt.plot(measures[key], label=key)
-        plt.scatter(range(len(labels)), measures[key], s=14, edgecolors='none', c='black')
+    markers = ['o-', '*-', 'v-', 'x-', '+-']
+
+    for i, key in enumerate(measures):
+        print(key, np.mean(measures[key]))
+        plt.plot(measures[key], markers[i], label=key)
+        #plt.scatter(range(len(labels)), measures[key], s=14, edgecolors='none', c='black',)
     print('---')
     plt.xlabel('Image')
     plt.ylabel('Measure')
     plt.legend(loc="lower right")
     plt.savefig(f'{name}.png')
-    #plt.show()
+    plt.show()
     plt.clf()
 
 
 if __name__ == '__main__':
 
-    dataset_name = 'membrane'
-    preds_names = ['memb1', 'memb2']
-
     #dataset_name = 'textures_simple'
-    #preds_names = ['texture1', 'texture2', 'texture3', 'texture4']
+    #preds_names = ['bestS', 'bestTS', 'unetS']
     
+    dataset_name = 'textures_regular'
+    preds_names = ['bestR', 'bestTR', 'unetR']
+
+    #dataset_name = 'textures_moderate'
+    #preds_names = ['bestM', 'bestTM', 'unetM']
+
+    #dataset_name = 'textures_full'
+    #preds_names = ['bestF', 'bestTF', 'unetF']
+
     dataset = load_dataset(f'datasets/{dataset_name}.pickle')
     
     labels = dataset['y_test']
@@ -84,4 +95,4 @@ if __name__ == '__main__':
         preds.append(load_predictions(f'analyze/{pname}'))
         apply_measures(labels, preds[i], pname)
 
-    apply_measures(labels, labels, 'labellabel')
+    #apply_measures(labels, labels, 'labellabel')

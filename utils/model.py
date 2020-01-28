@@ -54,6 +54,8 @@ def unet(input_size):
 
     #model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
+    print(model.count_params())
+
     return model
 
 
@@ -138,7 +140,7 @@ def dice_coef_loss(y_true, y_pred):
 
 
 #composed measure
-def weighted_measures(y_true, y_pred, w1=.25, w2=.25, w3=.25, w4=.25):
+def weighted_measures(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 
     m1 = w1 * (1 - jaccard_distance(y_true, y_pred))
     m2 = w2 * specificity(y_true, y_pred)
@@ -148,6 +150,10 @@ def weighted_measures(y_true, y_pred, w1=.25, w2=.25, w3=.25, w4=.25):
     return m1 + m2 + m3 + m4
 
 
-def weighted_measures_loss(y_true, y_pred, w1=.25, w2=.25, w3=.25, w4=.25):
+def weighted_measures_loss(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 
     return 1 - weighted_measures(y_true, y_pred, w1, w2, w3, w4)
+
+
+if __name__ == '__main__':
+    unet((256, 256, 1))
