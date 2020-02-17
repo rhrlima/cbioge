@@ -24,6 +24,7 @@ def get_args():
     args.add_argument('-va', '--valid', type=int, default=None) #valid size
     args.add_argument('-te', '--test', type=int, default=None) #test size
 
+    args.add_argument('-tl', '--timelimit', type=int, default=3600) #timelimit
     args.add_argument('-e', '--epochs', type=int, default=1) #epochs
     args.add_argument('-b', '--batch', type=int, default=1) #batch
     args.add_argument('-p', '--predict', type=int, default=0) #predict
@@ -56,6 +57,8 @@ def run():
     if not args.test is None:
         problem.test_size = args.test
 
+    problem.timelimit = args.timelimit
+    problem.epochs = args.epochs
     problem.verbose = args.verbose
     problem.workers = args.workers
     problem.multiprocessing = args.multip
@@ -73,8 +76,9 @@ def run():
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
-    print(result)
+    for _ in range(10): #TEMP
+        result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
+        print(result)
 
 
 if __name__ == '__main__':
