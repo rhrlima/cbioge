@@ -24,6 +24,7 @@ class UNetProblem(BaseProblem):
     def __init__(self, parser):
         self.batch_size = 1
         self.epochs = 1
+        self.timelimit = 3600
 
         self.loss = 'binary_crossentropy'
         self.opt = Adam(lr = 1e-4)
@@ -343,7 +344,7 @@ class UNetProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
-            ts = TimedStopping(seconds=3600, verbose=self.verbose) # 1h
+            ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose) # 1h
 
             callb_list = [ts]
 
