@@ -8,6 +8,7 @@ from grammars import BNFGrammar
 from problems import UNetProblem
 
 from utils.model import *
+from utils import checkpoint as ckpt
 
 from keras.models import model_from_json
 
@@ -34,6 +35,7 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
+    args.add_argument('-c', '--checkpoint', type=str, default='checkpoints')
     args.add_argument('-rs', '--seed', type=int, default=None)
 
     return args.parse_args()
@@ -59,12 +61,14 @@ def run():
 
     problem.timelimit = args.timelimit
     problem.epochs = args.epochs
-    problem.verbose = args.verbose
     problem.workers = args.workers
     problem.multiprocessing = args.multip
+    problem.verbose = args.verbose
 
     problem.loss = weighted_measures_loss
     problem.metrics = [weighted_measures]
+
+    ckpt.ckpt_folder = args.checkpoint
 
     s_values = eval(args.solution)
     if s_values == []:
@@ -76,7 +80,6 @@ def run():
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    for _ in range(10): #TEMP
         result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
         print(result)
 
