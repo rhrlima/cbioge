@@ -74,11 +74,11 @@ def apply_measures(labels, preds, name='plot.png'):
 
 if __name__ == '__main__':
 
-    #dataset_name = 'textures_simple'
-    #preds_names = ['bestS', 'bestTS', 'unetS']
+    dataset_name = 'textures_simple'
+    preds_names = ['bestS', 'bestTS', 'unetS']
     
-    dataset_name = 'textures_regular'
-    preds_names = ['bestR', 'bestTR', 'unetR']
+    #dataset_name = 'textures_regular'
+    #preds_names = ['bestR', 'bestTR', 'unetR']
 
     #dataset_name = 'textures_moderate'
     #preds_names = ['bestM', 'bestTM', 'unetM']
@@ -88,11 +88,20 @@ if __name__ == '__main__':
 
     dataset = load_dataset(f'datasets/{dataset_name}.pickle')
     
+    images = dataset['x_test']
     labels = dataset['y_test']
 
-    preds = []
-    for i, pname in enumerate(preds_names):
-        preds.append(load_predictions(f'analyze/{pname}'))
-        apply_measures(labels, preds[i], pname)
+    preds = load_predictions('analyze/'+preds_names[0])
+    predsT = load_predictions('analyze/'+preds_names[1])
+    predsU = load_predictions('analyze/'+preds_names[2])
+
+    i = np.reshape(images[0], (256, 256))
+    l = np.reshape(labels[0], (256, 256))
+    plot([i, l, preds[0], predsT[0], predsU[0]])
+
+    # preds = []
+    # for i, pname in enumerate(preds_names):
+    #     preds.append(load_predictions(f'analyze/{pname}'))
+    #     apply_measures(labels, preds[i], pname)
 
     #apply_measures(labels, labels, 'labellabel')

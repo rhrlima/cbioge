@@ -78,9 +78,11 @@ def run():
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    for _ in range(10):
-        result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
-        print(result)
+    model = model_from_json(solution.phenotype)
+    model.summary()
+    # for _ in range(10):
+    #     result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
+    #     print(result)
 
 
 if __name__ == '__main__':

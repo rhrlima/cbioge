@@ -22,14 +22,16 @@ from datasets.dataset import DataGenerator
 class UNetProblem(BaseProblem):
 
     def __init__(self, parser):
+        self.parser = parser
+
         self.batch_size = 1
         self.epochs = 1
+        self.timelimit = 3600
+        self.training = True
 
         self.loss = 'binary_crossentropy'
         self.opt = Adam(lr = 1e-4)
         self.metrics = ['accuracy']
-
-        self.parser = parser     
 
         self.workers = 1
         self.multiprocessing = False
@@ -37,7 +39,6 @@ class UNetProblem(BaseProblem):
         self.verbose = False
 
         self._initialize_blocks()
-        #self._generate_configurations()
 
     def read_dataset_from_pickle(self, pickle_file):
         with open(pickle_file, 'rb') as f:
@@ -78,22 +79,6 @@ class UNetProblem(BaseProblem):
 
             'bridge': ['bridge'], #check
         }
-
-    def _generate_configurations(self):
-        if self.parser:
-            kernels = [i[0] for i in self.parser.GRAMMAR['<kernel_size>']]
-            strides = [i[0] for i in self.parser.GRAMMAR['<strides>']]
-            padding = [i[0] for i in self.parser.GRAMMAR['<padding>']]
-            conv_configs = list(itertools.product(kernels, strides, padding))
-            max_img_size = self.input_shape[1]
-            self.conv_valid_configs = {}
-            for img_size in range(0, max_img_size+1):
-                key = str(img_size)
-                self.conv_valid_configs[key] = conv_configs[:]
-                for config in conv_configs:
-                    output_shape = calculate_output_size((img_size, img_size), *config)
-                    if (0, 0) > output_shape > (img_size, img_size):
-                        self.conv_valid_configs[key].remove(config)
 
     def _reshape_mapping(self, phenotype):
 
@@ -330,7 +315,7 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate(self, phenotype, train=True, predict=False):
+    def evaluate(self, phenotype, predict=False):
         try:
             model = model_from_json(phenotype)
 
@@ -343,12 +328,10 @@ class UNetProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
-            ts = TimedStopping(seconds=3600, verbose=True) #1h
+            ts = TimedStopping(seconds=self.timelimit, verbose=True)
 
-            callb_list = [ts]
-
-            if train:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callb_list)
+            if self.training:
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=[ts])
             scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
@@ -365,4 +348,4 @@ class UNetProblem(BaseProblem):
             return scores, model.count_params()
         except Exception as e:
             print('[evaluation]', e)
-            return -1, None, 0
+            return (-1, None), 0
