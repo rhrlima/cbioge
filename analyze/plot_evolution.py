@@ -174,7 +174,7 @@ def ckpt_to_json(max_, step, folder):
             continue
 
         if not os.path.exists(filename+'.ckpt'):
-            print('DO NOT EXISTS', filename)
+            print('DOES NOT EXISTS', filename)
             continue
 
         print(filename)
@@ -233,12 +233,13 @@ def load_data_and_group(files, convert=False):
     files.sort()
     data = {}
     group = []
+
     for file in files:
         print('loading:', file)
-
         if convert:
             ckpt_to_json(max_, step, file)
 
+    for file in files:
         key = file.split('/')[-1]
 
         #print(key)
@@ -307,16 +308,16 @@ def plot_evol_per_epoch(filenames, labels, save_to=None):
 if __name__ == '__main__':
 
     step = 20
-    max_ = 980
+    max_ = 400
 
     no_train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'notrain', '*'))
     train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'train', '*'))
 
-    no_train_data, no_train_group = load_data_and_group(no_train_files)
-    output_names = ['evolution-notrain.png', 'fit-param-notrain.png']
-    plot_all(no_train_data, no_train_group, output_names)
+    # no_train_data, no_train_group = load_data_and_group(no_train_files)
+    # output_names = ['evolution-notrain.png', 'fit-param-notrain.png']
+    # plot_all(no_train_data, no_train_group, output_names)
 
-    train_data, train_group = load_data_and_group(train_files)
+    train_data, train_group = load_data_and_group(train_files, convert=True)
     output_names = ['evolution-train.png', 'fit-param-train.png']
     plot_all(train_data, train_group, output_names)
    
