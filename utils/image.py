@@ -112,7 +112,7 @@ def dice_coef_loss(y_true, y_pred):
 
 
 # composed measure
-def weighted_measures(y_true, y_pred, w1=.2, w2=.2, w3=.2, w4=.2):
+def weighted_measures(y_true, y_pred, w1=.25, w2=.25, w3=.25, w4=.25):
 
     m1 = w1 * (1 - jaccard_distance(y_true, y_pred))
     m2 = w2 * specificity(y_true, y_pred)

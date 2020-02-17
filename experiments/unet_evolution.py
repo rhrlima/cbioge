@@ -20,15 +20,15 @@ def get_args():
 
     args = argparse.ArgumentParser(prog='script.py')
 
-    #args.add_argument('name', type=str) #name
+    # problem args
     args.add_argument('dataset', type=str) #dataset
 
-    args.add_argument('-t', '--training', type=int, default=1) #apply training
+    args.add_argument('-t', '--training', type=int, default=1) #training
     args.add_argument('-trs', '--train', type=int, default=None) #train steps
     args.add_argument('-va', '--valid', type=int, default=None) #valid size
     args.add_argument('-tes', '--test', type=int, default=None) #test steos
 
-    args.add_argument('-tl', '--timelimit', type=int, default=3600) #timelimit
+    args.add_argument('-tl', '--timelimit', type=int, default=3600) #timelimit (in seconds) 1h
     args.add_argument('-e', '--epochs', type=int, default=1) #epochs
     args.add_argument('-b', '--batch', type=int, default=1) #batch
     args.add_argument('-s', '--shuffle', type=int, default=0) #shuffle
@@ -36,8 +36,10 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
+    # evolution args
     args.add_argument('-ps', '--pop', type=int, default=5) #pop
     args.add_argument('-ev', '--evals', type=int, default=10) #evals
+    args.add_argument('-c', '--checkpoint', type=int, default=0) #from checkpoint
 
     args.add_argument('-v', '--verbose', type=int, default=1) #verbose (1 - evolution, 2 - problem)
 
@@ -59,11 +61,11 @@ if __name__ == '__main__':
 
     problem.read_dataset_from_pickle(args.dataset)
 
-    problem.verbose = (args.verbose>1) # verbose 2 or higher
     problem.timelimit = args.timelimit
     problem.epochs = args.epochs
     problem.workers = args.workers
     problem.multiprocessing = args.multip
+    problem.verbose = (args.verbose>1) # verbose 2 or higher
 
     problem.loss = weighted_measures_loss
     problem.metrics = [weighted_measures]
@@ -85,6 +87,7 @@ if __name__ == '__main__':
     algorithm.training = args.training
     algorithm.pop_size = args.pop
     algorithm.max_evals = args.evals
+    algorithm.training = args.training
 
     algorithm.selection = selection
     algorithm.crossover = crossover
@@ -93,7 +96,7 @@ if __name__ == '__main__':
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
 
-    population = algorithm.execute()
+    population = algorithm.execute(args.checkpoint)
 
     for s in population:
         print(s.fitness, s)

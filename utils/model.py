@@ -54,6 +54,8 @@ def unet(input_size):
 
     #model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
+    print(model.count_params())
+
     return model
 
 
@@ -151,3 +153,7 @@ def weighted_measures(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 def weighted_measures_loss(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 
     return 1 - weighted_measures(y_true, y_pred, w1, w2, w3, w4)
+
+
+if __name__ == '__main__':
+    unet((256, 256, 1))
