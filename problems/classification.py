@@ -15,27 +15,19 @@ from .problem import BaseProblem
 
 class CNNProblem(BaseProblem):
 
-    parser = None
-
-    x_train = None
-    y_train = None
-    x_valid = None
-    y_valid = None
-    x_test = None
-    y_test = None
-
-    input_shape = None
-    num_classes = None
-
-    batch_size = 128
-    epochs = 1
-
-    loss = 'categorical_crossentropy'
-    opt = 'adam'
-    metrics = ['accuracy']
-
     def __init__(self, parser_, dataset=None):
         self.parser = parser_
+
+        self.batch_size = 128
+        self.epochs = 1
+        self.training = True
+
+        self.loss = 'categorical_crossentropy'
+        self.opt = 'adam'
+        self.metrics = ['accuracy']
+
+        self.verbose = False
+
         if dataset:
             self._load_dataset_from_pickle(dataset)
         self._create_layers_base()
@@ -57,6 +49,9 @@ class CNNProblem(BaseProblem):
             self.input_shape = temp['input_shape']
             self.num_classes = temp['num_classes']
 
+            self.train_size = len(self.x_train)
+            self.valid_size = len(self.x_valid)
+            self.test_size = len(self.x_test)
             del temp
 
         self.x_train = self.x_train.reshape((-1,)+self.input_shape)
@@ -109,6 +104,23 @@ class CNNProblem(BaseProblem):
             phenotype = phenotype[end:]
 
         return new_mapping
+
+    def _get_layer_outputs(self, mapping):
+        outputs = []
+        depth = 0
+        for i, block in enumerate(mapping):
+            name, params = block[0], block[1:]
+            if name == 'input':
+                output_shape = self.input_shape
+            elif name == 'conv':
+                output_shape = calculate_output_size(output_shape, *params[1:4])
+                output_shape += (params[0],)
+            elif name in ['maxpool', 'avgpool']:
+                temp = calculate_output_size(output_shape, *params[:3])
+                output_shape = temp + (output_shape[2],)
+            print('\t'*depth, i, output_shape, block)
+            outputs.append(output_shape)
+        return outputs
 
     def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
 
@@ -197,79 +209,62 @@ class CNNProblem(BaseProblem):
         #print(base_block)
         return base_block
 
-    def _add_layer_to_model(self, model, layer):
-        if len(model['config']['layers']) > 0:
-            last = model['config']['layers'][-1]['name']
-            layer['inbound_nodes'].append([[last, 0, 0]])
-        model['config']['layers'].append(layer)
-
     def _wrap_up_model(self, model):
+        layers = model['config']['layers']
+        for i, layer in enumerate(layers[1:]):
+            last = model['config']['layers'][i]
+            layer['inbound_nodes'].append([[last['name'], 0, 0]])
+
         input_layer = model['config']['layers'][0]['name']
         output_layer = model['config']['layers'][-1]['name']
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
 
-    def _map_genotype_to_phenotype(self, genotype):
-
-        derivation = self.parser.dsge_recursive_parse(genotype)
-        derivation = self._reshape_mapping(derivation)
-        valid = self._repair_mapping(derivation)
-
-        if not valid:
-            return None
+    def map_genotype_to_phenotype(self, genotype):
 
         self.names = {}
-        model = {
-            'class_name': 'Model', 
+
+        mapping = self.parser.dsge_recursive_parse(genotype)
+        mapping = self._reshape_mapping(mapping)
+        repaired = self._repair_mapping(mapping)
+
+        if not repaired:
+            return None
+
+        model = {'class_name': 'Model', 
             'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
-        input_layer = self._build_block('input', [self.input_shape])
-
-        self._add_layer_to_model(model, input_layer)
-
-        for i, layer in enumerate(derivation):
+        mapping.insert(0, ['input', (None,)+self.input_shape])
+        for i, layer in enumerate(mapping):
             block_name, params = layer[0], layer[1:]
             block = self._build_block(block_name, params)
-            self._add_layer_to_model(model, block)
+            model['config']['layers'].append(block)
 
-        model = self._wrap_up_model(model)
+        self._wrap_up_model(model)
 
         return json.dumps(model)
 
-    def evaluate(self, solution, verbose=0):
-
+    def evaluate(self, phenotype):
         try:
-            json_model = self._map_genotype_to_phenotype(solution.genotype)
+            model = model_from_json(phenotype)
             
-            if not json_model:
-                return -1, None
+            model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
 
-            model = model_from_json(json_model)
+            x_train = self.x_train[:self.train_size]
+            y_train = self.y_train[:self.train_size]
+            x_valid = self.x_valid[:self.valid_size]
+            y_valid = self.y_valid[:self.valid_size]
+            x_test = self.x_test[:self.test_size]
+            y_test = self.y_test[:self.test_size]
 
-            model.compile(
-                loss=self.loss,
-                optimizer=self.opt,
-                metrics=self.metrics)
+            if self.training:
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose)
+            scores = model.evaluate(x_valid, y_valid, verbose=self.verbose)
 
-            # train
-            if verbose:
-                print('[training]')
-            model.fit(self.x_train, self.y_train, batch_size=self.batch_size,
-                      epochs=self.epochs, verbose=verbose)
+            if self.verbose:
+                print('scores', scores)
 
-            # valid
-            if verbose:
-                print('[validation]')
-            score = model.evaluate(self.x_valid, self.y_valid, verbose=verbose)
-
-            if verbose:
-                print('loss: {}\taccuracy: {}'.format(score[0], score[1]))
-
-            return score[1], json_model
-
+            return scores
         except Exception as e:
-            if DEBUG:
-                print(e)
-                print('[evaluation] invalid model from solution: {}'.format(
-                    solution.genotype))
-            return -1, None
+            print('[evaluation]', e)
+            return -1

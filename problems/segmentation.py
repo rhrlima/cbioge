@@ -133,7 +133,6 @@ class UNetProblem(BaseProblem):
         base_block['name'] = name
         for key, value in zip(self.blocks[block_name][1:], params):
             base_block['config'][key] = self._parse_value(value)
-
         #print(base_block)
         return base_block
 
