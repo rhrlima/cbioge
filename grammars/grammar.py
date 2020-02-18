@@ -13,12 +13,13 @@ class BNFGrammar:
         self.rule_reg = '<[a-zA-Z0-9_-]+>'
 
         lines = self._read_grammar(grammar_file)
+
         self._build_structure(lines)
 
         # for key in self.GRAMMAR:
         #     print(key, self.GRAMMAR[key])
         # print(self.NT)
-        # self._check_recursive_rules()
+        #self._check_recursive_rules()
 
     def _read_grammar(self, grammar_file):
         lines = []
@@ -66,7 +67,7 @@ class BNFGrammar:
     def _recursive_parse_call(self, genotype, new_gen, symb, depth):
 
         prod = []
-        
+       
         #print('symbol', symb, 'depth', depth, 'genotype', gen)
 
         #print(genotype[self.NT.index(symb)])
@@ -77,7 +78,7 @@ class BNFGrammar:
         else:
             value = genotype[self.NT.index(symb)].pop(0)
 
-        # print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
+        #print('value', value, 'out of', len(self.GRAMMAR[symb]), symb)
         expansion = self.GRAMMAR[symb][value]
         
         #print('###', expansion)
@@ -121,7 +122,6 @@ class BNFGrammar:
         falta parte que corrige a solucao quando a mesma é
         modificada pelos operadores geneticos'''
 
-        #gen = copy.deepcopy(genotype) # saves genotype before use
         gen_cpy = copy.deepcopy(genotype)
         to_add = [[] for _ in range(len(self.NT))]
         symb = self.NT[0] # assigns initial symbol
