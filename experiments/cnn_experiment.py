@@ -73,8 +73,10 @@ def run():
 
     solution = GESolution(parser.dsge_create_solution())
     solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
-    result = problem.evaluate(solution.phenotype)
-    print(result)
+    
+    
+    #result = problem.evaluate(solution.phenotype)
+    #print(result)
         
     #print(phenotype, 'valid', model is not None)
     # s_values = eval(args.solution)

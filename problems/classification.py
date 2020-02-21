@@ -226,23 +226,26 @@ class CNNProblem(BaseProblem):
 
         mapping = self.parser.dsge_recursive_parse(genotype)
         mapping = self._reshape_mapping(mapping)
-        repaired = self._repair_mapping(mapping)
+        
+        #repaired = self._repair_mapping(mapping)
 
-        if not repaired:
-            return None
+        # if not repaired:
+        #     return None
 
-        model = {'class_name': 'Model', 
-            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+        # model = {'class_name': 'Model', 
+        #     'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
-        mapping.insert(0, ['input', (None,)+self.input_shape])
+        # mapping.insert(0, ['input', (None,)+self.input_shape])
         for i, layer in enumerate(mapping):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            model['config']['layers'].append(block)
+            print(layer)
+        #     block_name, params = layer[0], layer[1:]
+        #     block = self._build_block(block_name, params)
+        #     model['config']['layers'].append(block)
 
-        self._wrap_up_model(model)
+        # self._wrap_up_model(model)
 
-        return json.dumps(model)
+        # return json.dumps(model)
+        return None
 
     def evaluate(self, phenotype):
         try:
