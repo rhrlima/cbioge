@@ -340,6 +340,8 @@ class UNetProblem(BaseProblem):
             if predict:
                 predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
 
+                print(predictions.shape)
+
                 if not os.path.exists(ckpt.ckpt_folder):
                     os.mkdir(ckpt.ckpt_folder)
                 

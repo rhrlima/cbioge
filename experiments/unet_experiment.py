@@ -60,13 +60,14 @@ def run():
         problem.test_size = args.test
 
     problem.timelimit = args.timelimit
+    problem.training = args.training
     problem.epochs = args.epochs
     problem.workers = args.workers
     problem.multiprocessing = args.multip
     problem.verbose = args.verbose
 
-    problem.loss = weighted_measures_loss
-    problem.metrics = [weighted_measures]
+    #problem.loss = weighted_measures_loss
+    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
 
     ckpt.ckpt_folder = args.checkpoint
 
@@ -80,8 +81,8 @@ def run():
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-        result = problem.evaluate(solution.phenotype, train=args.training, predict=args.predict)
-        print(result)
+    result = problem.evaluate(solution.phenotype, predict=args.predict)
+    print(result)
 
 
 if __name__ == '__main__':
