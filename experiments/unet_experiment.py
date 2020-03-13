@@ -41,7 +41,7 @@ def get_args():
     return args.parse_args()
 
 
-def run():
+def run_experiment():
 
     args = get_args()
     print(args)

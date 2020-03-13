@@ -14,6 +14,7 @@ from grammars import BNFGrammar
 from problems import UNetProblem
 
 from utils.model import *
+from utils import checkpoint as ckpt
 
 
 def get_args():
@@ -39,6 +40,8 @@ def get_args():
     # evolution args
     args.add_argument('-ps', '--pop', type=int, default=5) #pop
     args.add_argument('-ev', '--evals', type=int, default=10) #evals
+
+    args.add_argument('-f', '--folder', type=str, default='checkpoints')
     args.add_argument('-c', '--checkpoint', type=int, default=0) #from checkpoint
 
     args.add_argument('-v', '--verbose', type=int, default=1) #verbose (1 - evolution, 2 - problem)
@@ -48,7 +51,7 @@ def get_args():
     return args.parse_args()
 
 
-if __name__ == '__main__':
+def run_evolution():
 
     args = get_args()
     print(args)
@@ -67,8 +70,8 @@ if __name__ == '__main__':
     problem.multiprocessing = args.multip
     problem.verbose = (args.verbose>1) # verbose 2 or higher
 
-    problem.loss = weighted_measures_loss
-    problem.metrics = [weighted_measures]
+    #problem.loss = weighted_measures_loss
+    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
 
     if not args.train is None:
         problem.train_size = args.train
@@ -96,7 +99,13 @@ if __name__ == '__main__':
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
 
+    ckpt.ckpt_folder = args.folder
+
     population = algorithm.execute(args.checkpoint)
 
     for s in population:
         print(s.fitness, s)
+
+
+if __name__ == '__main__':
+    run_evolution()
