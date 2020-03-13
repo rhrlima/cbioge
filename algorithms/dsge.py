@@ -68,7 +68,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         scores, params = self.problem.evaluate(phenotype)
         end_time = dt.datetime.today()
 
-        fitness = scores[-1]
+        # scores:
+        # 0: loss
+        # 1: accuracy
+        # 2..: others
+        fitness = scores[1]
 
         # local changes for checkpoint
         solution.fitness = fitness
