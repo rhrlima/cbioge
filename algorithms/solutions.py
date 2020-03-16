@@ -5,7 +5,7 @@ class GESolution():
         self.id = None
         self.genotype = gen
         self.phenotype = None
-        self.fitness = None
+        self.fitness = -1
         self.evaluated = False
         self.time = None
         self.params = None
