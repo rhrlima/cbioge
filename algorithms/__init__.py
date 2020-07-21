@@ -1,19 +1,22 @@
 from .rs import RandomSearch
 from .ge import GrammaticalEvolution
 
-from .operators import TournamentSelection
+from .selection import TournamentSelection
 
-from .operators import OnePointCrossover
-from .operators import PointMutation
+from .crossover import OnePointCrossover
+from .crossover import DSGECrossover
+from .crossover import DSGEGeneCrossover
 
-from .operators import ReplaceWorst
-from .operators import ElitistReplacement
+from .mutation import PointMutation
+from .mutation import DSGEMutation
+from .mutation import DSGETerminalMutation
+from .mutation import DSGENonterminalMutation
 
 from .operators import GEPrune
 from .operators import GEDuplication
 
-from .operators import DSGECrossover
-from .operators import DSGEMutation
+from .operators import ReplaceWorst
+from .operators import ElitistReplacement
 
 __all__ = [
     'RandomSearch',
@@ -22,14 +25,17 @@ __all__ = [
     'TournamentSelection',
     
     'OnePointCrossover',
+    'DSGECrossover',
+    'DSGEGeneCrossover',
+
     'PointMutation',
+    'DSGEMutation',
+    'DSGETerminalMutation',
+    'DSGENonterminalMutation',
 
     'GEPrune',
     'GEDuplication',
     
     'ReplaceWorst',
     'ElitistReplacement',
-
-    'DSGECrossover',
-    'DSGEMutation',
 ]

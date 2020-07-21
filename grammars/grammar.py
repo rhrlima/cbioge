@@ -8,6 +8,8 @@ class BNFGrammar:
         #self.GRAMMAR = {}
         #self.NT = []
         #self.RECURSIVE = []
+        self.verbose = False
+        
         self.MAX_LOOPS = 1000
 
         self.rule_reg = '<[a-zA-Z0-9_-]+>'
@@ -68,23 +70,26 @@ class BNFGrammar:
         except:
             return value
 
-    def _recursive_parse_call(self, genotype, new_gen, symb, depth):
+    def _recursive_parse_call(self, genotype, added, symb, depth):
 
         prod = []
        
         if genotype[self.NT.index(symb)] == []:
             value = np.random.randint(0, len(self.GRAMMAR[symb]))
-            new_gen[self.NT.index(symb)].append(value)
-        else:
-            value = genotype[self.NT.index(symb)].pop(0)
+            added[self.NT.index(symb)].append(value)
+            genotype[self.NT.index(symb)].append(value)
 
+            if self.verbose:
+                print('[parse] not enough values. Adding:', value, 'to', symb)
+
+        value = genotype[self.NT.index(symb)].pop(0)
         expansion = self.GRAMMAR[symb][value]
         
         for s in expansion:
             if s not in self.NT:
                 prod.append(s)
             else:
-                prod += self._recursive_parse_call(genotype, new_gen, s, depth+1)
+                prod += self._recursive_parse_call(genotype, added, s, depth+1)
 
         return prod
 
@@ -123,44 +128,44 @@ class BNFGrammar:
     def dsge_recursive_parse(self, genotype):
 
         '''falta incorporar comportamento para quando ultrapassa 
-        profundidade maxima
+        profundidade maxima'''
 
-        falta parte que corrige a solucao quando a mesma é
-        modificada pelos operadores geneticos'''
-
-        gen_cpy = genotype[:]
-        to_add = [[] for _ in range(len(self.NT))]
+        gen_cpy = [g[:] for g in genotype]
+        added = [[] for _ in range(len(self.NT))]
         symb = self.NT[0] # assigns initial symbol
 
         prod = self._recursive_parse_call(
-            genotype=gen_cpy, new_gen=to_add, symb=symb, depth=0)
+            genotype=gen_cpy, added=added, symb=symb, depth=0)
 
-        #print('gen', genotype, prod)
-        #print('remove', gen_cpy)
-        #print('add', to_add)
+        if self.verbose:
+            print('pro', prod)
+            print('gen', genotype)
+            print('rem', gen_cpy)
+            print('add', added)
 
-        # remove extra values
-        for genA, genB in zip(genotype, gen_cpy):
-            for value in genB:
-                genA.remove(value)
+        # removes excess values and adds missing values
+        for symb in range(len(genotype)):
+            for _ in range(len(gen_cpy[symb])):
+                genotype[symb].pop()
+            genotype[symb].extend(added[symb])
 
-        # add new values when necessary
-        for genA, genB in zip(genotype, to_add):
-            for value in genB:
-                genA.append(value)
-
-        return list(filter(lambda x: x != '&', prod))
+        return list(filter(lambda x: x != '&', prod)), genotype
 
 if __name__ == '__main__':
     
-    #np.random.seed(6)
+    #np.random.seed(0)
 
     grammar = BNFGrammar('cnn2.bnf')
     solution = grammar.dsge_create_solution()
-    print(solution)
-    print(grammar.dsge_recursive_parse(solution))
+    #print(solution)
+    #print(grammar.dsge_recursive_parse(solution))
 
     grammar = BNFGrammar('unet_mirror2.bnf')
     solution = grammar.dsge_create_solution()
+    #print(solution)
+    #print(grammar.dsge_recursive_parse(solution))
+
+    solution = [[0],[1,1,0,2,3,3,2],[],[],[0,0,0,0,0,0,0],[0,0,0,0],[0,0,0],[2,2,4,0],[2,1,4,6],[],[],[2,0,2,2],[0,0,0]]
     print(solution)
-    print(grammar.dsge_recursive_parse(solution))
+    mapping, solution = grammar.dsge_recursive_parse(solution)
+    print(solution)

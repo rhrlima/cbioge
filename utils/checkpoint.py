@@ -3,16 +3,19 @@ import os
 import re
 import pickle
 
-from algorithms.solutions import GESolution
+from algorithms.solution import GESolution
 
 
 ckpt_folder = 'checkpoints'
+
+data_name = 'data_{0}.ckpt'
+solution_name = 'solution_{0}.ckpt'
 
 
 def save_solution(solution):
 
     json_solution = solution.to_json()
-    filename = f'solution_{solution.id}.ckpt'
+    filename = solution_name.format(solution.id)
 
     save_data(json_solution, filename)
 
@@ -25,7 +28,7 @@ def save_population(population):
 
 def load_solutions():
 
-    solution_files = glob.glob(os.path.join(ckpt_folder, 'solution_*.ckpt'))
+    solution_files = glob.glob(os.path.join(ckpt_folder, solution_name.format('*')))
     solution_files.sort()
 
     solutions = []

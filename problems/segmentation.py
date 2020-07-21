@@ -269,7 +269,7 @@ class UNetProblem(BaseProblem):
         self.naming = {}
         self.stack = []
 
-        mapping = self.parser.dsge_recursive_parse(genotype)
+        mapping, genotype = self.parser.dsge_recursive_parse(genotype)
         mapping = self._reshape_mapping(mapping)
         mapping = self._build_right_side(mapping)
         self._non_recursive_repair(mapping)
@@ -315,9 +315,10 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate(self, phenotype, predict=False):
+    def evaluate(self, phenotype=None, model=None, predict=False, save_model=False):
         try:
-            model = model_from_json(phenotype)
+            if model is None:
+                model = model_from_json(phenotype)
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
 
@@ -328,10 +329,16 @@ class UNetProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
+
             ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
+            callbacks = [ts]
+
+            if save_model:
+                mc = ModelCheckpoint(filepath=f'{ckpt.ckpt_folder}_weights.hdf5', monitor='val_accuracy', save_weights_only=True, save_best_only=True)
+                callbacks.append(mc)
 
             if self.training:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=[ts])
+                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
             scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
@@ -339,8 +346,6 @@ class UNetProblem(BaseProblem):
 
             if predict:
                 predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
-
-                print(predictions.shape)
 
                 if not os.path.exists(ckpt.ckpt_folder):
                     os.mkdir(ckpt.ckpt_folder)

@@ -8,8 +8,11 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import model_from_json
 
 from algorithms.dsge import GrammaticalEvolution
-from algorithms import TournamentSelection, DSGECrossover, DSGEMutation, ReplaceWorst
-from datasets.dataset import DataGenerator
+from algorithms.selection import *
+from algorithms.crossover import *
+from algorithms.mutation import *
+from algorithms.operators import *
+
 from grammars import BNFGrammar
 from problems import UNetProblem
 
@@ -38,8 +41,11 @@ def get_args():
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
     # evolution args
-    args.add_argument('-ps', '--pop', type=int, default=5) #pop
-    args.add_argument('-ev', '--evals', type=int, default=10) #evals
+    args.add_argument('-ps', '--pop', type=int, default=10) #pop
+    args.add_argument('-ev', '--evals', type=int, default=20) #evals
+    args.add_argument('-cr', '--crossrate', type=float, default=0.8) #crossover rate
+    args.add_argument('-mr', '--mutrate', type=float, default=0.01) #mutation rate
+
 
     args.add_argument('-f', '--folder', type=str, default='checkpoints')
     args.add_argument('-c', '--checkpoint', type=int, default=0) #from checkpoint
@@ -52,6 +58,10 @@ def get_args():
 
 
 def run_evolution():
+
+    import platform
+    if platform.system() == 'Windows':
+        limit_gpu_memory()
 
     args = get_args()
     print(args)
@@ -68,10 +78,11 @@ def run_evolution():
     problem.epochs = args.epochs
     problem.workers = args.workers
     problem.multiprocessing = args.multip
-    problem.verbose = (args.verbose>1) # verbose 2 or higher
 
-    #problem.loss = weighted_measures_loss
-    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
+    wmetric = WeightedMetric(w_spe=.1, w_dic=.4, w_sen=.4, w_jac=.1)
+    # problem.loss = wmetric.get_loss()
+    # problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
+    problem.metrics = [wmetric.get_metric()]
 
     if not args.train is None:
         problem.train_size = args.train
@@ -80,10 +91,16 @@ def run_evolution():
     if not args.test is None:
         problem.test_size = args.test
 
-    selection = TournamentSelection(t_size=2, maximize=True)
-    crossover = DSGECrossover(cross_rate=0.9)
-    mutation = DSGEMutation(mut_rate=0.01, parser=parser)
-    replace = ReplaceWorst(maximize=True)
+    selection = TournamentSelection(t_size=5, maximize=True)
+    #crossover = DSGECrossover(cross_rate=args.crossrate)
+    crossover = DSGEGeneCrossover(cross_rate=args.crossrate)
+    #mutation = DSGEMutation(mut_rate=args.mutrate, parser=parser)
+    #mutation = DSGETerminalMutation(mut_rate=args.mutrate, parser=parser, start_index=4)
+    mutation = DSGENonterminalMutation(mut_rate=args.mutrate, parser=parser, end_index=4)
+    
+    operator = HalfAndHalfOperator(op1=crossover, op2=mutation, rate=0.6)
+
+    replace = ElitistReplacement(rate=0.25, maximize=True)
 
     algorithm = GrammaticalEvolution(problem, parser)
 
@@ -93,13 +110,15 @@ def run_evolution():
     algorithm.training = args.training
 
     algorithm.selection = selection
-    algorithm.crossover = crossover
-    algorithm.mutation = mutation
+    algorithm.crossover = operator#crossover
+    #algorithm.mutation = mutation
     algorithm.replacement = replace
 
-    algorithm.verbose = (args.verbose>0) # verbose 1 or higher
-
     ckpt.ckpt_folder = args.folder
+
+    algorithm.verbose = (args.verbose>0) # verbose 1 or higher
+    problem.verbose = (args.verbose>1) # verbose 2 or higher
+    parser.verbose = args.verbose>1
 
     population = algorithm.execute(args.checkpoint)
 

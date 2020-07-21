@@ -3,7 +3,7 @@ import argparse
 
 import numpy as np
 
-from algorithms.solutions import GESolution
+from algorithms.solution import GESolution
 from grammars import BNFGrammar
 from problems import UNetProblem
 
@@ -35,7 +35,7 @@ def get_args():
     args.add_argument('-w', '--workers', type=int, default=1) #workers    
     args.add_argument('-mp', '--multip', type=int, default=0) #multiprocessing
 
-    args.add_argument('-c', '--checkpoint', type=str, default='checkpoints')
+    args.add_argument('-f', '--folder', type=str, default='checkpoints')
     args.add_argument('-rs', '--seed', type=int, default=None)
 
     return args.parse_args()
@@ -66,10 +66,12 @@ def run_experiment():
     problem.multiprocessing = args.multip
     problem.verbose = args.verbose
 
-    #problem.loss = weighted_measures_loss
-    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
+    wmetric = WeightedMetric(w_spe=.1, w_dic=.4, w_sen=.4, w_jac=.1)
+    # problem.loss = wmetric.get_loss()
+    # problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
+    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity, wmetric.get_metric()]
 
-    ckpt.ckpt_folder = args.checkpoint
+    ckpt.ckpt_folder = args.folder
 
     s_values = eval(args.solution)
     if s_values == []:
@@ -81,9 +83,11 @@ def run_experiment():
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
 
-    result = problem.evaluate(solution.phenotype, predict=args.predict)
+    print(solution.genotype)
+    result = problem.evaluate(solution.phenotype, predict=args.predict, save_model=True)
     print(result)
 
 
 if __name__ == '__main__':
-    run()
+
+    run_experiment()

@@ -93,7 +93,7 @@ def jaccard_distance(y_true, y_pred, smooth=100):
     intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
     sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
     jac = (intersection + smooth) / (sum_ - intersection + smooth)
-    return (1 - jac) * smooth
+    return 1-((1 - jac) * smooth)
 
 
 def specificity(y_true,y_pred):
@@ -153,6 +153,45 @@ def weighted_measures(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 def weighted_measures_loss(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
 
     return 1 - weighted_measures(y_true, y_pred, w1, w2, w3, w4)
+
+
+class WeightedMetric:
+
+    def __init__(self, w_jac=.25, w_dic=.25, w_spe=.25, w_sen=.25):
+        self.w_jac = w_jac
+        self.w_dic = w_dic
+        self.w_spe = w_spe
+        self.w_sen = w_sen
+
+    def execute_metric(self, y_true, y_pred):
+
+        m1 = self.w_jac * (1 - jaccard_distance(y_true, y_pred))
+        m4 = self.w_dic * dice_coef(y_true, y_pred)
+        m2 = self.w_spe * specificity(y_true, y_pred)
+        m3 = self.w_sen * sensitivity(y_true, y_pred)
+
+        return m1 + m2 + m3 + m4
+
+    def execute_loss(self, y_true, y_pred):
+
+        return 1 - self.execute_metric(y_true, y_pred)
+
+    def get_metric(self):
+
+        return self.execute_metric
+
+    def get_loss(self):
+
+        return self.execute_loss
+
+
+#limits GPU memory to use tensorflow-gpu
+def limit_gpu_memory(fraction=0.5):
+    import tensorflow as tf
+    from keras.backend.tensorflow_backend import set_session
+    config = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = fraction
+    set_session(tf.Session(config=config))
 
 
 if __name__ == '__main__':

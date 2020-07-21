@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from multiprocessing import Pool
-from .solutions import GESolution
+from .solution import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
 

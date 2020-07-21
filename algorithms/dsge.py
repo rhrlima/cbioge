@@ -8,7 +8,7 @@ import numpy as np
 from multiprocessing import Pool
 
 from utils import checkpoint as ckpt
-from .solutions import GESolution
+from .solution import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
 
@@ -20,7 +20,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.parser = parser
 
         self.seed = None
-
         self.pop_size = 5
         self.max_evals = 100
         self.training = True
@@ -93,6 +92,24 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         for s in population:
             self.evaluate_solution(s)
 
+    def apply_selection(self):
+
+        return self.selection.execute(self.population)
+
+    def apply_crossover(self, parents):        
+        if self.crossover is not None:
+            return self.crossover.execute(parents)
+        return parents[0].copy()
+
+    def apply_mutation(self, offspring):
+        if self.mutation is not None:
+            return self.mutation.execute(offspring)
+        return offspring.copy()
+
+    def apply_replacement(self, offspring_pop):
+
+        return self.replacement.execute(self.population, offspring_pop)
+
     def execute(self, checkpoint=False):
 
         if checkpoint:
@@ -113,20 +130,23 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             if offspring_pop == []:
                 for index in range(self.pop_size):
-                    parents = self.selection.execute(self.population)
-                    offspring = self.crossover.execute(parents)
+                    parents = self.apply_selection()
 
+                    offspring = self.apply_crossover(parents)
                     offspring.id = self.evals + index # check
-                    self.mutation.execute(offspring)
+                    
+                    offspring = self.apply_mutation(offspring)
+
                     ckpt.save_solution(offspring)
 
                     offspring_pop.append(offspring)
 
             self.evaluate_population(offspring_pop)
-            self.population = self.replacement.execute(self.population, offspring_pop)
+
+            self.population = self.apply_replacement(offspring_pop)
 
             self.evals += len(offspring_pop)
-            offspring_pop = []
+            offspring_pop.clear()
 
             self.save_state()
             self.print_progress()
@@ -138,10 +158,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         data = {
             'evals': self.evals,
             'population': [s.to_json() for s in self.population],
-            'selection': self.selection,
-            'crossover': self.crossover,
-            'mutation': self.mutation,
-            'replacement': self.replacement}
+            #'selection': self.selection,
+            #'crossover': self.crossover,
+            #'mutation': self.mutation,
+            #'replacement': self.replacement
+        }
 
         filename = f'data_{self.evals}.ckpt'
         saved = ckpt.save_data(data, filename)
@@ -163,13 +184,17 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         data_files.sort(key=lambda x: ckpt.natural_key(x), reverse=True)
         data = ckpt.load_data(data_files[0])
 
-        print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
+        
         self.evals = data['evals']
         self.population = [GESolution(json_data=json_data) for json_data in data['population']]
-        self.selection = data['selection']
-        self.crossover = data['crossover']
-        self.mutation = data['mutation']
-        self.replacement = data['replacement']
+        #self.selection = data['selection']
+        #self.crossover = data['crossover']
+        #self.mutation = data['mutation']
+        #self.replacement = data['replacement']
+
+        print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
+        print('Evals:', self.evals)
+        print('Population:', len(self.population))
 
     def print_progress(self):
         curr_time = time.strftime('%x %X')

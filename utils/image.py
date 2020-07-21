@@ -6,9 +6,9 @@ import skimage.transform as trans
 import matplotlib.pyplot as plt
 
 
-def load_image(path, npy=False):
+def load_image(path, npy=False, as_gray=False):
 
-    return io.imread(path) if not npy else np.load(path)
+    return io.imread(path, as_gray=as_gray) if not npy else np.load(path)
 
 
 def write_image(path, img, npy=False):
@@ -120,3 +120,33 @@ def weighted_measures(y_true, y_pred, w1=.25, w2=.25, w3=.25, w4=.25):
     m4 = w4 * dice_coef(y_true, y_pred)
 
     return m1 + m2 + m3 + m4
+
+
+class WeightedMetric:
+
+    def __init__(self, w_jac, w_dic, w_spe, w_sen):
+        self.w_jac = w_jac
+        self.w_dic = w_dic
+        self.w_spe = w_spe
+        self.w_sen = w_sen
+
+    def execute_metric(self, y_true, y_pred):
+
+        m1 = self.w_jac * (1 - jaccard_distance(y_true, y_pred))
+        m4 = self.w_dic * dice_coef(y_true, y_pred)
+        m2 = self.w_spe * specificity(y_true, y_pred)
+        m3 = self.w_sen * sensitivity(y_true, y_pred)
+
+        return m1 + m2 + m3 + m4
+
+    def execute_loss(self, y_true, y_pred):
+
+        return 1 - self.execute_metric(y_true, y_pred)
+
+    def get_metric(self):
+
+        return self.execute_metric
+
+    def get_loss(self):
+
+        return self.execute_loss

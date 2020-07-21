@@ -4,7 +4,7 @@ import time
 from multiprocessing import Pool
 import numpy as np
 from utils import checkpoint
-from .solutions import GESolution
+from .solution import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
 
