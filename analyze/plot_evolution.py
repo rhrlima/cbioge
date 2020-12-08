@@ -310,14 +310,16 @@ if __name__ == '__main__':
     step = 20
     max_ = 400
 
-    no_train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'notrain', '*'))
-    train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'train', '*'))
+    #no_train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'notrain', '*'))
+    #train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'train', '*'))
+    #no_train_files = glob.glob(os.path.join('analyze', 'TEXTURE', 'notrain', '*'))
+    train_files = glob.glob(os.path.join('results', 'tex2*', '*'))
 
     # no_train_data, no_train_group = load_data_and_group(no_train_files)
     # output_names = ['evolution-notrain.png', 'fit-param-notrain.png']
     # plot_all(no_train_data, no_train_group, output_names)
 
-    train_data, train_group = load_data_and_group(train_files, convert=True)
+    train_data, train_group = load_data_and_group(train_files, convert=False)
     output_names = ['evolution-train.png', 'fit-param-train.png']
     plot_all(train_data, train_group, output_names)
    

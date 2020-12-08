@@ -1,3 +1,4 @@
+import os
 import json
 import argparse
 
@@ -11,6 +12,7 @@ from utils.model import *
 from utils import checkpoint as ckpt
 
 from keras.models import model_from_json
+from keras.utils import plot_model
 
 def get_args():
 
@@ -43,6 +45,10 @@ def get_args():
 
 def run_experiment():
 
+    import platform
+    if platform.system() == 'Windows':
+        limit_gpu_memory()
+
     args = get_args()
     print(args)
 
@@ -69,9 +75,11 @@ def run_experiment():
     wmetric = WeightedMetric(w_spe=.1, w_dic=.4, w_sen=.4, w_jac=.1)
     # problem.loss = wmetric.get_loss()
     # problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity]
-    problem.metrics = ['accuracy', jaccard_distance, dice_coef, specificity, sensitivity, wmetric.get_metric()]
+    problem.metrics = [wmetric.get_metric()]
 
     ckpt.ckpt_folder = args.folder
+    if not os.path.exists(ckpt.ckpt_folder):
+        os.mkdir(ckpt.ckpt_folder)
 
     s_values = eval(args.solution)
     if s_values == []:
@@ -82,6 +90,8 @@ def run_experiment():
         print('Running solution', s_values)
         solution = GESolution(s_values)
         solution.phenotype = problem.map_genotype_to_phenotype(solution.genotype)
+
+    #plot_model(model_from_json(solution.phenotype))
 
     print(solution.genotype)
     result = problem.evaluate(solution.phenotype, predict=args.predict, save_model=True)

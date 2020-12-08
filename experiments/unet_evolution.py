@@ -91,16 +91,18 @@ def run_evolution():
     if not args.test is None:
         problem.test_size = args.test
 
-    selection = TournamentSelection(t_size=5, maximize=True)
+    selection = TournamentSelection(t_size=3, maximize=True)
     #crossover = DSGECrossover(cross_rate=args.crossrate)
     crossover = DSGEGeneCrossover(cross_rate=args.crossrate)
-    #mutation = DSGEMutation(mut_rate=args.mutrate, parser=parser)
-    #mutation = DSGETerminalMutation(mut_rate=args.mutrate, parser=parser, start_index=4)
-    mutation = DSGENonterminalMutation(mut_rate=args.mutrate, parser=parser, end_index=4)
+    
+    mutation1 = DSGEMutation(mut_rate=args.mutrate, parser=parser)
+    mutation2 = DSGETerminalMutation(mut_rate=args.mutrate, parser=parser, start_index=4)
+    mutation3 = DSGENonterminalMutation(mut_rate=args.mutrate, parser=parser, end_index=4)
     
     operator = HalfAndHalfOperator(op1=crossover, op2=mutation, rate=0.6)
+    #operator = HalfAndChoiceOperator(h_op=crossover, o_ops=[mutation1, mutation2, mutation3], h_rate=0.6, o_rate=[0.5, 0.25, 0.25])
 
-    replace = ElitistReplacement(rate=0.25, maximize=True)
+    replace = ElitistReplacement(rate=0.10, maximize=True)
 
     algorithm = GrammaticalEvolution(problem, parser)
 

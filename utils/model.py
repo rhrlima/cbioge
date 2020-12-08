@@ -163,6 +163,9 @@ class WeightedMetric:
         self.w_spe = w_spe
         self.w_sen = w_sen
 
+    def __str__(self):
+        return 'weightedmetric'
+
     def execute_metric(self, y_true, y_pred):
 
         m1 = self.w_jac * (1 - jaccard_distance(y_true, y_pred))

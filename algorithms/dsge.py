@@ -187,6 +187,12 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         
         self.evals = data['evals']
         self.population = [GESolution(json_data=json_data) for json_data in data['population']]
+
+        # temp
+        for s in self.population:
+            if s.fitness is None:
+                s.fitness = -1
+        
         #self.selection = data['selection']
         #self.crossover = data['crossover']
         #self.mutation = data['mutation']

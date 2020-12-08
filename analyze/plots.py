@@ -31,9 +31,10 @@ def load_data(files):
     }
 
     for f in files:
-        print(f)
         data = ckpt.load_data(f)
         population = data['population']
+        
+        print(f, len(population))
 
         mean_fit = []
         mean_param = []
@@ -61,7 +62,7 @@ def plot(x, y, xlabel='x', ylabel='y', markers='*', label='label', name='plot.pn
     plt.plot(x, y, markers, label=label)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.xticks(np.arange(0, 20, step=5))
+    plt.xticks(np.arange(0, 30, step=5))
     #plt.yscale('log')
     plt.legend(loc='lower right')
     #plt.legend(loc='upper left')
@@ -92,7 +93,7 @@ def group_mean(data):
     return mean_data
 
 
-def load_and_plot(folders, tag, labels, name='plot'):
+def load_and_plot(folders, tag, labels, best=False, name='plot'):
 
     for i, f in enumerate(folders):
 
@@ -102,8 +103,10 @@ def load_and_plot(folders, tag, labels, name='plot'):
         data = load_data(files)
 
         if tag is 'fitness':
-            #y_axis = data['mean_fit']
-            y_axis = data['best_fit']
+            if best:
+                y_axis = data['best_fit']
+            else:
+                y_axis = data['mean_fit']
             plot(range(len(y_axis)), y_axis, 'generation', 'fitness', markers[i], labels[i], name=f'{name}-fit.png')
         elif tag is 'param':
             y_axis = data['mean_param']
@@ -114,7 +117,7 @@ def load_and_plot(folders, tag, labels, name='plot'):
     #plt.show()
     plt.clf()
 
-def load_group_plot(folders, tag, labels, name='plot'):
+def load_group_plot(folders, tag, labels, best=False, name='plot'):
 
     for i, f in enumerate(folders):
 
@@ -129,8 +132,10 @@ def load_group_plot(folders, tag, labels, name='plot'):
         data = group_mean(data)
 
         if tag is 'fitness':
-            #y_axis = data['mean_fit']
-            y_axis = data['best_fit']
+            if best:
+                y_axis = data['best_fit']
+            else:
+                y_axis = data['mean_fit']
             plot(range(len(y_axis)), y_axis, 'generation', 'fitness', markers[i], labels[i], name=f'{name}-fit.png')
         elif tag is 'param':
             y_axis = data['mean_param']
@@ -145,18 +150,34 @@ def load_group_plot(folders, tag, labels, name='plot'):
 
 if __name__ == '__main__':
 
-    markers = ['o-', '*-', 'v-', 'x-', '+-']
+    markers = ['o-', '*-', 'v-', 'x-', '+-', '--', ',-']
 
     labels = ['Normal', 'NoMut', 'NoCross']
 
-    load_and_plot(['normal', 'nomut', 'nocross'], 'fitness', labels, 'dataset1')
+    #load_and_plot(['normal', 'nomut', 'nocross'], 'fitness', labels, 'dataset1')
     #load_and_plot(['normal', 'nomut', 'nocross'], 'param', labels, 'dataset1')
     #load_and_plot(['normal', 'nomut', 'nocross'], 'time', labels, 'dataset1')
 
     #load_group_plot(['rand2?', 'tex2?'], 'fitness', labels, 'dataset2')
     #load_group_plot(['rand3?', 'tex3?'], 'fitness', labels, 'dataset3')
+    #load_group_plot(['normal?', 'nomut?', 'nocross?'], 'fitness', labels, 'dataset1')
+    #load_group_plot(['halfhalf1?', 'normal?', 'cross0?', 'cross1?', 'mut0?', 'mut1?', 'mut2?'], 'fitness', ['HaH', 'Normal', 'Cross', 'GCross', 'Mut', 'TMut', 'NTMut'], 'dataset1')
+    
+    #load_group_plot(['cross0?', 'cross1?', 'mut0?', 'mut1?', 'mut2?'], 'fitness', ['Cross', 'GCross', 'Mut', 'TMut', 'NTMut'], True, 'operators-best')
+    #load_group_plot(['cross0?', 'cross1?', 'mut0?', 'mut1?', 'mut2?'], 'fitness', ['Cross', 'GCross', 'Mut', 'TMut', 'NTMut'], False, 'operators-mean')
+    #load_group_plot(['halfhalf1?', 'halfchoice1?', 'normal?'], 'fitness', ['HaH', 'HaC', 'Normal'], True, 'evol-best')
+    #load_group_plot(['halfhalf1?', 'halfchoice1?', 'normal?'], 'fitness', ['HaH', 'HaC', 'Normal'], False, 'evol-mean')
+    
+    #load_group_plot(['halfhalf1?', 'halfhalf2?', 'halfhalf3?'], 'fitness', ['Texture1', 'Texture2', 'Texture3'], 'datasets')
 
+    #load_and_plot(['membrane1', 'membrane2', 'membrane3', 'membrane4', 'membrane5'], 'fitness', ['M1', 'M2', 'M3', 'M4', 'M5'], True, 'membrane-best')
+    #load_and_plot(['membrane1', 'membrane2', 'membrane3', 'membrane4', 'membrane5'], 'fitness', ['M1', 'M2', 'M3', 'M4', 'M5'], False, 'membrane-mean')
 
+    #load_and_plot(['borders1', 'borders2', 'borders3', 'borders4', 'borders5'], 'fitness', ['B1', 'B2', 'B3', 'B4', 'B5'], True, 'borders-best')
+    #load_and_plot(['borders1', 'borders2', 'borders3', 'borders4', 'borders5'], 'fitness', ['B1', 'B2', 'B3', 'B4', 'B5'], False, 'borders-mean')
+
+    load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], True, 'bsds-best')
+    load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], False, 'bsds-mean')
 
 
     # load_group_plot(['rand2?', 'tex2?'], 'param', labels, 'dataset2')
@@ -164,42 +185,3 @@ if __name__ == '__main__':
 
     # load_group_plot(['rand2?', 'tex2?'], 'time', labels, 'dataset2')
     # load_group_plot(['rand3?', 'tex3?'], 'time', labels, 'dataset3')
-
-
-    # execute(['acc1', 'dic1', 'jac1', 'sen1', 'spe1'], 'fitness', 'dataset1')
-    # plt.clf()
-    # execute(['acc2', 'dic2', 'jac2', 'sen2', 'spe2'], 'fitness', 'dataset2')
-    # plt.clf()
-    # execute(['acc3', 'dic3', 'jac3', 'sen3', 'spe3'], 'fitness', 'dataset3')
-    # plt.clf()
-
-    # execute(['acc1', 'dic1', 'jac1', 'sen1', 'spe1'], 'param', 'dataset1')
-    # plt.clf()
-    # execute(['acc2', 'dic2', 'jac2', 'sen2', 'spe2'], 'param', 'dataset2')
-    # plt.clf()
-    # execute(['acc3', 'dic3', 'jac3', 'sen3', 'spe3'], 'param', 'dataset3')
-    # plt.clf()
-
-    # execute(['acc1', 'dic1', 'jac1', 'sen1', 'spe1'], 'time', 'dataset1')
-    # plt.clf()
-    # execute(['acc2', 'dic2', 'jac2', 'sen2', 'spe2'], 'time', 'dataset2')
-    # plt.clf()
-    # execute(['acc3', 'dic3', 'jac3', 'sen3', 'spe3'], 'time', 'dataset3')
-    # plt.clf()
-
-    # execute(['acc2', 'racc2'], 'fitness', 'dataset2')
-    # plt.show()
-    # plt.clf()
-
-    # execute(['dic4', 'sen4'], 'param', 'dataset4')
-    # plt.clf()
-    # execute(['dic4', 'sen4'], 'time', 'dataset4')
-    # plt.clf()
-
-
-    # execute(['tex22', 'rand21', 'rand22'], 'fitness', 'dataset2', ['tex2', 'rand1', 'rand2'])
-    # plt.show()
-    # plt.clf()
-    # execute(['tex31', 'tex32', 'rand31', 'rand32'], 'fitness', 'dataset3', ['tex1', 'tex2', 'rand1', 'rand2'])
-    # plt.show()
-    # plt.clf()

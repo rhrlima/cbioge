@@ -36,6 +36,10 @@ class ElitistReplacement(GeneticOperator):
 
     def execute(self, population, offspring):
 
+        for s in population:
+            if s.fitness is None:
+                s.fitness = -1
+
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         offspring.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
@@ -127,3 +131,32 @@ class HalfAndHalfOperator(GeneticOperator):
             offspring = self.op2.execute(offspring)
 
         return offspring
+
+
+class HalfAndChoiceOperator(GeneticOperator):
+
+    def __init__(self, h_op, o_ops, h_rate=0.5, o_rate=[0.5]):
+        self.h_op = h_op
+        self.o_ops = o_ops
+        self.h_rate = h_rate
+        self.o_rate = o_rate
+
+    def execute(self, parents):
+
+        offspring = parents[0].copy()
+
+        if np.random.rand() < self.h_rate:
+            print('applied crossover')
+            offspring = self.h_op.execute(parents)
+        else:
+            rand = np.random.rand()
+            print(rand)
+            for i in range(len(self.o_ops)):
+                if rand < np.sum(self.o_rate[:i+1]):
+                    print('applying', self.o_ops[i])
+                    offspring = self.o_ops[i].execute(offspring)
+                    break
+
+        return offspring
+
+

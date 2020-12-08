@@ -107,3 +107,7 @@ class DSGENonterminalMutation(DSGEMutation):
     def __str__(self):
 
         return 'DSGE Nonterminal Mutation'
+
+class DSGENonTerminalMutation(DSGEMutation):
+
+    pass

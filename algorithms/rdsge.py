@@ -163,6 +163,11 @@ class RandomGrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.mutation = data['mutation']
         self.replacement = data['replacement']
 
+        # temp
+        for s in self.population:
+            if s.fitness is None:
+                s.fitness = -1
+
     def print_progress(self):
         curr_time = time.strftime('%x %X')
         best = self.population[0].genotype

@@ -321,6 +321,7 @@ class UNetProblem(BaseProblem):
                 model = model_from_json(phenotype)
 
             model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
+            model.summary()
 
             x_train = self.x_train[:self.train_size]
             y_train = self.y_train[:self.train_size]
@@ -328,7 +329,6 @@ class UNetProblem(BaseProblem):
             y_valid = self.y_valid[:self.valid_size]
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
-
 
             ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
             callbacks = [ts]
@@ -338,7 +338,9 @@ class UNetProblem(BaseProblem):
                 callbacks.append(mc)
 
             if self.training:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
+                history = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
+                self.plot_loss(history)
+                self.plot_acc(history)
             scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
             if self.verbose:
@@ -351,9 +353,34 @@ class UNetProblem(BaseProblem):
                     os.mkdir(ckpt.ckpt_folder)
                 
                 for i, img in enumerate(predictions):
+                    #img = img.astype('uint8')
                     write_image(os.path.join(ckpt.ckpt_folder, f'{i}.png'), img)
 
             return scores, model.count_params()
         except Exception as e:
             print('[evaluation]', e)
             return (-1, None), 0
+
+    def plot_loss(self, history):
+
+        plt.figure(figsize=[8,6])
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.legend(['Training Loss', 'Validation Loss'])
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title('Loss Curves')
+        plt.savefig(os.path.join(ckpt.ckpt_folder, 'loss.png'))
+
+    def plot_acc(self, history):
+
+        metric_name = self.metrics[0].__name__
+
+        plt.figure(figsize=[8,6])
+        plt.plot(history.history[metric_name])
+        plt.plot(history.history['val_'+metric_name])
+        plt.legend(['Training Accuracy', 'Validation Accuracy'], loc='lower right')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.title('Accuracy Curves')
+        plt.savefig(os.path.join(ckpt.ckpt_folder, 'acc.png'))

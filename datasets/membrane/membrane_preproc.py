@@ -105,6 +105,7 @@ if __name__ == '__main__':
     #save_images('train_posproc/label', masks)
     #save_images('npy/train/image', images, npy=True)
     #save_images('npy/train/label', masks, npy=True)
+
     print('original')
     print(train_dataset.shape, train_labels.shape)
 
@@ -125,17 +126,19 @@ if __name__ == '__main__':
     print(train_dataset.shape, train_labels.shape)
     print(valid_dataset.shape, valid_labels.shape)
 
-    with open(pickle_file, 'wb') as f:
-        save = {
-            'train_dataset': train_dataset, 
-            'train_labels': train_labels, 
-            'valid_dataset': valid_dataset, 
-            'valid_labels': valid_labels, 
-            'test_dataset': test_dataset, 
-            'test_labels': test_labels, 
-            'input_shape': train_dataset[0].shape
-        }
-        pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
 
-    stat_info = os.stat(pickle_file)
-    print('Compressed pickle size: ', stat_info.st_size)
+
+    # with open(pickle_file, 'wb') as f:
+    #     save = {
+    #         'train_dataset': train_dataset, 
+    #         'train_labels': train_labels, 
+    #         'valid_dataset': valid_dataset, 
+    #         'valid_labels': valid_labels, 
+    #         'test_dataset': test_dataset, 
+    #         'test_labels': test_labels, 
+    #         'input_shape': train_dataset[0].shape
+    #     }
+    #     pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
+
+    # stat_info = os.stat(pickle_file)
+    # print('Compressed pickle size: ', stat_info.st_size)

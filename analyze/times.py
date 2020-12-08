@@ -5,7 +5,7 @@ import glob
 import sys
 import os
 
-#import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 
 # from algorithms.solutions import GESolution
@@ -68,11 +68,12 @@ from utils import checkpoint as ckpt
 # plot_time_x_complex(solutions)
 
 
-def plot(x, y, xlabel='x', ylabel='y'):
+def plot(x, y, xlabel='x', ylabel='y', name='plot.png'):
     plt.plot(x, y)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.savefig('plotxy.png')
+    plt.savefig(name)
+    plt.clf()
 
 
 if __name__ == '__main__':
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     fitness = []
     params = []
     times = []
-    population.sort(key=lambda s: s['params'])
+    #population.sort(key=lambda s: s['params'])
     for s in population:
         #print(s['fitness'], s['params'], s['time'].total_seconds())
         fitness.append(s['fitness'])
@@ -104,5 +105,19 @@ if __name__ == '__main__':
 
         totaltime += s['time']
 
+    mean_fitness = []
+    mean_params = []
+    mean_times = []
+    for i in range(0, 1000, 10):
+        print(i, i+10, np.mean(fitness[i:i+10]))
+        #mean_fitness.append(max(fitness[i:i+10]))
+        mean_fitness.append(np.mean(fitness[i:i+10]))
+        mean_params.append(np.mean(params[i:i+10]))
+        mean_times.append(np.mean(times[i:i+10]))
+
     print('total time', totaltime)
     #plot(params, times, 'params', 'times')
+    plot(range(len(mean_fitness)), mean_fitness, 'index', 'fitness', 'mean_fitness.png')
+    plot(range(len(mean_params)), mean_params, 'index', 'params', 'mean_params.png')
+    plot(range(len(mean_times)), mean_times, 'index', 'times', 'mean_times.png')
+    #plot(range(len(fitness)), params, 'index', 'params', 'params.png')
