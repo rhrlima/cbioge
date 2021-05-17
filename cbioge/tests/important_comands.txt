@@ -1,4 +1,0 @@
-To test: python3 setup.py pytest
-To build: python3 setup.py  bdist_wheel
-
-to Install pip3 install /path/to/wheelfile.whl
