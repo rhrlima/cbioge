@@ -23,7 +23,8 @@ Install external dependencies:
 `python3 -m pip install -U scikit-image`
 
 To test library: `python3 setup.py pytest`
+
 To build library: `python3 setup.py  bdist_wheel`
 
-To Install pip3 install /path/to/cbioge/cbioge-X.X.-py3-none-any.whl
+To Install library: `pip3 install /path/to/cbioge/cbioge-X.X.-py3-none-any.whl`
 
