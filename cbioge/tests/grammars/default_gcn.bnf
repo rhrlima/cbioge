@@ -1,0 +1,9 @@
+<gcn> ::= <layer_c> <conv> <dense>
+<layer_c> ::= <conv> | <dropout> | <layer_c> <layer_c>
+<dense> ::= conv <conv_type> <units> softmax
+<conv> ::= conv <conv_type> <units> <activation>
+<conv_type> ::= GraphConv | GraphSageConv | ARMAConv | GraphAttention | APPNP 
+<dropout> ::= dropout <rate>
+<units> ::= 32 | 64 | 128 | 256
+<activation> ::= relu 
+<rate> ::= 0.25 | 0.33 | 0.5
