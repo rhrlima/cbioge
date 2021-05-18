@@ -1,3 +1,4 @@
+import os
 import itertools
 import json
 import numpy as np
@@ -6,70 +7,117 @@ import re
 
 from math import sin, cos, exp, log
 
+from keras.optimizers import Adam
 from keras.models import model_from_json
 from keras.utils import np_utils
+from keras.callbacks import ModelCheckpoint, History
 
+from utils import checkpoint as ckpt
 from utils.image import *
+from utils.model import TimedStopping, plot_acc, plot_loss
 
 from .problem import BaseProblem
 
 class CNNProblem(BaseProblem):
 
-    def __init__(self, parser_, dataset=None):
+    def __init__(self, parser_):
         self.parser = parser_
 
-        self.batch_size = 128
+        self.batch_size = 10
         self.epochs = 1
         self.training = True
+        self.timelimit = 3600
 
         self.loss = 'categorical_crossentropy'
-        self.opt = 'adam'
+        self.opt = Adam(lr = 1e-4)
         self.metrics = ['accuracy']
 
         self.verbose = False
 
-        if dataset:
-            self._load_dataset_from_pickle(dataset)
-        self._create_layers_base()
-        self._generate_configurations()
+        self._initialize_blocks()
+        #self._create_layers_base()
+        #self._generate_configurations()
 
-    def _load_dataset_from_pickle(self, pickle_file):
+        self.workers = 1
+        self.multiprocessing = False
+
+        self.verbose = False
+
+    def read_dataset_from_pickle(self, pickle_file):
+        ''' Reads a dataset stored in a pickle file
+
+            expects a dict with the following keys:
+            x_train, y_train
+            x_valid, y_valid
+            x_test, y_test
+            input_shape
+            num_classes
+        '''
         with open(pickle_file, 'rb') as f:
             temp = pickle.load(f)
 
-            self.x_train = temp['train_dataset']
-            self.y_train = temp['train_labels']
+            # self.x_train = temp['x_train']
+            # self.y_train = temp['y_train']
+            # self.x_valid = temp['x_valid']
+            # self.y_valid = temp['y_valid']
+            # self.x_test = temp['x_test']
+            # self.y_test = temp['y_test']
+            # self.input_shape = temp['input_shape']
+            # self.num_classes = temp['num_classes']
 
-            self.x_valid = temp['valid_dataset']
-            self.y_valid = temp['valid_labels']
+            # self.train_size = len(self.x_train)
+            # self.valid_size = len(self.x_valid)
+            # self.test_size = len(self.x_test)
 
-            self.x_test = temp['test_dataset']
-            self.y_test = temp['test_labels']
+            self.read_dataset_from_dict(temp)
 
-            self.input_shape = temp['input_shape']
-            self.num_classes = temp['num_classes']
-
-            self.train_size = len(self.x_train)
-            self.valid_size = len(self.x_valid)
-            self.test_size = len(self.x_test)
             del temp
 
-        self.x_train = self.x_train.reshape((-1,)+self.input_shape)
-        self.x_valid = self.x_valid.reshape((-1,)+self.input_shape)
-        self.x_test = self.x_test.reshape((-1,)+self.input_shape)
+        #self.x_train = self.x_train.reshape((-1,)+self.input_shape)
+        #self.x_valid = self.x_valid.reshape((-1,)+self.input_shape)
+        #self.x_test = self.x_test.reshape((-1,)+self.input_shape)
+
+        #self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
+        #self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
+        #self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
+
+    def read_dataset_from_dict(self, data_dict):
+        ''' Reads a dataset stored in dict
+
+            expects a dict with the following keys:
+            x_train, y_train
+            x_valid, y_valid
+            x_test, y_test
+            input_shape
+            num_classes
+        '''
+
+        self.x_train = data_dict['x_train']
+        self.y_train = data_dict['y_train']
+        self.x_valid = data_dict['x_valid']
+        self.y_valid = data_dict['y_valid']
+        self.x_test = data_dict['x_test']
+        self.y_test = data_dict['y_test']
+        self.input_shape = data_dict['input_shape']
+        self.num_classes = data_dict['num_classes']
+
+        self.train_size = len(self.x_train)
+        self.valid_size = len(self.x_valid)
+        self.test_size = len(self.x_test)
 
         self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
         self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
         self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
 
-    def _create_layers_base(self):
-        self.layers = {
+    def _initialize_blocks(self):
+        self.blocks = {
             'input': ['InputLayer', 'batch_input_shape'],
             'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
             'avgpool': ['AveragePooling2D', 'pool_size', 'strides', 'padding'],
             'maxpool': ['MaxPooling2D', 'pool_size', 'strides', 'padding'],
             'dropout': ['Dropout', 'rate'],
-            'dense': ['Dense', 'units'],
+            'dense': ['Dense', 'units', 'activation'],
+            'flatten': ['Flatten'],
         }
 
     def _generate_configurations(self):
@@ -93,12 +141,13 @@ class CNNProblem(BaseProblem):
         index = 0
         while index < len(phenotype):
             block = phenotype[index]
-            if block == 'conv':
-                end = index+6
-            elif block == 'avgpool' or block == 'maxpool':
-                end = index+4
-            else:
-                end = index+2
+            # if block == 'conv':
+            #     end = index+6
+            # elif block == 'avgpool' or block == 'maxpool':
+            #     end = index+4
+            # else:
+            #     end = index+2
+            end = index + len(self.blocks[block])
 
             new_mapping.append(phenotype[index:end])
             phenotype = phenotype[end:]
@@ -196,15 +245,15 @@ class CNNProblem(BaseProblem):
 
         base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
 
-        if block_name in self.names:
-            self.names[block_name] += 1
+        if block_name in self.naming:
+            self.naming[block_name] += 1
         else:
-            self.names[block_name] = 0
-        name = f'{block_name}_{self.names[block_name]}'
+            self.naming[block_name] = 0
+        name = f'{block_name}_{self.naming[block_name]}'
 
-        base_block['class_name'] = self.layers[block_name][0]
+        base_block['class_name'] = self.blocks[block_name][0]
         base_block['name'] = name
-        for name, value in zip(self.layers[block_name][1:], params):
+        for name, value in zip(self.blocks[block_name][1:], params):
             base_block['config'][name] = self._parse_value(value)
         #print(base_block)
         return base_block
@@ -222,36 +271,34 @@ class CNNProblem(BaseProblem):
 
     def map_genotype_to_phenotype(self, genotype):
 
-        self.names = {}
+        self.naming = {}
 
-        mapping = self.parser.dsge_recursive_parse(genotype)
+        mapping, genotype = self.parser.dsge_recursive_parse(genotype)
         mapping = self._reshape_mapping(mapping)
-        
-        #repaired = self._repair_mapping(mapping)
 
-        # if not repaired:
-        #     return None
+        mapping.insert(0, ['input', (None,)+self.input_shape]) #input layer
+        mapping.append(['dense', self.num_classes, 'softmax']) #output layer
 
-        # model = {'class_name': 'Model', 
-        #     'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+        model = {'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
-        # mapping.insert(0, ['input', (None,)+self.input_shape])
         for i, layer in enumerate(mapping):
-            print(layer)
-        #     block_name, params = layer[0], layer[1:]
-        #     block = self._build_block(block_name, params)
-        #     model['config']['layers'].append(block)
+            #print(layer)
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            model['config']['layers'].append(block)
 
-        # self._wrap_up_model(model)
+        self._wrap_up_model(model)
 
-        # return json.dumps(model)
-        return None
+        return json.dumps(model)
 
-    def evaluate(self, phenotype):
+    def evaluate(self, phenotype=None, model=None, predict=False, save_model=False):
         try:
-            model = model_from_json(phenotype)
+            if model is None:
+                model = model_from_json(phenotype)
             
             model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
+            #model.summary()
 
             x_train = self.x_train[:self.train_size]
             y_train = self.y_train[:self.train_size]
@@ -260,14 +307,43 @@ class CNNProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
+            ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
+            callbacks = [ts]
+
+            if save_model:
+                mc = ModelCheckpoint(
+                    filepath=os.path.join(ckpt.ckpt_folder, f'model_weights.hdf5'), 
+                    monitor='val_accuracy', save_weights_only=True, save_best_only=True)
+                callbacks.append(mc)
+
             if self.training:
-                model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose)
-            scores = model.evaluate(x_valid, y_valid, verbose=self.verbose)
+                history = model.fit(x_train, y_train, 
+                    validation_data=(x_valid, y_valid), batch_size=self.batch_size, 
+                    epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
+            scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, 
+                verbose=self.verbose)
 
             if self.verbose:
                 print('scores', scores)
 
-            return scores
+            if predict:
+                if not os.path.exists(ckpt.ckpt_folder):
+                    os.mkdir(ckpt.ckpt_folder)
+
+                predictions = model.predict(x_test, batch_size=self.batch_size, 
+                    verbose=self.verbose)
+
+                np.save(os.path.join(ckpt.ckpt_folder, 'predictions.npy'), 
+                    predictions)
+
+                plot_acc(history)
+                plot_loss(history)
+
+                #print(predictions.shape)
+                #print(predictions)
+                
+            return scores, model.count_params()
+
         except Exception as e:
             print('[evaluation]', e)
-            return -1
+            return (-1, None), 0

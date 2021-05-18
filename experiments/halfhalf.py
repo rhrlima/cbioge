@@ -112,7 +112,7 @@ def run_evolution():
 
     algorithm.verbose = (args.verbose>0) # verbose 1 or higher
     problem.verbose = (args.verbose>1) # verbose 2 or higher
-    parser.verbose = args.verbose>1
+    parser.verbose = (args.verbose>1)
 
     population = algorithm.execute(args.checkpoint)
 

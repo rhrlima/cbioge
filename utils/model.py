@@ -1,3 +1,4 @@
+import os
 import time
 
 from keras.callbacks import Callback
@@ -6,6 +7,33 @@ from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
 from keras import backend as K
+
+import matplotlib.pyplot as plt
+import utils.checkpoint as ckpt
+
+
+def plot_loss(history, name='loss.png'):
+
+    plt.figure(figsize=[8,6])
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.legend(['Training Loss', 'Validation Loss'])
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Loss Curves')
+    plt.savefig(os.path.join(ckpt.ckpt_folder, name))
+
+
+def plot_acc(history, metric_name='accuracy', name='acc.png'):
+
+    plt.figure(figsize=[8,6])
+    plt.plot(history.history[metric_name])
+    plt.plot(history.history['val_'+metric_name])
+    plt.legend(['Training Accuracy', 'Validation Accuracy'], loc='lower right')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy Curves')
+    plt.savefig(os.path.join(ckpt.ckpt_folder, name))
 
 
 def unet(input_size):
@@ -186,15 +214,6 @@ class WeightedMetric:
     def get_loss(self):
 
         return self.execute_loss
-
-
-#limits GPU memory to use tensorflow-gpu
-def limit_gpu_memory(fraction=0.5):
-    import tensorflow as tf
-    from keras.backend.tensorflow_backend import set_session
-    config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = fraction
-    set_session(tf.Session(config=config))
 
 
 if __name__ == '__main__':
