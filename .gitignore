@@ -19,3 +19,6 @@ datasets/*
 # pycharm files
 .idea/
 
+# coverage and pytest
+.coverage
+.pytest_cache

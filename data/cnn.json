@@ -11,8 +11,8 @@
 		"flatten": ["Flatten"]
 	},
 
-	"grammar": {
-		"<cnn>": [["input", "<conv>", "<c_layer>", "flatten", "<d_layer>", "<dense>"]],
+	"rules": {
+		"<cnn>": [["<conv>", "<c_layer>", "flatten", "<d_layer>", "<dense>"]],
 
 		"<c_layer>" : [["<conv>", "<c_layer>"], ["<pool>", "<c_layer>"], ["<c_node>"], ["&"]],
 		"<d_layer>" : [["<dense>", "<d_layer>"], ["<dropout>", "<d_layer>"], ["<d_node>"], ["&"]],
