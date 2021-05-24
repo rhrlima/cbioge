@@ -1,4 +1,5 @@
 from cbioge.problems.problem import BaseProblem
+from cbioge.problems.dnn import ModelRunner
 
 from cbioge.problems.classification import CNNProblem
 from cbioge.problems.segmentation import UNetProblem
@@ -9,6 +10,8 @@ from cbioge.problems.stringmatch import StringMatchProblem
 
 
 __all__ = [
+    'ModelRunner',
+
 	'BaseProblem',
 	
     'CNNProblem',

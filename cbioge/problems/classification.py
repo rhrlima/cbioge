@@ -1,32 +1,26 @@
 import os
-import itertools
 import json
-import numpy as np
-import pickle
 import re
-
-from math import sin, cos, exp, log
+import numpy as np
 
 from keras.optimizers import Adam
 from keras.models import model_from_json
 from keras.utils import np_utils
-from keras.callbacks import ModelCheckpoint, History
 
 from cbioge.utils import checkpoint as ckpt
-from cbioge.utils.image import *
-from cbioge.utils.model import TimedStopping, plot_acc, plot_loss
 
-from .problem import BaseProblem
+from cbioge.problems import BaseProblem
+from cbioge.problems.dnn import ModelRunner
 
 class CNNProblem(BaseProblem):
 
-    def __init__(self, parser_):
-        self.parser = parser_
+    def __init__(self, parser, dataset):
+        self.parser = parser
+        self._read_dataset(dataset)
 
         self.batch_size = 10
         self.epochs = 1
-        self.training = True
-        self.timelimit = 3600
+        self.timelimit = None
 
         self.loss = 'categorical_crossentropy'
         self.opt = Adam(lr = 1e-4)
@@ -34,9 +28,7 @@ class CNNProblem(BaseProblem):
 
         self.verbose = False
 
-        self._initialize_blocks()
-        #self._create_layers_base()
-        #self._generate_configurations()
+        self.blocks = self.parser.blocks
 
         self.workers = 1
         self.multiprocessing = False
@@ -71,31 +63,6 @@ class CNNProblem(BaseProblem):
         self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
         self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
 
-    def _initialize_blocks(self):
-        self.blocks = {
-            'input': ['InputLayer', 'batch_input_shape'],
-            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
-            'avgpool': ['AveragePooling2D', 'pool_size', 'strides', 'padding'],
-            'maxpool': ['MaxPooling2D', 'pool_size', 'strides', 'padding'],
-            'dropout': ['Dropout', 'rate'],
-            'dense': ['Dense', 'units', 'activation'],
-            'flatten': ['Flatten'],
-        }
-
-    def _generate_configurations(self):
-        kernels = [i[0] for i in self.parser.GRAMMAR['<ksize>']]
-        strides = [i[0] for i in self.parser.GRAMMAR['<strides>']]
-        padding = [i[0] for i in self.parser.GRAMMAR['<padding>']]
-        conv_configs = list(itertools.product(kernels, strides, padding))
-        max_img_size = self.input_shape[1]
-        self.conv_valid_configs = {}
-        for img_size in range(0, max_img_size+1):
-            key = str(img_size)
-            self.conv_valid_configs[key] = conv_configs[:] #copies the configs list
-            for config in conv_configs:
-                if calculate_output_size((img_size, img_size), *config) <= (0, 0):
-                    self.conv_valid_configs[key].remove(config)
-
     def _reshape_mapping(self, phenotype):
 
         new_mapping = []
@@ -103,90 +70,12 @@ class CNNProblem(BaseProblem):
         index = 0
         while index < len(phenotype):
             block = phenotype[index]
-            # if block == 'conv':
-            #     end = index+6
-            # elif block == 'avgpool' or block == 'maxpool':
-            #     end = index+4
-            # else:
-            #     end = index+2
             end = index + len(self.blocks[block])
 
             new_mapping.append(phenotype[index:end])
             phenotype = phenotype[end:]
 
         return new_mapping
-
-    def _get_layer_outputs(self, mapping):
-        outputs = []
-        depth = 0
-        for i, block in enumerate(mapping):
-            name, params = block[0], block[1:]
-            if name == 'input':
-                output_shape = self.input_shape
-            elif name == 'conv':
-                output_shape = calculate_output_size(output_shape, *params[1:4])
-                output_shape += (params[0],)
-            elif name in ['maxpool', 'avgpool']:
-                temp = calculate_output_size(output_shape, *params[:3])
-                output_shape = temp + (output_shape[2],)
-            print('\t'*depth, i, output_shape, block)
-            outputs.append(output_shape)
-        return outputs
-
-    def _repair_mapping(self, phenotype, input_shape=None, index=0, configurations=None):
-
-        #print('#'*index, index)
-
-        # if the mapping reached the end, without problems, return TRUE
-        if index >= len(phenotype):
-            return True
-
-        input_shape = self.input_shape if input_shape is None else input_shape
-        img_size = input_shape[1]
-
-        # the repair occurs just for convolution or pooling
-        if phenotype[index][0] in ['conv', 'maxpool', 'avgpool']:
-
-            # get the needed parameters for each type of block (convolution or pooling)    
-            if phenotype[index][0] == 'conv':
-                start, end = 2, 5
-            if phenotype[index][0] in ['maxpool', 'avgpool']:
-                start, end = 1, 4
-
-            this_config = tuple(phenotype[index][start:end])
-
-            # if the current config is VALID, calculate output and call next block
-            if this_config in self.conv_valid_configs[str(img_size)]:
-                output_shape = calculate_output_size(input_shape, *this_config)
-                #print(this_config, 'is valid', input_shape, output_shape)
-                return self._repair_mapping(phenotype, output_shape, index+1)
-            else:
-
-                # if the current config is not VALID, generate a list of indexes 
-                # of the possible configurations and shuffles it
-                if configurations is None:
-                    configurations = np.arange(len(self.conv_valid_configs[str(img_size)]))
-                    np.random.shuffle(configurations)
-
-                # if the current config is in the possibilities but can't be used
-                # remove the index corresponding to it
-                if this_config in self.conv_valid_configs[str(img_size)]:
-                    cfg_index = self.conv_valid_configs[str(img_size)].index(this_config)
-                    configurations.remove(cfg_index)
-
-                # for each new config, try it by calling the repair to it
-                for cfg_index in configurations:
-                    new_config = self.conv_valid_configs[str(img_size)][cfg_index]
-                    phenotype[index][start:end] = list(new_config)
-                    if self._repair_mapping(phenotype, input_shape, index, configurations):
-                        return True
-
-            # if all possibilities are invalid or can't be used, this solutions
-            # is invalid
-            return False
-
-        # nothing to be validated, call next block
-        return self._repair_mapping(phenotype, input_shape, index+1)
 
     def _parse_value(self, value):
         #value = value.replace(' ', '')
@@ -217,7 +106,6 @@ class CNNProblem(BaseProblem):
         base_block['name'] = name
         for name, value in zip(self.blocks[block_name][1:], params):
             base_block['config'][name] = self._parse_value(value)
-        #print(base_block)
         return base_block
 
     def _wrap_up_model(self, model):
@@ -254,13 +142,19 @@ class CNNProblem(BaseProblem):
 
         return json.dumps(model)
 
-    def evaluate(self, phenotype=None, model=None, predict=False, save_model=False):
+    def evaluate(self, solution):
+        ''' Evaluates the phenotype
+
+            phenotype: json structure containing the network architecture
+            weights: network weights (optional)
+
+        '''
         try:
-            if model is None:
-                model = model_from_json(phenotype)
-            
+            model = model_from_json(solution.phenotype)
             model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
 
+            # defines the portion of the dataset being used for 
+            # training, validation, and test
             x_train = self.x_train[:self.train_size]
             y_train = self.y_train[:self.train_size]
             x_valid = self.x_valid[:self.valid_size]
@@ -268,43 +162,27 @@ class CNNProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
-            ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
-            callbacks = [ts]
+            solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
+            runner = ModelRunner(model, path=solution_path, verbose=self.verbose)
+            runner.train_model(x_train, y_train, 
+                self.batch_size, 
+                self.epochs, 
+                validation_data=(x_valid, y_valid), 
+                timelimit=self.timelimit)
+            runner.test_model(x_test, y_test, 
+                self.batch_size)
 
-            if save_model:
-                mc = ModelCheckpoint(
-                    filepath=os.path.join(ckpt.ckpt_folder, f'model_weights.hdf5'), 
-                    monitor='val_accuracy', save_weights_only=True, save_best_only=True)
-                callbacks.append(mc)
+            # local changes for checkpoint
+            solution.fitness = runner.accuracy
+            solution.params = runner.params
+            solution.evaluated = True
 
-            if self.training:
-                history = model.fit(x_train, y_train, 
-                    validation_data=(x_valid, y_valid), batch_size=self.batch_size, 
-                    epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
-            scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, 
-                verbose=self.verbose)
-
-            if self.verbose:
-                print('scores', scores)
-
-            if predict:
-                if not os.path.exists(ckpt.ckpt_folder):
-                    os.mkdir(ckpt.ckpt_folder)
-
-                predictions = model.predict(x_test, batch_size=self.batch_size, 
-                    verbose=self.verbose)
-
-                np.save(os.path.join(ckpt.ckpt_folder, 'predictions.npy'), 
-                    predictions)
-
-                plot_acc(history)
-                plot_loss(history)
-
-                #print(predictions.shape)
-                #print(predictions)
-                
-            return scores, model.count_params()
+            return True
 
         except Exception as e:
             print('[evaluation]', e)
-            return (1, -1), 0 #(loss, acc), params
+            solution.fitness = -1
+            solution.params = 0
+            solution.evaluated = True
+
+            return False

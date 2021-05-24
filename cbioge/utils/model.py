@@ -9,7 +9,7 @@ from keras.optimizers import *
 from keras import backend as K
 
 import matplotlib.pyplot as plt
-import utils.checkpoint as ckpt
+from cbioge.utils import checkpoint as ckpt
 
 
 def plot_loss(history, name='loss.png'):
@@ -88,11 +88,14 @@ def unet(input_size):
 
 
 class TimedStopping(Callback):
-    '''Stop training when enough time has passed.
-    # Arguments
-        seconds: maximum time before stopping.
-        verbose: verbosity mode.
+    ''' Stop training when enough time has passed.
+        Verification is made at each batch end.
+        
+        # Arguments
+        seconds: maximum time before stopping
+        verbose: verbosity mode
     '''
+
     def __init__(self, seconds=None, verbose=0):
         super(Callback, self).__init__()
 
@@ -217,4 +220,11 @@ class WeightedMetric:
 
 
 if __name__ == '__main__':
-    unet((256, 256, 1))
+    #unet((256, 256, 1))
+
+    inputs = Input((32, 32, 3))
+    dense1 = Dense(256)(inputs)
+    dense2 = Dense(10)(dense1)
+    model = Model(inputs=inputs, outputs=dense2)
+    model.compile('Adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    print(model.to_json())

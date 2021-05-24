@@ -7,7 +7,7 @@ import numpy as np
 
 from multiprocessing import Pool
 
-from utils import checkpoint as ckpt
+from ..utils import checkpoint as ckpt
 from .solution import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 

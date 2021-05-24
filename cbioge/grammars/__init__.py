@@ -1,3 +1,3 @@
-from cbioge.grammars.grammar import BNFGrammar, Grammar
+from cbioge.grammars.grammar import Grammar
 
-__all__ = ['BNFGrammar', 'Grammar']
+__all__ = ['Grammar']

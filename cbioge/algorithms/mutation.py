@@ -68,8 +68,8 @@ class DSGEMutation(GeneticOperator):
         gene_idx = np.random.randint(0, genes_len)
 
         if np.random.rand() < self.mut_rate:
-            symb = self.parser.NT[block_idx] # symbol on the gene index
-            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
+            symb = self.parser.nonterm[block_idx] # symbol on the gene index
+            max_value = len(self.parser.rules[symb]) # options for the symb
             #print('values', max_value)
             if max_value > 1:
                 curr_value = solution.genotype[block_idx][gene_idx]

@@ -7,7 +7,7 @@ import numpy as np
 
 from multiprocessing import Pool
 
-from utils import checkpoint as ckpt
+from ..utils import checkpoint as ckpt
 from .solution import GESolution
 from .ea import BaseEvolutionaryAlgorithm
 
@@ -34,6 +34,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.verbose = False
 
+        
         np.random.seed(seed=self.seed)
 
     def create_solution(self):
@@ -61,24 +62,24 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             print(f'<{curr_time}> [eval] solution {solution.id} started')
             print('genotype:', solution.genotype)
 
-        phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
+        solution.phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
 
         start_time = dt.datetime.today()
-        scores, params = self.problem.evaluate(phenotype)
+        self.problem.evaluate(solution)
         end_time = dt.datetime.today()
 
         # scores:
         # 0: loss
         # 1: accuracy
         # 2..: others
-        fitness = scores[1]
+        #fitness = scores[1]
 
         # local changes for checkpoint
-        solution.fitness = fitness
-        solution.phenotype = phenotype
-        solution.evaluated = True
+        #solution.fitness = fitness
+        #solution.phenotype = phenotype
+        #solution.evaluated = True
         solution.time = end_time - start_time
-        solution.params = params
+        #solution.params = params
 
         ckpt.save_solution(solution)
 

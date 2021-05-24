@@ -3,21 +3,17 @@ import re
 import copy
 import json
 import pickle
-import itertools
 
-import keras
 from keras.optimizers import Adam
 from keras.models import model_from_json
-from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import *
 from keras.callbacks import *
 
-from utils import checkpoint as ckpt
-from utils.image import *
-from utils.model import TimedStopping
+from ..utils import checkpoint as ckpt
+from ..utils.image import *
+from ..utils.model import TimedStopping
 
-from problems import BaseProblem
-from datasets.dataset import DataGenerator
+from ..problems import BaseProblem
 
 
 class UNetProblem(BaseProblem):
