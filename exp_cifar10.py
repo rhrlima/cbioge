@@ -11,6 +11,8 @@ halfandhalf 60/40
 elitism 0.25
 
 '''
+import os
+
 from cbioge.algorithms.dsge import GrammaticalEvolution
 from cbioge.algorithms.selection import TournamentSelection
 from cbioge.algorithms.crossover import DSGECrossover
@@ -30,7 +32,7 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
-    ckpt.ckpt_folder = 'exp_cifar10'
+    ckpt.ckpt_folder = os.path.join('exp_cifar10', str(os.getpid()))
 
     dataset = read_dataset_from_pickle('data/cifar10.pickle')
     parser = Grammar('data/cnn.json')
@@ -39,12 +41,12 @@ def run_evolution():
     problem.epochs = 10
     problem.batch_size = 32
     problem.timelimit = 3600 #1h
-    problem.workers = 4
+    problem.workers = 2
     problem.multiprocessing = 1
 
     algorithm = GrammaticalEvolution(problem, parser)
     algorithm.pop_size = 20
-    algorithm.max_evals = 60
+    algorithm.max_evals = 500
     algorithm.selection = TournamentSelection(t_size=5, maximize=True)
     crossover = DSGECrossover(cross_rate=1.0)
     mutation = DSGENonterminalMutation(mut_rate=1.0, parser=parser, end_index=4)

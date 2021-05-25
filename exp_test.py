@@ -11,6 +11,8 @@ halfandhalf 60/40
 elitism 0.25
 
 '''
+import os
+
 from cbioge.algorithms.dsge import GrammaticalEvolution
 from cbioge.algorithms.selection import TournamentSelection
 from cbioge.algorithms.crossover import DSGECrossover
@@ -31,6 +33,8 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
+    ckpt.ckpt_folder = os.path.join('exp_cifar10', str(os.getpid()))
+
     dataset = read_dataset_from_pickle('data/cifar10.pickle')
     parser = Grammar('data/cnn.json')
     problem = CNNProblem(parser, dataset)
@@ -46,19 +50,14 @@ def run_evolution():
     problem.test_size = 100
 
     algorithm = GrammaticalEvolution(problem, parser)
-
     algorithm.pop_size = 20
-    algorithm.max_evals = 500
+    algorithm.max_evals = 60
     algorithm.selection = TournamentSelection(t_size=5, maximize=True)
-    crossover = DSGECrossover(cross_rate=1.0)
-    mutation = DSGENonterminalMutation(mut_rate=1.0, parser=parser, end_index=4)
-    algorithm.crossover = HalfAndHalfOperator(op1=crossover, op2=mutation, rate=0.6)
     algorithm.replacement = ElitistReplacement(rate=0.25, maximize=True)
-
-    ckpt.ckpt_folder = 'exp_cifar10'
-    if os.path.exists(ckpt.ckpt_folder):
-        import shutil
-        shutil.rmtree(path=ckpt.ckpt_folder) # deleta pasta se existir
+    algorithm.crossover = HalfAndHalfOperator(
+        op1=DSGECrossover(cross_rate=1.0), 
+        op2=DSGENonterminalMutation(mut_rate=1.0, parser=parser, end_index=4), 
+        rate=0.6)
 
     # 0 - sem log
     # 1 - log da evolução

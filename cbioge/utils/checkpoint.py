@@ -47,7 +47,7 @@ def save_data(data, filename):
 
     try:
         if not os.path.exists(ckpt_folder):
-            os.mkdir(ckpt_folder)
+            os.makedirs(ckpt_folder)
 
         complete_path = os.path.join(ckpt_folder, filename)
 
