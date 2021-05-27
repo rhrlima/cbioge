@@ -28,8 +28,8 @@ def run_evolution():
         shutil.rmtree(base_path)
     ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
 
-    dataset = read_dataset_from_pickle('data/membrane.pickle')
-    parser = Grammar('data/unet_restricted.json')
+    dataset = read_dataset_from_pickle('data/datasets/membrane.pickle')
+    parser = Grammar('data/grammars/unet_restricted.json')
     problem = UNetProblem(parser, dataset)
 
     problem.epochs = 1

@@ -24,4 +24,5 @@ datasets/*
 .pytest_cache
 
 # dataset files
+data/datasets/
 *.pickle

@@ -35,8 +35,8 @@ def run_evolution():
     base_path = 'exp_cifar10'
     ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
 
-    dataset = read_dataset_from_pickle('data/cifar10.pickle')
-    parser = Grammar('data/cnn.json')
+    dataset = read_dataset_from_pickle('data/datasets/cifar10.pickle')
+    parser = Grammar('data/grammars/cnn.json')
 
     problem = CNNProblem(parser, dataset)
     problem.epochs = 10
