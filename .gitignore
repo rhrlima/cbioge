@@ -22,3 +22,6 @@ datasets/*
 # coverage and pytest
 .coverage
 .pytest_cache
+
+# dataset files
+*.pickle
