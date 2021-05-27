@@ -1,4 +1,4 @@
-from cbioge.problems.problem import BaseProblem
+from cbioge.problems.problem import BaseProblem, DNNProblem
 from cbioge.problems.dnn import ModelRunner
 
 from cbioge.problems.classification import CNNProblem
@@ -13,6 +13,7 @@ __all__ = [
     'ModelRunner',
 
 	'BaseProblem',
+    'DNNProblem',    
 	
     'CNNProblem',
     'UNetProblem',

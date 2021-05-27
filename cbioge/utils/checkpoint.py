@@ -44,7 +44,6 @@ def load_solutions():
 
 
 def save_data(data, filename):
-
     try:
         if not os.path.exists(ckpt_folder):
             os.makedirs(ckpt_folder)

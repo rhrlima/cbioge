@@ -1,17 +1,5 @@
-'''
-DSGE para CIFAR 10
-
-epochs 10
-batch 32
-
-pop 20
-evals 500
-selection 5
-halfandhalf 60/40
-elitism 0.25
-
-'''
 import os
+import shutil
 
 from cbioge.algorithms.dsge import GrammaticalEvolution
 from cbioge.algorithms.selection import TournamentSelection
@@ -21,7 +9,7 @@ from cbioge.algorithms.operators import ElitistReplacement, HalfAndHalfOperator
 
 from cbioge.datasets.dataset import read_dataset_from_pickle
 from cbioge.grammars import Grammar
-from cbioge.problems import CNNProblem
+from cbioge.problems import UNetProblem
 
 from cbioge.utils.model import *
 from cbioge.utils import checkpoint as ckpt
@@ -33,26 +21,30 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
-    ckpt.ckpt_folder = os.path.join('exp_cifar10', str(os.getpid()))
+    base_path = 'exp_unet_test'
 
-    dataset = read_dataset_from_pickle('data/cifar10.pickle')
-    parser = Grammar('data/cnn.json')
-    problem = CNNProblem(parser, dataset)
+    # deletes folder and sub-folders for clean run
+    if os.path.exists(base_path):
+        shutil.rmtree(base_path)
+    ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
 
-    problem.epochs = 10
-    problem.batch_size = 32
-    problem.timelimit = 3600 #1h
-    problem.workers = 4
+    dataset = read_dataset_from_pickle('data/membrane.pickle')
+    parser = Grammar('data/unet_restricted.json')
+    problem = UNetProblem(parser, dataset)
+
+    problem.epochs = 1
+    problem.batch_size = 5
+    problem.workers = 2
     problem.multiprocessing = 1
 
-    problem.train_size = 100
-    problem.valid_size = 100
-    problem.test_size = 100
+    problem.train_size = 10
+    problem.valid_size = 10
+    problem.test_size = 10
 
     algorithm = GrammaticalEvolution(problem, parser)
     algorithm.pop_size = 20
-    algorithm.max_evals = 60
-    algorithm.selection = TournamentSelection(t_size=5, maximize=True)
+    algorithm.max_evals = 40
+    algorithm.selection = TournamentSelection(t_size=2, maximize=True)
     algorithm.replacement = ElitistReplacement(rate=0.25, maximize=True)
     algorithm.crossover = HalfAndHalfOperator(
         op1=DSGECrossover(cross_rate=1.0), 
@@ -63,7 +55,7 @@ def run_evolution():
     # 1 - log da evolução
     # 2 - log do problema
     # 3 - log da gramatica
-    verbose = 0
+    verbose = 2
     algorithm.verbose = verbose > 0
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2

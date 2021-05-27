@@ -1,3 +1,4 @@
+from cbioge.problems.problem import DNNProblem
 import os
 import re
 import copy
@@ -9,128 +10,26 @@ from keras.models import model_from_json
 from keras.optimizers import *
 from keras.callbacks import *
 
-from ..utils import checkpoint as ckpt
-from ..utils.image import *
-from ..utils.model import TimedStopping
+from cbioge.problems import DNNProblem
 
-from ..problems import BaseProblem
+from cbioge.utils import checkpoint as ckpt
+from cbioge.utils.image import *
+from cbioge.utils.model import TimedStopping
 
 
-class UNetProblem(BaseProblem):
+class UNetProblem(DNNProblem):
 
-    def __init__(self, parser):
-        self.parser = parser
+    def __init__(self, parser, dataset):
+        super().__init__(parser, dataset)
 
-        self.batch_size = 1
-        self.epochs = 1
-        self.timelimit = 3600
-        self.training = True
-
+        # segmentation specific
         self.loss = 'binary_crossentropy'
-        self.opt = Adam(lr = 1e-4)
-        self.metrics = ['accuracy']
-
-        self.workers = 1
-        self.multiprocessing = False
-
-        self.verbose = False
-
-        self._initialize_blocks()
-
-    def read_dataset_from_pickle(self, pickle_file):
-        with open(pickle_file, 'rb') as f:
-            temp = pickle.load(f)
-
-            self.x_train = temp['x_train']
-            self.y_train = temp['y_train']
-
-            self.x_valid = temp['x_valid']
-            self.y_valid = temp['y_valid']
-
-            self.x_test = temp['x_test']
-            self.y_test = temp['y_test']
-
-            self.input_shape = temp['input_shape']
-
-            self.train_size = len(self.x_train)
-            self.valid_size = len(self.x_valid)
-            self.test_size = len(self.x_test)
-            del temp
 
     def read_dataset_from_generator(self, dataset, train_gen, test_gen):
         self.dataset = dataset
         self.train_generator = train_gen
         self.test_generator = test_gen
         self.input_shape = tuple(dataset['input_shape'])
-
-    def _initialize_blocks(self):
-        self.blocks = {
-            'input': ['InputLayer', 'batch_input_shape'],
-            'conv': ['Conv2D', 'filters', 'kernel_size', 'strides', 'padding', 'activation'],
-            'avgpool': ['AveragePooling', 'pool_size', 'strides', 'padding'],
-            'maxpool': ['MaxPooling2D', 'pool_size', 'strides', 'padding'],
-            'dropout': ['Dropout', 'rate'],
-            'upsamp': ['UpSampling2D', 'size'],
-            'concat': ['Concatenate', 'axis'],
-            'crop': ['Cropping2D', 'cropping'],
-
-            'bridge': ['bridge'], #check
-        }
-
-    def _reshape_mapping(self, phenotype):
-
-        new_mapping = []
-
-        index = 0
-        while index < len(phenotype):
-            block = phenotype[index]
-            if block == 'conv':
-                end = index+6
-            elif block in ['avgpool', 'maxpool']:
-                end = index+4
-            elif block == 'bridge':
-                end = index+1
-            else:
-                end = index+2
-
-            new_mapping.append(phenotype[index:end])
-            phenotype = phenotype[end:]
-
-        return new_mapping
-
-    def _parse_value(self, value):
-        if type(value) is str:
-            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
-            if m:
-                min_ = eval(m.group(1))
-                max_ = eval(m.group(2))
-                if type(min_) == int and type(max_) == int:
-                    return np.random.randint(min_, max_)
-                elif type(min_) == float and type(max_) == float:
-                    return np.random.uniform(min_, max_)
-                else:
-                    raise TypeError('type mismatch')
-            else:
-                return value
-        else:
-            return value
-
-    def _build_block(self, block_name, params):
-
-        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
-
-        if block_name in self.naming:
-            self.naming[block_name] += 1
-        else:
-            self.naming[block_name] = 0
-        name = f'{block_name}_{self.naming[block_name]}'
-
-        base_block['class_name'] = self.blocks[block_name][0]
-        base_block['name'] = name
-        for key, value in zip(self.blocks[block_name][1:], params):
-            base_block['config'][key] = self._parse_value(value)
-        #print(base_block)
-        return base_block
 
     def _wrap_up_model(self, model):
         layers = model['config']['layers']
@@ -154,9 +53,6 @@ class UNetProblem(BaseProblem):
         output_layer = model['config']['layers'][-1]['name']
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
-
-        # for l in layers:
-        #     print(l)
 
     def _repair_genotype(self, genotype, phenotype):
         print(genotype)
@@ -263,7 +159,6 @@ class UNetProblem(BaseProblem):
     def map_genotype_to_phenotype(self, genotype):
         
         self.naming = {}
-        self.stack = []
 
         mapping, genotype = self.parser.dsge_recursive_parse(genotype)
         mapping = self._reshape_mapping(mapping)
@@ -311,51 +206,53 @@ class UNetProblem(BaseProblem):
             print('[evaluation]', e)
             return -1, None
 
-    def evaluate(self, phenotype=None, model=None, predict=False, save_model=False):
-        try:
-            if model is None:
-                model = model_from_json(phenotype)
+    def evaluate(self, solution):
 
-            model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
-            model.summary()
+        super().evaluate(solution)
+        # try:
+        #     if model is None:
+        #         model = model_from_json(phenotype)
 
-            x_train = self.x_train[:self.train_size]
-            y_train = self.y_train[:self.train_size]
-            x_valid = self.x_valid[:self.valid_size]
-            y_valid = self.y_valid[:self.valid_size]
-            x_test = self.x_test[:self.test_size]
-            y_test = self.y_test[:self.test_size]
+        #     model.compile(optimizer=self.opt, loss=self.loss, metrics=self.metrics)
+        #     model.summary()
 
-            ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
-            callbacks = [ts]
+        #     x_train = self.x_train[:self.train_size]
+        #     y_train = self.y_train[:self.train_size]
+        #     x_valid = self.x_valid[:self.valid_size]
+        #     y_valid = self.y_valid[:self.valid_size]
+        #     x_test = self.x_test[:self.test_size]
+        #     y_test = self.y_test[:self.test_size]
 
-            if save_model:
-                mc = ModelCheckpoint(filepath=f'{ckpt.ckpt_folder}_weights.hdf5', monitor='val_accuracy', save_weights_only=True, save_best_only=True)
-                callbacks.append(mc)
+        #     ts = TimedStopping(seconds=self.timelimit, verbose=self.verbose)
+        #     callbacks = [ts]
 
-            if self.training:
-                history = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
-                self.plot_loss(history)
-                self.plot_acc(history)
-            scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
+        #     if save_model:
+        #         mc = ModelCheckpoint(filepath=f'{ckpt.ckpt_folder}_weights.hdf5', monitor='val_accuracy', save_weights_only=True, save_best_only=True)
+        #         callbacks.append(mc)
 
-            if self.verbose:
-                print('scores', scores)
+        #     if self.training:
+        #         history = model.fit(x_train, y_train, validation_data=(x_valid, y_valid), batch_size=self.batch_size, epochs=self.epochs, verbose=self.verbose, callbacks=callbacks)
+        #         self.plot_loss(history)
+        #         self.plot_acc(history)
+        #     scores = model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=self.verbose)
 
-            if predict:
-                predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
+        #     if self.verbose:
+        #         print('scores', scores)
 
-                if not os.path.exists(ckpt.ckpt_folder):
-                    os.mkdir(ckpt.ckpt_folder)
+        #     if predict:
+        #         predictions = model.predict(x_test, batch_size=self.batch_size, verbose=self.verbose)
+
+        #         if not os.path.exists(ckpt.ckpt_folder):
+        #             os.mkdir(ckpt.ckpt_folder)
                 
-                for i, img in enumerate(predictions):
-                    #img = img.astype('uint8')
-                    write_image(os.path.join(ckpt.ckpt_folder, f'{i}.png'), img)
+        #         for i, img in enumerate(predictions):
+        #             #img = img.astype('uint8')
+        #             write_image(os.path.join(ckpt.ckpt_folder, f'{i}.png'), img)
 
-            return scores, model.count_params()
-        except Exception as e:
-            print('[evaluation]', e)
-            return (-1, None), 0
+        #     return scores, model.count_params()
+        # except Exception as e:
+        #     print('[evaluation]', e)
+        #     return (-1, None), 0
 
     def plot_loss(self, history):
 

@@ -1,11 +1,10 @@
 import argparse
 import platform
 
+MAX_GPU_MEMORY=0.7
 
-def _limit_gpu_memory(fraction=0.5):
-    
+def _limit_gpu_memory(fraction=MAX_GPU_MEMORY):
     # limits GPU memory to use tensorflow-gpu
-
     import tensorflow as tf
     from keras.backend.tensorflow_backend import set_session
     config = tf.ConfigProto()

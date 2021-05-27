@@ -57,25 +57,8 @@ class Grammar:
 
         return production
 
-    def dsge_create_solution(self, max_depth=10, genotype=None, symb=None, depth=0):
-        ''' creates a random solution based on the grammar, according to the 
-            DSGE method
-
-            returns: a list of lists containing integer values that is a valid
-            solution related to the grammar
-
-            TODO adicionar chamada de função interna pra remover os parametros 
-            desnecessarios do metodo principal
-        '''
-
-        # prod = []
-
-        if symb is None:
-            gen = [[] for _ in range(len(self.nonterm))]
-            symb = self.nonterm[0] # assigns initial symbol
-        else:
-            gen = genotype
-
+    def _recursive_create_call(self, max_depth, genotype, symb, depth=0):
+        
         value = np.random.randint(0, len(self.rules[symb]))
         expansion = self.rules[symb][value]
 
@@ -88,15 +71,42 @@ class Grammar:
                 expansion = self.rules[symb][value]
             #print('changed to:', symb, expansion)
 
-        gen[self.nonterm.index(symb)].append(value)
+        genotype[self.nonterm.index(symb)].append(value)
 
-        for s in expansion:
-            if s in self.nonterm:
-                self.dsge_create_solution(max_depth, gen, s, depth+1)
+        for curr_symb in expansion:
+            if curr_symb in self.nonterm:
+                #self.dsge_create_solution(max_depth, genotype, s, depth+1)
+                self._recursive_create_call(max_depth, genotype, curr_symb, depth+1)
+
+        return genotype
+
+    def dsge_create_solution(self, max_depth=10):
+        ''' creates a random solution based on the grammar, according to the 
+            DSGE method
+
+            returns: a list of lists containing integer values that is a valid
+            solution related to the grammar
+
+            TODO adicionar chamada de função interna pra remover os parametros 
+            desnecessarios do metodo principal
+        '''
+
+        genotype = [[] for _ in range(len(self.nonterm))]
+        symb = self.nonterm[0] # assigns initial symbol
+
+        value = np.random.randint(0, len(self.rules[symb]))
+        expansion = self.rules[symb][value]
+
+        genotype[self.nonterm.index(symb)].append(value)
+
+        for curr_symb in expansion:
+            if curr_symb in self.nonterm:
+                #self.dsge_create_solution(max_depth, gen, s, depth+1)
+                self._recursive_create_call(max_depth, genotype, curr_symb)
 
         #print(depth)
 
-        return gen
+        return genotype
 
     def dsge_recursive_parse(self, genotype):
         ''' performs the initial call for the grammar expansion according to the

@@ -67,7 +67,19 @@ def test_dsge_recursive_parse():
     )
 
 def test_dsge_create_solution_adding_values():
-    assert False
+    np.random.seed(0)
+    grammar = Grammar('tests/grammars/test_grammar.json')
+    solution = [[0], [0], [], [], [1], [0]]
+    assert grammar.dsge_recursive_parse(solution) == (
+        ['conv', 32, 'valid', 'dense', 32], 
+        [[0], [0], [0], [0], [1], [0]]
+    )
 
 def test_dsge_create_solution_removing_values():
-    assert False
+    np.random.seed(0)
+    grammar = Grammar('tests/grammars/test_grammar.json')
+    solution = [[0, 0], [0], [], [1], [1, 0, 0], [0]]
+    assert grammar.dsge_recursive_parse(solution) == (
+        ['conv', 32, 'same', 'dense', 32], 
+        [[0], [0], [0], [1], [1], [0]]
+    )

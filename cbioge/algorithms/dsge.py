@@ -15,7 +15,7 @@ from .ea import BaseEvolutionaryAlgorithm
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def __init__(self, problem, parser):
-        super(GrammaticalEvolution, self).__init__(problem)
+        super().__init__(problem)
 
         self.parser = parser
 
