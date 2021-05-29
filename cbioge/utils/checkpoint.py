@@ -7,7 +7,6 @@ from cbioge.algorithms.solution import GESolution
 
 
 ckpt_folder = 'checkpoints'
-
 data_name = 'data_{0}.ckpt'
 solution_name = 'solution_{0}.ckpt'
 
@@ -35,7 +34,7 @@ def load_solutions():
     for file in solution_files:
         data = load_data(file)
         s = GESolution(json_data=data)
-        if s.fitness is None:
+        if s.fitness is None: # TODO remover quando possivel
             s.fitness = -1
         solutions.append(s)
 

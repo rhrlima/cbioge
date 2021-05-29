@@ -1,10 +1,3 @@
-''' 
-    treinar modelo
-    testar modelo
-    plotar historico
-    salvar modelo
-    carregar modelo
-'''
 import os
 import numpy as np
 
@@ -63,12 +56,13 @@ class ModelRunner:
             callbacks.append(ts)
 
         validation_data = None
-        if 'validation_data' in kwargs:
-            # TODO adicionar verificações extras de tipo e tamanho
-            validation_data = kwargs['validation_data']
+        if ('validation_data' in kwargs 
+            and kwargs['validation_data'] is tuple 
+            and len(kwargs['validation_data']) == 2):
+                validation_data = kwargs['validation_data']
 
         self.history = self.model.fit(x_train, y_train, 
-            validation_data=validation_data, # TODO tornar opcional 
+            validation_data=validation_data, 
             batch_size=batch_size, 
             epochs=epochs, 
             verbose=self.verbose, 
@@ -88,10 +82,10 @@ class ModelRunner:
             batch_size=batch_size, 
             verbose=self.verbose)
 
-    def predict_model(self, x_test):
+    def predict_model(self, x_test, batch_size):
 
         predictions = self.model.predict(x_test, 
-            batch_size=self.batch_size, 
+            batch_size=batch_size, 
             verbose=self.verbose)
 
         pred_path = os.path.join(self.ckpt_path, 'predictions.npy')

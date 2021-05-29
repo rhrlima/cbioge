@@ -8,7 +8,12 @@ from keras.optimizers import Adam
 from cbioge.problems.dnn import ModelRunner
 from cbioge.utils import checkpoint as ckpt
 
+
 class BaseProblem:
+    ''' This BaseProblem class should be used as a reference of what a 
+        problem class must have to be used with the evolutionary algorithms. 
+        During the evolution the methods in this class are called.
+    '''
 
     def map_genotype_to_phenotype(self, genotype) -> str:
         raise NotImplementedError('Not implemented yet.')
@@ -18,7 +23,7 @@ class BaseProblem:
 
 
 class DNNProblem(BaseProblem):
-    ''' Base class used for Problems relatated to the automatic design of
+    ''' Base class used for Problems related to the automatic design of
         deep neural networks. Specific behavior must be implemented in child
         classes after calling the super() funcions.
     '''
@@ -50,6 +55,8 @@ class DNNProblem(BaseProblem):
             input_shape
             num_classes
         '''
+        if data_dict is None:
+            raise AttributeError('data_dict cannot be NoneType')
 
         self.x_train = data_dict['x_train']
         self.y_train = data_dict['y_train']
@@ -63,21 +70,22 @@ class DNNProblem(BaseProblem):
         self.valid_size = len(self.x_valid)
         self.test_size = len(self.x_test)
 
-    def _reshape_mapping(self, phenotype):
+    def _reshape_mapping(self, mapping):
         # groups layer name and parameters together
-
         new_mapping = []
-
         index = 0
-        while index < len(phenotype):
-            block = phenotype[index]
+        while index < len(mapping):
+            block = mapping[index]
             end = index + len(self.blocks[block])
-            new_mapping.append(phenotype[index:end])
-            phenotype = phenotype[end:]
-
+            new_mapping.append(mapping[index:end])
+            mapping = mapping[end:]
         return new_mapping
 
     def _parse_value(self, value):
+        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
+        ''' parses a string in the form of "[int, int]" or "[float, float]"
+            to the correct types and return a random between the interval
+        '''
         if type(value) is str:
             m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
             if m:
@@ -90,6 +98,20 @@ class DNNProblem(BaseProblem):
                 else:
                     raise TypeError('type mismatch')
         return value
+
+    def _base_build(self, mapping):
+
+        self.naming = {}
+
+        model = {'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+
+        for i, layer in enumerate(mapping):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            model['config']['layers'].append(block)
+
+        return model
 
     def _build_block(self, block_name, params):
 
@@ -107,38 +129,18 @@ class DNNProblem(BaseProblem):
             base_block['config'][name] = self._parse_value(value)
         return base_block
 
-    def _set_data_size(value, target):
-        if type(value) is float and 0 < value <= 1:
-            # percentage
-            return int(value * target)
-        elif type(value) is int and value >= 1:
-            # absolute
-            return min(value, target)
-        else:
-            # unknown
-            return target
+    def _wrap_up_model(self, model):
+        # iterates over layers and add previous layer as input of current one
+        for i, layer in enumerate(model['config']['layers'][1:]):
+            last = model['config']['layers'][i]
+            layer['inbound_nodes'].append([[last['name'], 0, 0]])
 
-    def set_data_size(self, train=1.0, valid=1.0, test=1.0):
-        ''' Sets the portions of the dataset that will be used in training, 
-            validation, and test. Values [0, 1] are considered as % of the 
-            dataset (floor), and absolute values will be used as is.
-        '''
-        x_train = self.x_train[:self.train_size]
-        y_train = self.y_train[:self.train_size]
-        x_valid = self.x_valid[:self.valid_size]
-        y_valid = self.y_valid[:self.valid_size]
-        x_test = self.x_test[:self.test_size]
-        y_test = self.y_test[:self.test_size]
+        # creates and adds input and output layers to model
+        input_layer = model['config']['layers'][0]['name']
+        output_layer = model['config']['layers'][-1]['name']
+        model['config']['input_layers'].append([input_layer, 0, 0])
+        model['config']['output_layers'].append([output_layer, 0, 0])
 
-    def predict(self, model, weights=None):
-        ''' runs the prediction on a model
-            if weights are provided, the model will feed them into the network
-
-            return: list structure with the predictions of the network for the
-            given dataset
-        '''
-        raise NotImplementedError('Not implemented yet.')
-    
     def evaluate(self, solution):
         ''' Evaluates the phenotype
 
@@ -148,7 +150,10 @@ class DNNProblem(BaseProblem):
         '''
         try:
             model = model_from_json(solution.phenotype)
-            model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
+            model.compile(
+                loss=self.loss, 
+                optimizer=self.opt, 
+                metrics=self.metrics)
 
             # defines the portion of the dataset being used for 
             # training, validation, and test
@@ -183,3 +188,40 @@ class DNNProblem(BaseProblem):
             solution.evaluated = True
 
             return False
+
+
+
+    # not used yet?
+    def _set_data_size(value, target):
+        if type(value) is float and 0 < value <= 1:
+            # percentage
+            return int(value * target)
+        elif type(value) is int and value >= 1:
+            # absolute
+            return min(value, target)
+        else:
+            # unknown
+            return target
+
+    def set_data_size(self, train=1.0, valid=1.0, test=1.0):
+        ''' Sets the portions of the dataset that will be used in training, 
+            validation, and test. Values [0, 1] are considered as % of the 
+            dataset (floor), and absolute values will be used as is.
+        '''
+        x_train = self.x_train[:self.train_size]
+        y_train = self.y_train[:self.train_size]
+        x_valid = self.x_valid[:self.valid_size]
+        y_valid = self.y_valid[:self.valid_size]
+        x_test = self.x_test[:self.test_size]
+        y_test = self.y_test[:self.test_size]
+
+    def predict(self, model, weights=None):
+        ''' runs the prediction on a model
+            if weights are provided, the model will feed them into the network
+
+            return: list structure with the predictions of the network for the
+            given dataset
+        '''
+        raise NotImplementedError('Not implemented yet.')
+    
+    

@@ -29,6 +29,24 @@ class Grammar:
         self.rules = data['rules']
         self.nonterm = list(self.rules.keys())
 
+        self._validate_grammar()
+
+    def _validate_grammar(self):
+        ''' checks for inconsitencies in the grammar file:
+            - missing rules
+            - missing blocks
+            - unused rules
+            - unused blocks
+        '''
+        pass
+    
+    def _parse_special_types(self, value):
+        ''' parses special types present in the grammar
+            
+            ex: [min, max] is parsed to random between min and max
+        '''
+        pass
+
     def _recursive_parse_call(self, genotype, added, symb, depth):
         ''' recursive method to produce the grammar expansion
 

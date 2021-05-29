@@ -37,13 +37,13 @@ def run_evolution():
     problem.workers = 2
     problem.multiprocessing = 1
 
-    problem.train_size = 10
-    problem.valid_size = 10
-    problem.test_size = 10
+    problem.train_size = 5
+    problem.valid_size = 5
+    problem.test_size = 5
 
     algorithm = GrammaticalEvolution(problem, parser)
-    algorithm.pop_size = 20
-    algorithm.max_evals = 40
+    algorithm.pop_size = 10
+    algorithm.max_evals = 20
     algorithm.selection = TournamentSelection(t_size=2, maximize=True)
     algorithm.replacement = ElitistReplacement(rate=0.25, maximize=True)
     algorithm.crossover = HalfAndHalfOperator(
@@ -55,7 +55,7 @@ def run_evolution():
     # 1 - log da evolução
     # 2 - log do problema
     # 3 - log da gramatica
-    verbose = 2
+    verbose = 3
     algorithm.verbose = verbose > 0
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2

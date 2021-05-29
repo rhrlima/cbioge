@@ -38,9 +38,9 @@ def run_evolution():
     problem.workers = 2
     problem.multiprocessing = 1
 
-    problem.train_size = 100
-    problem.valid_size = 100
-    problem.test_size = 100
+    problem.train_size = 10
+    problem.valid_size = 10
+    problem.test_size = 10
 
     algorithm = GrammaticalEvolution(problem, parser)
     algorithm.pop_size = 20
