@@ -8,25 +8,28 @@
 
 	"rules": {
 		"<start>": [
+            ["<start>", "<start>"], 
+            ["<conv>"], 
+            ["<dense>"], 
             ["<conv>", "<dense>"], 
             ["<conv>", "<conv>", "<dense>"], 
             ["<conv>", "<dense>", "<dense>"]
         ],
-		"<conv>" : [
+		"<conv>": [
             ["conv", "<filters>", "<padding>"]
         ],
-		"<dense>" : [
+		"<dense>": [
             ["dense", "<units>"]
         ],
-		"<padding>" : [
+		"<padding>": [
             ["valid"], 
             ["same"]
         ],
-		"<filters>" : [
+		"<filters>": [
             [16], 
             [32]
         ],
-		"<units>" : [
+		"<units>": [
             [32], 
             [64]
         ]

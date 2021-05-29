@@ -28,12 +28,6 @@ class UNetProblem(DNNProblem):
         # segmentation specific
         self.loss = 'binary_crossentropy'
 
-    def read_dataset_from_generator(self, dataset, train_gen, test_gen):
-        self.dataset = dataset
-        self.train_generator = train_gen
-        self.test_generator = test_gen
-        self.input_shape = tuple(dataset['input_shape'])
-
     def _wrap_up_model(self, model):
         # creates a stack with the layers that will have a bridge (concat) connection
         stack = []

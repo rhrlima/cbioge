@@ -4,9 +4,9 @@ import numpy as np
 
 class Grammar:
 
-    def __init__(self, grammar_file):
+    def __init__(self, grammar_file, verbose=False):
         self._read_grammar(grammar_file)
-        self.verbose = 0
+        self.verbose = verbose
     
     def _read_grammar(self, grammar_file):
         ''' reads a file expecting a json structure
@@ -29,23 +29,31 @@ class Grammar:
         self.rules = data['rules']
         self.nonterm = list(self.rules.keys())
 
-        self._validate_grammar()
+        # self._validate_grammar()
 
-    def _validate_grammar(self):
-        ''' checks for inconsitencies in the grammar file:
-            - missing rules
-            - missing blocks
-            - unused rules
-            - unused blocks
-        '''
-        pass
-    
-    def _parse_special_types(self, value):
-        ''' parses special types present in the grammar
+    # def _validate_grammar(self):
+    #     ''' checks for inconsitencies in the grammar file:
+    #         - missing rules
+    #         - missing blocks
+    #         - unused rules
+    #         - unused blocks
+    #     '''
+    #     # missing rules using defined blocks
+    #     print('### blocks')
+    #     for block in self.blocks:
+    #         print(block)
+        
+    #     # missing blocks using defined rules
+    #     print('### rules')
+    #     for rule in self.rules:
+    #         print(rule)
+
+    # def _parse_special_types(self, value):
+    #     ''' parses special types present in the grammar
             
-            ex: [min, max] is parsed to random between min and max
-        '''
-        pass
+    #         ex: [min, max] is parsed to random between min and max
+    #     '''
+    #     pass
 
     def _recursive_parse_call(self, genotype, added, symb, depth):
         ''' recursive method to produce the grammar expansion
@@ -76,18 +84,21 @@ class Grammar:
         return production
 
     def _recursive_create_call(self, max_depth, genotype, symb, depth=0):
-        
+
         value = np.random.randint(0, len(self.rules[symb]))
         expansion = self.rules[symb][value]
 
         # if expansion is recursive, pick another option
         if depth > max_depth and symb in expansion:
-            #print('max depth reached and next expansion is recursive')
-            #print(depth, symb, expansion)
+            #raise ValueError('MAX DEPTH')
+            if self.verbose:
+                print('[create] WARNING. Max depth reached and next expansion is recursive.')
+                print(depth, symb, expansion, end=' ')
             while symb in expansion:
                 value = np.random.randint(0, len(self.rules[symb]))
                 expansion = self.rules[symb][value]
-            #print('changed to:', symb, expansion)
+            if self.verbose:
+                print('changed to:', symb, expansion)
 
         genotype[self.nonterm.index(symb)].append(value)
 
@@ -104,9 +115,6 @@ class Grammar:
 
             returns: a list of lists containing integer values that is a valid
             solution related to the grammar
-
-            TODO adicionar chamada de função interna pra remover os parametros 
-            desnecessarios do metodo principal
         '''
 
         genotype = [[] for _ in range(len(self.nonterm))]
@@ -137,9 +145,6 @@ class Grammar:
             requested, and removing values if they are not used
 
             returns: the final production, the modified genotype
-
-            TODO falta incorporar comportamento para quando ultrapassa 
-            profundidade maxima. Não tem atrapalhado até agora.
         '''
 
         gen_cpy = [g[:] for g in genotype]

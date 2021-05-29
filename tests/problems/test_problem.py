@@ -70,32 +70,7 @@ def test_reshape_mapping():
         ['dense', 10]
     ]
 
-def test_base_build():
-    mapping = ['conv', 32, 'same', 'conv', 32, 'same', 'dense', 10]
-    problem = DNNProblem(get_mockup_parser(), get_mockup_data_dict())
-    mapping = problem._reshape_mapping(mapping)
-    model = problem._base_build(mapping)
-    assert model == {
-        'class_name': 'Model', 'config': {'layers': [
-            {'class_name': 'Conv2D', 'config': {
-                'filters': 32, 'padding': 'same'}, 'inbound_nodes': [], 'name': 'conv_0'},
-            {'class_name': 'Conv2D', 'config': {
-                'filters': 32, 'padding': 'same'}, 'inbound_nodes': [], 'name': 'conv_1'},
-            {'class_name': 'Dense', 'config': {'units': 10}, 
-                'inbound_nodes': [], 'name': 'dense_0'}
-        ], 'input_layers': [], 'output_layers': []}}
-
-
-# def test_build_block():
-#     block_name, params = 'conv', [32, 'same']
-#     problem = DNNProblem(get_mockup_parser(), get_mockup_data_dict())
-#     block = problem._build_block(block_name, params)
-#     assert block == {
-#         'class_name': 'Conv2D', 'config': {
-#             'filters': 32, 'padding': 'same'}, 
-#             'inbound_nodes': [], 'name': 'conv_0'}
-
-def test_wrap_up_model():
+def test_building_json_model():
     mapping = ['conv', 32, 'same', 'conv', 32, 'same', 'dense', 10]
     problem = DNNProblem(get_mockup_parser(), get_mockup_data_dict())
     mapping = problem._reshape_mapping(mapping)
