@@ -21,12 +21,19 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
+    from_last_checkpoint = True
     base_path = 'exp_cnn_test'
+    ckpt.ckpt_folder = ckpt.get_latest_or_new(base_path)
 
-    # deletes folder and sub-folders for clean run
-    if os.path.exists(base_path):
-        shutil.rmtree(base_path)
-    ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
+    # if from_last_checkpoint:
+    #     latest = ckpt.get_latest(base_path)
+    #     print('last checkpoint found is: ', latest)
+    #     ckpt.ckpt_folder = latest
+    # else:
+    #     # deletes folder and sub-folders for clean run
+    #     if os.path.exists(base_path):
+    #         shutil.rmtree(base_path)
+    #     ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
 
     dataset = read_dataset_from_pickle('data/datasets/cifar10.pickle')
     parser = Grammar('data/grammars/cnn.json')
@@ -61,7 +68,7 @@ def run_evolution():
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2
 
-    population = algorithm.execute(checkpoint=False)
+    population = algorithm.execute(checkpoint=from_last_checkpoint)
 
     # remove and add better post-run
     population.sort(key=lambda x: x.fitness, reverse=True)

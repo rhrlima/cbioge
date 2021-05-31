@@ -1,14 +1,22 @@
-import glob
-import os
-import re
-import pickle
-
+import glob, os, re, pickle
 from cbioge.algorithms.solution import GESolution
-
 
 ckpt_folder = 'checkpoints'
 data_name = 'data_{0}.ckpt'
 solution_name = 'solution_{0}.ckpt'
+
+
+def get_latest_or_new(base_path):
+    # if base path does not exists return new
+    if not os.path.exists(base_path):
+        print(f'{base_path} not found, creating new.')
+        return os.path.join(base_path, str(os.getpid()))
+
+    # gets the latest pid folder inside base path
+    folders = glob.glob(os.path.join(base_path, '*/'))
+    folders.sort(reverse=True)
+    print(f'latest checkpoint found is {folders[0]}')
+    return folders[0]
 
 
 def save_solution(solution):

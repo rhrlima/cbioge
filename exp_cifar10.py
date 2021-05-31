@@ -32,8 +32,9 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
+    from_last_checkpoint = True
     base_path = 'exp_cifar10'
-    ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
+    ckpt.ckpt_folder = ckpt.get_latest_or_new(base_path)
 
     dataset = read_dataset_from_pickle('data/datasets/cifar10.pickle')
     parser = Grammar('data/grammars/cnn.json')
