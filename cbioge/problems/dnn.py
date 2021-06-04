@@ -2,7 +2,6 @@ import os
 import numpy as np
 
 from cbioge.utils.model import TimedStopping
-
 from cbioge.utils import checkpoint as ckpt
 
 class ModelRunner:
@@ -28,10 +27,7 @@ class ModelRunner:
         self.verbose = verbose
         self.ckpt_path = ckpt.ckpt_folder if path is None else path
 
-        if not os.path.exists(self.ckpt_path):
-            os.makedirs(self.ckpt_path)
-
-    def train_model(self, x_train, y_train, batch_size, epochs, **kwargs):
+    def train_model(self, x_train, y_train, batch_size, epochs, save_weights=False, **kwargs):
         ''' executes the training of a model.
 
             # Parameters
@@ -68,9 +64,13 @@ class ModelRunner:
             verbose=self.verbose, 
             callbacks=callbacks)
 
-        # TODO executar de acordo com a politica
-        model_path = os.path.join(self.ckpt_path, f'weights.hdf5')
-        self.model.save_weights(model_path)
+        if save_weights:
+            # only create the folders if we want to save the weights
+            if  not os.path.exists(self.ckpt_path):
+                os.makedirs(self.ckpt_path)
+
+            model_path = os.path.join(self.ckpt_path, f'weights.hdf5')
+            self.model.save_weights(model_path)
 
     def test_model(self, x_test, y_test, batch_size, weights_path=None):
 
@@ -87,6 +87,9 @@ class ModelRunner:
         predictions = self.model.predict(x_test, 
             batch_size=batch_size, 
             verbose=self.verbose)
+
+        if  not os.path.exists(self.ckpt_path):
+            os.makedirs(self.ckpt_path)
 
         pred_path = os.path.join(self.ckpt_path, 'predictions.npy')
         np.save(pred_path, predictions)

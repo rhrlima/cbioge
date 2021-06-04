@@ -19,10 +19,10 @@ class ReplaceWorst(GeneticOperator):
         population += offspring
 
         # TODO REVER
-        for i, s in enumerate(population):
-            if s.fitness is None:
-                print(i, 'solution fitness is none, assigning -1')
-                population[i].fitness = -1
+        # for i, s in enumerate(population):
+        #     if s.fitness is None:
+        #         print(i, 'solution fitness is none, assigning -1')
+        #         population[i].fitness = -1
 
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         return population[:len(offspring)]
@@ -36,10 +36,10 @@ class ElitistReplacement(GeneticOperator):
 
     def execute(self, population, offspring):
 
-        # GAMBI
-        for s in population:
-            if s.fitness is None:
-                s.fitness = -1
+        # TODO REVER
+        # for s in population:
+        #     if s.fitness is None:
+        #         s.fitness = -1
 
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         offspring.sort(key=lambda x: x.fitness, reverse=self.maximize)

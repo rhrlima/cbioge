@@ -1,15 +1,11 @@
-import os
-import glob
-import time
+import os, glob, time
 import datetime as dt
 
 import numpy as np
 
-from multiprocessing import Pool
-
-from ..utils import checkpoint as ckpt
-from .solution import GESolution
-from .ea import BaseEvolutionaryAlgorithm
+from cbioge.utils import checkpoint as ckpt
+from cbioge.algorithms.solution import GESolution
+from cbioge.algorithms.ea import BaseEvolutionaryAlgorithm
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
@@ -146,7 +142,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             self.population = self.apply_replacement(offspring_pop)
 
-            self.evals += len(offspring_pop)
+            self.evals += self.pop_size
             offspring_pop.clear()
 
             self.save_state()

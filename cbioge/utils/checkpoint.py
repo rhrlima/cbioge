@@ -1,4 +1,10 @@
+''' Module responsible for helping manage the save and load of data for checkpoints
+
+    Experiments will be stored in a folder named 'checkpoints' by default
+'''
+
 import glob, os, re, pickle
+
 from cbioge.algorithms.solution import GESolution
 
 ckpt_folder = 'checkpoints'
@@ -6,14 +12,19 @@ data_name = 'data_{0}.ckpt'
 solution_name = 'solution_{0}.ckpt'
 
 
-def get_latest_or_new(base_path):
-    # if base path does not exists return new
-    if not os.path.exists(base_path):
-        print(f'{base_path} not found, creating new.')
-        return os.path.join(base_path, str(os.getpid()))
+def get_new_unique_path(base_path, name=None):
+    # stores the data inside a sub-folder. Uses PID if name is None
+    name = str(os.getpid()) if name is None else name
+    return os.path.join(base_path, name)
 
+
+def get_latest_pid_or_new(base_path):
     # gets the latest pid folder inside base path
     folders = glob.glob(os.path.join(base_path, '*/'))
+
+    if folders == []:
+        return get_new_unique_path()
+
     folders.sort(reverse=True)
     print(f'latest checkpoint found is {folders[0]}')
     return folders[0]
@@ -42,8 +53,8 @@ def load_solutions():
     for file in solution_files:
         data = load_data(file)
         s = GESolution(json_data=data)
-        if s.fitness is None: # TODO remover quando possivel
-            s.fitness = -1
+        # if s.fitness is None: # TODO REVER
+        #     s.fitness = -1
         solutions.append(s)
 
 

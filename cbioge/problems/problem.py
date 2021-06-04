@@ -1,7 +1,8 @@
-import os
-import re
+import os, re
+
 import numpy as np
 
+from keras import backend as K # TODO memory leak?
 from keras.models import model_from_json
 from keras.optimizers import Adam
 
@@ -152,7 +153,7 @@ class DNNProblem(BaseProblem):
             model = model_from_json(solution.phenotype)
             model.compile(
                 loss=self.loss, 
-                optimizer=self.opt, 
+                optimizer=Adam(lr = 1e-4), #self.opt, TODO TEST
                 metrics=self.metrics)
 
             # defines the portion of the dataset being used for 
@@ -178,6 +179,9 @@ class DNNProblem(BaseProblem):
             solution.fitness = runner.accuracy
             solution.params = runner.params
             solution.evaluated = True
+
+            # clears everything so memory wont stack up
+            K.clear_session()
 
             return True
 

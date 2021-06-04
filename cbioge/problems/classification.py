@@ -1,15 +1,8 @@
 import json
-import os
-import re
-import numpy as np
 
-from keras.optimizers import Adam
-from keras.models import model_from_json
 from keras.utils import np_utils
 
 from cbioge.problems import DNNProblem
-from cbioge.problems.dnn import ModelRunner
-from cbioge.utils import checkpoint as ckpt
 
 class CNNProblem(DNNProblem):
     ''' Problem class for problems related to classification tasks for DNNs.

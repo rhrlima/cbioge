@@ -130,9 +130,7 @@ class DataGenerator(keras.utils.Sequence):
 
 def read_dataset_from_pickle(pickle_file):
     ''' Reads a dataset stored in a pickle file. Expects a pickle file 
-        containing a dict with the following keys:
-
-        x_train, y_train, x_valid, y_valid, x_test, y_test, input_shape, num_classes
+        containing a dict structure.
     '''
     with open(pickle_file, 'rb') as f:
         data = pickle.load(f)

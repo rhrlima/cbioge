@@ -64,7 +64,7 @@ def run_evolution():
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2
 
-    population = algorithm.execute(checkpoint=True)
+    population = algorithm.execute(checkpoint=from_last_checkpoint)
 
     # TODO melhorar o post-run
     population.sort(key=lambda x: x.fitness, reverse=True)
