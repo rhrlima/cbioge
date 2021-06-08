@@ -3,16 +3,18 @@ import os
 import re
 import pickle
 
-from cbioge.algorithms.solutions import GESolution
+from cbioge.algorithms.solution import GESolution
 
 
 ckpt_folder = 'checkpoints'
+data_name = 'data_{0}.ckpt'
+solution_name = 'solution_{0}.ckpt'
 
 
 def save_solution(solution):
 
     json_solution = solution.to_json()
-    filename = f'solution_{solution.id}.ckpt'
+    filename = solution_name.format(solution.id)
 
     save_data(json_solution, filename)
 
@@ -25,22 +27,25 @@ def save_population(population):
 
 def load_solutions():
 
-    solution_files = glob.glob(os.path.join(ckpt_folder, 'solution_*.ckpt'))
+    solution_files = glob.glob(os.path.join(ckpt_folder, solution_name.format('*')))
     solution_files.sort()
 
     solutions = []
     for file in solution_files:
         data = load_data(file)
-        solutions.append(GESolution(json_data=data))
+        s = GESolution(json_data=data)
+        if s.fitness is None: # TODO remover quando possivel
+            s.fitness = -1
+        solutions.append(s)
+
 
     return solutions
 
 
 def save_data(data, filename):
-
     try:
         if not os.path.exists(ckpt_folder):
-            os.mkdir(ckpt_folder)
+            os.makedirs(ckpt_folder)
 
         complete_path = os.path.join(ckpt_folder, filename)
 

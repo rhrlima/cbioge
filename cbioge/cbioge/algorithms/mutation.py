@@ -1,6 +1,6 @@
 import numpy as np
 
-from cbiogeevolution.algorithms.operators import GeneticOperator
+from .operators import GeneticOperator
 
 
 class PointMutation(GeneticOperator):
@@ -32,93 +32,82 @@ class PointMutation(GeneticOperator):
 
 class DSGEMutation(GeneticOperator):
 
+    '''Changes one value for a new valid one
+
+        mut_rate: chance to apply the operator
+        parser: parser object needed to replace the values
+    '''
+
     def __init__(self, mut_rate, parser):
         self.mut_rate = mut_rate
         self.parser = parser
+
+        self.start_index = None
+        self.end_index = None
 
     def __str__(self):
 
         return 'DSGE Point Mutation'
 
     def execute(self, solution):
-        for gidx, genes in enumerate(solution.genotype):
-            symb = self.parser.NT[gidx] # symbol on the gene index
-            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
-            for i, _ in enumerate(genes):
-                if np.random.rand() < self.mut_rate:
-                    print('[operator] mutation applied to gene', i)
-                    new_val = genes[i]
-                    while new_val == genes[i] and max_value > 1:
-                        new_val = np.random.randint(0, max_value)
-                    # if max_value == 1:
-                    #     print('only one option', genes[i])
-                    # print('MUTOU', _, 'to', new_val, 'out of', max_value)
-                    genes[i] = new_val
+        if self.start_index is None:
+            self.start_index = 0
+        if self.end_index is None:
+            self.end_index = len(solution.genotype)
+
+        solution_copy = solution.copy()
+
+        block_idx = np.random.randint(self.start_index, self.end_index)
+
+        genes_len = len(solution.genotype[block_idx])
+        while genes_len == 0:
+            #print('not enough genes')
+            block_idx = np.random.randint(self.start_index, self.end_index)
+            genes_len = len(solution.genotype[block_idx])
+
+        gene_idx = np.random.randint(0, genes_len)
+
+        if np.random.rand() < self.mut_rate:
+            symb = self.parser.nonterm[block_idx] # symbol on the gene index
+            max_value = len(self.parser.rules[symb]) # options for the symb
+            #print('values', max_value)
+            if max_value > 1:
+                curr_value = solution.genotype[block_idx][gene_idx]
+                new_value = solution.genotype[block_idx][gene_idx]
+                while new_value == curr_value:
+                    new_value = np.random.randint(0, max_value)
+                solution_copy.genotype[block_idx][gene_idx] = new_value
+                #print('mutou', curr_value, 'para', new_value)
+        return solution_copy
 
 
-class DSGETerminalMutation(GeneticOperator):
+class DSGETerminalMutation(DSGEMutation):
 
-    '''Changes a value for a new valid one, starting from a given index
-    '''
+    '''Changes a value for a new valid one, starting from a given index'''
 
     def __init__(self, mut_rate, parser, start_index):
-        self.mut_rate = mut_rate
-        self.parser = parser
+        super().__init__(mut_rate, parser)
+        
         self.start_index = start_index
 
     def __str__(self):
 
-        return 'DSGE Restricted Point Mutation'
-
-    def execute(self, solution):
-        for gidx, genes in enumerate(solution.genotype):
-
-            if gidx < self.start_index:
-                continue
-
-            symb = self.parser.NT[gidx] # symbol on the gene index
-            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
-            #print(symb, max_value)
-            for i, _ in enumerate(genes):
-                if np.random.rand() < self.mut_rate:
-                    new_val = genes[i]
-                    while new_val == genes[i] and max_value > 1:
-                        new_val = np.random.randint(0, max_value)
-                    # if max_value == 1:
-                    #     print('only one option', genes[i])
-                    #print('MUTOU', _, 'to', new_val, 'out of', max_value)
-                    genes[i] = new_val
+        return 'DSGE Terminal Mutation'
 
 
-class DSGENonTerminalMutation(GeneticOperator):
+class DSGENonterminalMutation(DSGEMutation):
 
-    '''Changes a value for a new valid one, only for non-terminals
-    '''
+    '''Changes a value for a new valid one, restricted to and index'''
 
     def __init__(self, mut_rate, parser, end_index):
-        self.mut_rate = mut_rate
-        self.parser = parser
+        super().__init__(mut_rate, parser)
+
         self.end_index = end_index
 
     def __str__(self):
 
-        return 'DSGE Restricted Point Mutation'
+        return 'DSGE Nonterminal Mutation'
 
-    def execute(self, solution):
-        for gidx, genes in enumerate(solution.genotype):
+class DSGENonTerminalMutation(DSGEMutation):
 
-            if gidx >= self.end_index:
-                continue
-
-            symb = self.parser.NT[gidx] # symbol on the gene index
-            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
-            #print(symb, max_value)
-            for i, _ in enumerate(genes):
-                if np.random.rand() < self.mut_rate:
-                    new_val = genes[i]
-                    while new_val == genes[i] and max_value > 1:
-                        new_val = np.random.randint(0, max_value)
-                    # if max_value == 1:
-                    #     print('only one option', genes[i])
-                    #print('MUTOU', _, 'to', new_val, 'out of', max_value)
-                    genes[i] = new_val
+    pass

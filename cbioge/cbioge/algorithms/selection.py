@@ -1,6 +1,6 @@
 import numpy as np
 
-from cbiogeevolution.algorithms.operators import GeneticOperator
+from .operators import GeneticOperator
 
 
 def get_n_random(population, n_size):

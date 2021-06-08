@@ -23,14 +23,22 @@ def read_dataset_from_directory(path, npy=False):
 		print(img.shape, img.min(), img.max(), msk.shape, msk.min(), msk.max())
 
 
+def read_dataset_from_pickle():
+	pass
 
+def read_dataset_from_dict():
+	pass
 
+def split_dataset(data, labels, split_size):
+	'''splits the array into two arrays of data
 
-if __name__ == '__main__':
+	fist returned array has the split_size, second 
+	has the remainder of content
 
-	if len(sys.argv) == 2:
-		read_dataset_from_directory(sys.argv[1])
-	elif len(sys.argv) == 3:
-		read_dataset_from_directory(sys.argv[1], sys.argv[2])
-	else:
-		print('expected: script.py <path> [True|False]')
+	split size: number of images
+	'''
+	data_a = data[:split_size,:,:]
+	data_b = data[split_size:,:,:]
+	label_a = labels[:split_size]
+	label_b = labels[split_size:]
+	return data_a, label_a, data_b, label_b

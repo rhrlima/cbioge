@@ -8,152 +8,6 @@ class GeneticOperator:
         return {'name': self.__str__(), 'config': self.__dict__}
 
 
-# Selection
-
-class TournamentSelection(GeneticOperator):
-
-    ''' Tournament Selection picks N random solutions,
-        the best solution among these N is added to list of parents.
-        The process is repeated for the number of desired parents.
-
-        n_parents: the number os parents (default 2)
-        t_size: number of solutions selected for the tournament (default 2)
-        maximize: if the problem is a maximization problem (default False)
-    '''
-
-    def __init__(self, n_parents=2, t_size=2, maximize=False):
-        self.n_parents = n_parents
-        self.t_size = t_size
-        self.maximize = maximize
-
-    def __str__(self):
-        return 'Tournament Selection'
-
-    def execute(self, population):
-
-        if len(population) <= self.t_size:
-            raise ValueError('population size <= tournament size')
-
-        parents = []
-        while len(parents) < self.n_parents:
-            pool = []
-            while len(pool) < self.t_size:
-                temp = np.random.choice(population)
-                if temp not in pool:
-                    pool.append(temp)
-            pool.sort(key=lambda s: s.fitness, reverse=self.maximize)
-            if pool[0] not in parents:
-                parents.append(pool[0])
-        return parents
-
-
-# Crossover
-
-class OnePointCrossover(GeneticOperator):
-
-    ''' One Point Crossover combines two solutions into one new by
-        combining the first half of the first parent solution and
-        the second part of the second parent solution
-
-        cross_rate: chance to apply the operator
-    '''
-
-    def __init__(self, cross_rate):
-        self.cross_rate = cross_rate
-
-    def __str__(self):
-        return 'One Point Crossover'
-
-    def execute(self, parents):
-        off1 = parents[0].copy()
-        off2 = parents[1].copy()
-
-        if np.random.rand() < self.cross_rate:
-            p1 = off1.genotype[:]
-            p2 = off2.genotype[:]
-            min_len = min(len(p1), len(p2))
-            cut = np.random.randint(0, min_len)
-            off1.genotype = np.concatenate((p1[:cut], p2[cut:]))
-        return [off1]
-
-
-class DSGECrossover(GeneticOperator):
-
-    def __init__(self, cross_rate):
-        self.cross_rate = cross_rate
-
-    def __str__(self):
-        return 'DSGE Crossover'
-
-    def execute(self, parents):
-        off1 = parents[0].copy()
-        off2 = parents[1].copy()
-
-        if np.random.rand() < self.cross_rate:
-            #print('CRUZOU')
-            p1 = off1.genotype[:]
-            p2 = off2.genotype[:]
-            min_len = min(len(p1), len(p2))
-            cut = np.random.randint(0, min_len)
-            off1.genotype = p1[:cut] + p2[cut:]
-            #off2.genotype = p2[:cut] + p1[cut:]
-        return off1#[off1, off2]
-
-    
-# Mutation
-
-class PointMutation(GeneticOperator):
-
-    ''' Point Mutation changes a list of solutions by selecting a random
-        point and generating a new value for that position (repeate for
-        each solution)
-
-        mut_rate: chance to apply the operator
-        min_value: min possible value for the solution
-        max_value: max possible value for the solution
-    '''
-
-    def __init__(self, mut_rate, min_value=0, max_value=1):
-        self.mut_rate = mut_rate
-        self.min_value = min_value
-        self.max_value = max_value
-
-    def __str__(self):
-        return 'Point Mutation'
-
-    def execute(self, offspring):
-        if np.random.rand() < self.mut_rate:
-            for off in offspring:
-                index = np.random.randint(0, len(off.genotype))
-                off.genotype[index] = np.random.randint(
-                    self.min_value, self.max_value)
-
-
-class DSGEMutation(GeneticOperator):
-
-    def __init__(self, mut_rate, parser):
-        self.mut_rate = mut_rate
-        self.parser = parser
-
-    def __str__(self):
-
-        return 'DSGE Point Mutation'
-
-    def execute(self, solution):
-        for gidx, genes in enumerate(solution.genotype):
-            symb = self.parser.NT[gidx] # symbol on the gene index
-            max_value = len(self.parser.GRAMMAR[symb]) # options for the symb
-            for i, _ in enumerate(genes):
-                if np.random.rand() < self.mut_rate:
-                    new_val = genes[i]
-                    while new_val == genes[i] and max_value > 1:
-                        new_val = np.random.randint(0, max_value)
-                    # if max_value == 1:
-                    #     print('only one option', genes[i])
-                    # print('MUTOU', _, 'to', new_val, 'out of', max_value)
-                    genes[i] = new_val
-
-
 # Replacement
 
 class ReplaceWorst(GeneticOperator):
@@ -163,6 +17,13 @@ class ReplaceWorst(GeneticOperator):
 
     def execute(self, population, offspring):
         population += offspring
+
+        # TODO REVER
+        for i, s in enumerate(population):
+            if s.fitness is None:
+                print(i, 'solution fitness is none, assigning -1')
+                population[i].fitness = -1
+
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         return population[:len(offspring)]
 
@@ -174,12 +35,24 @@ class ElitistReplacement(GeneticOperator):
         self.maximize = maximize
 
     def execute(self, population, offspring):
+
+        # GAMBI
+        for s in population:
+            if s.fitness is None:
+                s.fitness = -1
+
         population.sort(key=lambda x: x.fitness, reverse=self.maximize)
         offspring.sort(key=lambda x: x.fitness, reverse=self.maximize)
 
-        save = math.floor(self.rate * len(population))
+        elites = int(math.floor(self.rate * len(population)))
 
-        population = population[:save] + offspring[:len(offspring)-save]
+        if elites < 1:
+            print('[replace] not applied, elites less than 1')
+            return population
+
+        population = population[:elites] + offspring[:-elites]
+
+        return population
 
 
 # Prune
@@ -236,3 +109,53 @@ class GEDuplication(GeneticOperator):
                     cut = 1
                 genes = off.genotype
                 off.genotype = np.concatenate((genes, genes[:cut]))
+
+
+# Custom
+
+class HalfAndHalfOperator(GeneticOperator):
+
+    def __init__(self, op1, op2, rate=0.5):
+        self.op1 = op1
+        self.op2 = op2
+        self.rate = rate
+
+    def execute(self, parents):
+
+        offspring = parents[0].copy()
+
+        if np.random.rand() < self.rate:
+            #print('applied crossover')
+            offspring = self.op1.execute(parents)
+        else:
+            #print('applied mutation')
+            offspring = self.op2.execute(offspring)
+
+        return offspring
+
+
+class HalfAndChoiceOperator(GeneticOperator):
+
+    def __init__(self, h_op, o_ops, h_rate=0.5, o_rate=[0.5]):
+        self.h_op = h_op
+        self.o_ops = o_ops
+        self.h_rate = h_rate
+        self.o_rate = o_rate
+
+    def execute(self, parents):
+
+        offspring = parents[0].copy()
+
+        if np.random.rand() < self.h_rate:
+            print('applied crossover')
+            offspring = self.h_op.execute(parents)
+        else:
+            rand = np.random.rand()
+            print(rand)
+            for i in range(len(self.o_ops)):
+                if rand < np.sum(self.o_rate[:i+1]):
+                    print('applying', self.o_ops[i])
+                    offspring = self.o_ops[i].execute(offspring)
+                    break
+
+        return offspring

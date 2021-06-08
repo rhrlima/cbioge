@@ -1,3 +1,4 @@
+import os
 import time
 
 from keras.callbacks import Callback
@@ -6,6 +7,33 @@ from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
 from keras import backend as K
+
+import matplotlib.pyplot as plt
+from cbioge.utils import checkpoint as ckpt
+
+
+def plot_loss(history, name='loss.png'):
+
+    plt.figure(figsize=[8,6])
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.legend(['Training Loss', 'Validation Loss'])
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Loss Curves')
+    plt.savefig(os.path.join(ckpt.ckpt_folder, name))
+
+
+def plot_acc(history, metric_name='accuracy', name='acc.png'):
+
+    plt.figure(figsize=[8,6])
+    plt.plot(history.history[metric_name])
+    plt.plot(history.history['val_'+metric_name])
+    plt.legend(['Training Accuracy', 'Validation Accuracy'], loc='lower right')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy Curves')
+    plt.savefig(os.path.join(ckpt.ckpt_folder, name))
 
 
 def unet(input_size):
@@ -60,11 +88,14 @@ def unet(input_size):
 
 
 class TimedStopping(Callback):
-    '''Stop training when enough time has passed.
-    # Arguments
-        seconds: maximum time before stopping.
-        verbose: verbosity mode.
+    ''' Stop training when enough time has passed.
+        Verification is made at each batch end.
+        
+        # Arguments
+        seconds: maximum time before stopping
+        verbose: verbosity mode
     '''
+
     def __init__(self, seconds=None, verbose=0):
         super(Callback, self).__init__()
 
@@ -93,7 +124,7 @@ def jaccard_distance(y_true, y_pred, smooth=100):
     intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
     sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
     jac = (intersection + smooth) / (sum_ - intersection + smooth)
-    return (1 - jac) * smooth
+    return 1-((1 - jac) * smooth)
 
 
 def specificity(y_true,y_pred):
@@ -155,5 +186,45 @@ def weighted_measures_loss(y_true, y_pred, w1=.3, w2=.05, w3=.35, w4=.3):
     return 1 - weighted_measures(y_true, y_pred, w1, w2, w3, w4)
 
 
+class WeightedMetric:
+
+    def __init__(self, w_jac=.25, w_dic=.25, w_spe=.25, w_sen=.25):
+        self.w_jac = w_jac
+        self.w_dic = w_dic
+        self.w_spe = w_spe
+        self.w_sen = w_sen
+
+    def __str__(self):
+        return 'weightedmetric'
+
+    def execute_metric(self, y_true, y_pred):
+
+        m1 = self.w_jac * (1 - jaccard_distance(y_true, y_pred))
+        m4 = self.w_dic * dice_coef(y_true, y_pred)
+        m2 = self.w_spe * specificity(y_true, y_pred)
+        m3 = self.w_sen * sensitivity(y_true, y_pred)
+
+        return m1 + m2 + m3 + m4
+
+    def execute_loss(self, y_true, y_pred):
+
+        return 1 - self.execute_metric(y_true, y_pred)
+
+    def get_metric(self):
+
+        return self.execute_metric
+
+    def get_loss(self):
+
+        return self.execute_loss
+
+
 if __name__ == '__main__':
-    unet((256, 256, 1))
+    #unet((256, 256, 1))
+
+    inputs = Input((32, 32, 3))
+    dense1 = Dense(256)(inputs)
+    dense2 = Dense(10)(dense1)
+    model = Model(inputs=inputs, outputs=dense2)
+    model.compile('Adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    print(model.to_json())

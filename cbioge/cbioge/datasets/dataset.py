@@ -1,5 +1,6 @@
 import os
 import glob
+import pickle
 
 import numpy as np
 
@@ -8,6 +9,7 @@ import skimage.io as io
 
 from cbioge.utils.image import *
 
+# TODO sem uso, util pra "criar" dataset a partir de uma pasta com imagens
 class DataGenerator(keras.utils.Sequence):
 
     '''The dataset should be organized as:
@@ -125,3 +127,51 @@ class DataGenerator(keras.utils.Sequence):
             #print(i, x[i].shape, y[i].shape, x[i].min(), x[i].max(), 'processed')
 
         return x, y
+
+def read_dataset_from_pickle(pickle_file):
+    ''' Reads a dataset stored in a pickle file. Expects a pickle file 
+        containing a dict with the following keys:
+
+        x_train, y_train, x_valid, y_valid, x_test, y_test, input_shape, num_classes
+    '''
+    with open(pickle_file, 'rb') as f:
+        data = pickle.load(f)
+
+    return data
+
+
+def read_dataset_from_directory(path):
+    ''' Reads a path and loads the content into a dict. Expects two folders 
+        inside path:
+        dataset/
+        --image/
+        --label/
+
+        return: dict containing the keys expected by the Problem class
+    '''
+    # images = glob.glob(os.path.join(path, 'image', '*'))
+    # labels = glob.glob(os.path.join(path, 'label', '*'))
+
+    # for img, msk in zip(images, labels):
+
+    #   img = np.load(img) if npy else io.imread(img)
+    #   msk = np.load(msk) if npy else io.imread(msk)
+
+    #     print(img.shape, img.min(), img.max(), msk.shape, msk.min(), msk.max())
+
+    return {}
+
+
+def split_dataset(data, labels, split_size):
+    '''splits the array into two arrays of data
+
+    fist returned array has the split_size, second 
+    has the remainder of content
+
+    split size: number of images
+    '''
+    data_a = data[:split_size,:,:]
+    data_b = data[split_size:,:,:]
+    label_a = labels[:split_size]
+    label_b = labels[split_size:]
+    return data_a, label_a, data_b, label_b
