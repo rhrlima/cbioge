@@ -1,7 +1,7 @@
 import logging, sys, platform, calendar, time, os, codecs
 from cbioge.utils.coreutil import contains, create_dir
 import numpy as np
-from cbioge.grammars.grammar import BNFGrammar
+from cbioge.grammars.grammar import Grammar
 from cbioge.problems.gcnProblem import GCNProblem
 from cbioge.algorithms.selection import SimilaritySelection, TournamentSelection
 from cbioge.algorithms.crossover import OnePointCrossover, DSGECrossover, DSGEGeneCrossover
@@ -242,7 +242,7 @@ class GEEvolutionRunner():
 
     def build_grammar(self):
         try:
-            self.grammar = BNFGrammar(self.grammar_path)
+            self.grammar = Grammar(self.grammar_path)
             return self.grammar
         except:
             logging.error(":: Unexpected error: ", sys.exc_info()[0])

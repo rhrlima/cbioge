@@ -3,9 +3,9 @@ import glob
 import time
 from multiprocessing import Pool
 import numpy as np
-from ..utils import checkpoint
-from .solution import GESolution
-from .ea import BaseEvolutionaryAlgorithm
+from cbioge.utils import checkpoint
+from cbioge.algorithms.solutions import GESolution
+from cbioge.algorithms.ea import BaseEvolutionaryAlgorithm
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):

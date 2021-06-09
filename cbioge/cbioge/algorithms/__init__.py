@@ -1,19 +1,19 @@
-from .rs import RandomSearch
-from .ge import GrammaticalEvolution
+from cbioge.algorithms.rs import RandomSearch
+from cbioge.algorithms.ge import GrammaticalEvolution
 
-from .operators import TournamentSelection
+from cbioge.algorithms.selection import TournamentSelection
 
-from .operators import OnePointCrossover
-from .operators import PointMutation
+from cbioge.algorithms.crossover import OnePointCrossover
+from cbioge.algorithms.mutation import PointMutation
 
-from .operators import ReplaceWorst
-from .operators import ElitistReplacement
+from cbioge.algorithms.operators import ReplaceWorst
+from cbioge.algorithms.operators import ElitistReplacement
 
-from .operators import GEPrune
-from .operators import GEDuplication
+from cbioge.algorithms.operators import GEPrune
+from cbioge.algorithms.operators import GEDuplication
 
-from .operators import DSGECrossover
-from .operators import DSGEMutation
+from cbioge.algorithms.crossover import DSGECrossover
+from cbioge.algorithms.mutation import DSGEMutation
 
 __all__ = [
     'RandomSearch',

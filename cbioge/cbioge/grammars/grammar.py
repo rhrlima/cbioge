@@ -20,7 +20,7 @@ class Grammar:
                 grammar: pair of key/value with the key being the nonterminal, and
                 the value being a list of the productions for that nonterminal
         '''
-
+        print(grammar_file)
         with open(grammar_file) as f:
             data = json.load(f)
 

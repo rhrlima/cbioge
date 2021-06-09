@@ -5,7 +5,7 @@ import os
 dataset_path='tests/dataset/test'
 dataset='mr'
 output='tests/test_output'
-grammar='tests/grammars/default_gcn.bnf'
+grammar='tests/grammars/default_gcn.json'
 
 gcnge = GCNGEEvolution()
 

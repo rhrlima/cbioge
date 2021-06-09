@@ -7,9 +7,9 @@ import numpy as np
 
 from multiprocessing import Pool
 
-from ..utils import checkpoint as ckpt
-from .solution import GESolution
-from .ea import BaseEvolutionaryAlgorithm
+from cbioge.utils import checkpoint as ckpt
+from cbioge.algorithms.solutions import GESolution
+from cbioge.algorithms.ea import BaseEvolutionaryAlgorithm
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):

@@ -3,7 +3,7 @@ import os
 import re
 import pickle
 
-from cbioge.algorithms.solution import GESolution
+from cbioge.algorithms.solutions import GESolution
 
 
 ckpt_folder = 'checkpoints'

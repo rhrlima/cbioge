@@ -1,8 +1,8 @@
 import numpy as np
 import time
 from multiprocessing import Pool
-from .solution import GESolution
-from .ea import BaseEvolutionaryAlgorithm
+from cbioge.algorithms.solutions import GESolution
+from cbioge.algorithms.ea import BaseEvolutionaryAlgorithm
 
 
 class RandomSearch(BaseEvolutionaryAlgorithm):
