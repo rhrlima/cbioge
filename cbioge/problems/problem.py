@@ -2,7 +2,7 @@ import os, re
 
 import numpy as np
 
-from keras import backend as K # TODO memory leak?
+from keras import backend as K
 from keras.models import model_from_json
 from keras.optimizers import Adam
 
@@ -83,7 +83,6 @@ class DNNProblem(BaseProblem):
         return new_mapping
 
     def _parse_value(self, value):
-        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
         ''' parses a string in the form of "[int, int]" or "[float, float]"
             to the correct types and return a random between the interval
         '''

@@ -53,10 +53,7 @@ def load_solutions():
     for file in solution_files:
         data = load_data(file)
         s = GESolution(json_data=data)
-        # if s.fitness is None: # TODO REVER
-        #     s.fitness = -1
         solutions.append(s)
-
 
     return solutions
 
