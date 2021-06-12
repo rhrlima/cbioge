@@ -1,18 +1,3 @@
-'''
-DSGE para CIFAR 10
-
-epochs 10
-batch 32
-
-pop 20
-evals 500
-selection 5
-halfandhalf 60/40
-elitism 0.25
-
-'''
-import os
-
 from cbioge.algorithms.dsge import GrammaticalEvolution
 from cbioge.algorithms.selection import TournamentSelection
 from cbioge.algorithms.crossover import DSGECrossover
@@ -29,7 +14,6 @@ from cbioge.utils.experiments import check_os
 
 def run_evolution():
 
-    # check if Windows to limit GPU memory and avoid errors
     check_os()
 
     from_last_checkpoint = True

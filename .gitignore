@@ -1,23 +1,10 @@
-# python compiled
+# python compiled and folders
 *.pyc
-
-#folders
 __pycache__/
-*/__pycache__/
 
-# ignore all but .py files
-datasets/*
-!datasets/*.py
-
-# outputs
-*.o*
-*.e*
-
-# run scripts
-*.sbatch
-
-# pycharm files
+# pycharm/vscode files
 .idea/
+.vscode/
 
 # coverage and pytest
 .coverage

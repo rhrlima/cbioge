@@ -9,8 +9,15 @@ class CNNProblem(DNNProblem):
         This class includes methods focused on the design of CNNs.
     '''
 
-    def __init__(self, parser, dataset):
-        super().__init__(parser, dataset)
+    def __init__(self, parser, dataset,
+        batch_size=10, 
+        epochs=1, 
+        timelimit=None, 
+        workers=1, 
+        multiprocessing=False, 
+        verbose=False):
+        super().__init__(parser, dataset,
+            batch_size, epochs, timelimit, workers, multiprocessing, verbose)
 
         # classification specific
         self.loss = 'categorical_crossentropy'

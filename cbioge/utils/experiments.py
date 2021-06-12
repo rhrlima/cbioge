@@ -13,6 +13,7 @@ def _limit_gpu_memory(fraction=MAX_GPU_MEMORY):
 
 
 def check_os():
+    # check if Windows to limit GPU memory and avoid errors
     if platform.system() == 'Windows':
         _limit_gpu_memory()
 

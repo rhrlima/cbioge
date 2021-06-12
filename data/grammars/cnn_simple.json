@@ -1,0 +1,40 @@
+{
+	"name": "CNN2.0",
+
+	"blocks": {
+		"input": ["InputLayer", "batch_input_shape"],
+		"conv": ["Conv2D", "filters", "kernel_size", "activation"],
+		"maxpool": ["MaxPooling2D"],
+		"dropout": ["Dropout", "rate"],
+		"dense": ["Dense", "units", "activation"],
+		"flatten": ["Flatten"]
+	},
+
+	"rules": {
+		"<cnn>": 
+            [["<conv>", "<node>"]
+        ],
+
+        "<node>": [
+            ["<conv>", "<node>"], 
+            ["<pool>", "<node>"],
+            ["flatten", "<cnode>"]
+        ],
+
+        "<cnode>": [
+            ["<dense>", "<cnode>"],
+            ["<dropout>", "<cnode>"],
+            ["&"]
+        ],
+
+		"<conv>" : [["conv", "<filters>", 2, "<activation>"]],
+		"<dense>" : [["dense", "<units>", "<activation>"]],
+		"<dropout>" : [["dropout", "<rate>"]],
+		"<pool>" : [["maxpool"]],
+
+		"<activation>" : [["relu"], ["selu"], ["elu"]],
+		"<filters>" : [[16], [32], [64], [128], [256]],
+		"<units>" : [[32], [64], [128], [256], [512], [1024]],
+		"<rate>" : [["[0.0,0.5]"]]
+	}
+}

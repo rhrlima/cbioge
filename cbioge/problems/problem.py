@@ -29,22 +29,29 @@ class DNNProblem(BaseProblem):
         classes after calling the super() funcions.
     '''
 
-    def __init__(self, parser, dataset):
+    def __init__(self, parser, dataset, 
+        batch_size=10, 
+        epochs=1, 
+        timelimit=None, 
+        workers=1, 
+        multiprocessing=False, 
+        verbose=False):
+
         self.parser = parser
         self._read_dataset(dataset)
         self.blocks = self.parser.blocks
 
-        self.batch_size = 10
-        self.epochs = 1
-        self.timelimit = None
+        self.batch_size = batch_size
+        self.epochs = epochs
+        self.timelimit = timelimit
 
         self.opt = Adam(lr = 1e-4)
         self.metrics = ['accuracy']
 
-        self.workers = 1
-        self.multiprocessing = False
+        self.workers = workers
+        self.multiprocessing = multiprocessing
 
-        self.verbose = False
+        self.verbose = verbose
 
     def _read_dataset(self, data_dict):
         ''' Reads a dataset stored in dict
