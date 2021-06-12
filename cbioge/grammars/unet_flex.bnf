@@ -1,0 +1,25 @@
+<unet> ::= <conv3> <pair_node> <conv3> <conv1>
+
+
+<pair_node> ::= <conv3> <pair_node> <conv3> | push <pool> <pair_node_p> <upsamp> <conv2> <concat> | <pool> <pair_node_p> <upsamp> <conv2>
+<pair_node_p> ::= <conv3> <pair_node> <conv3> | <midle>
+<midle> ::= <conv3> | <dropout> | <midle> <midle>
+
+
+<conv3> ::= conv 32 3 1 same relu
+<conv2> ::= conv 32 2 1 same relu
+<conv1> ::= conv 1 1 1 valid sigmoid
+
+
+<pool> ::= maxpool 2 2 same
+<upsamp> ::= upsamp 2
+<dropout> ::= dropout 0.5
+<concat> ::= concat 3
+
+
+<filters> ::= 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
+<kernel_size> ::= 1 | 2 | 3
+<strides> ::= 1 | 2
+<padding> ::= valid | same
+<activation> ::= relu | sigmoid | linear
+<rate> ::= [0.0,0.5]

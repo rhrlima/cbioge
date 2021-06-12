@@ -1,0 +1,37 @@
+{
+	"name": "test_grammar",
+
+	"blocks": {
+		"conv": ["Conv2D", "filters", "padding"],
+        "dense": ["Dense", "units"]
+	},
+
+	"rules": {
+		"<start>": [
+            ["<start>", "<start>"], 
+            ["<conv>"], 
+            ["<dense>"], 
+            ["<conv>", "<dense>"], 
+            ["<conv>", "<conv>", "<dense>"], 
+            ["<conv>", "<dense>", "<dense>"]
+        ],
+		"<conv>": [
+            ["conv", "<filters>", "<padding>"]
+        ],
+		"<dense>": [
+            ["dense", "<units>"]
+        ],
+		"<padding>": [
+            ["valid"], 
+            ["same"]
+        ],
+		"<filters>": [
+            [16], 
+            [32]
+        ],
+		"<units>": [
+            [32], 
+            [64]
+        ]
+	}
+}

@@ -7,11 +7,11 @@ from keras.models import Sequential
 # from keras.callbacks import History
 from keras.utils import np_utils
 
-# file = '../datasets/mnist/mnist.pickle'
+file = '../datasets/mnist.pickle'
 # file = '../datasets/notmnist/notMNIST.pickle'
 # file = '../datasets/fashion-mnist/fashion-mnist.pickle'
 # file = '../datasets/cifar-10/cifar-10.pickle'
-file = '../datasets/cifar-100/cifar-100.pickle'
+# file = '../datasets/cifar-100/cifar-100.pickle'
 
 EPOCHS = 5
 BATCH_SIZE = 128
@@ -54,34 +54,34 @@ model.add(Dense(num_classes, activation='softmax'))
 
 model.summary()
 
-opt = keras.optimizers.Adam(
-    lr=0.01,
-    beta_1=0.9,
-    beta_2=0.999,
-    epsilon=1.0 * 10**-8,
-    decay=0.001,
-    amsgrad=False)
+# opt = keras.optimizers.Adam(
+#     lr=0.01,
+#     beta_1=0.9,
+#     beta_2=0.999,
+#     epsilon=1.0 * 10**-8,
+#     decay=0.001,
+#     amsgrad=False)
 
-model.compile(
-    loss='categorical_crossentropy',
-    optimizer=opt,
-    metrics=['accuracy'])
+# model.compile(
+#     loss='categorical_crossentropy',
+#     optimizer=opt,
+#     metrics=['accuracy'])
 
-es = keras.callbacks.EarlyStopping(
-    monitor='val_loss',
-    min_delta=0,
-    patience=2,
-    verbose=0,
-    mode='auto')
+# es = keras.callbacks.EarlyStopping(
+#     monitor='val_loss',
+#     min_delta=0,
+#     patience=2,
+#     verbose=0,
+#     mode='auto')
 
-hist = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
-                 verbose=VERBOSE, validation_data=(x_valid, y_valid),
-                 callbacks=[es])
+# hist = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
+#                  verbose=VERBOSE, validation_data=(x_valid, y_valid),
+#                  callbacks=[es])
 
-print('train\nloss: {}\taccuracy: {}'.format(
-    np.mean(hist.history['loss']),
-    np.mean(hist.history['acc']))
-)
+# print('train\nloss: {}\taccuracy: {}'.format(
+#     np.mean(hist.history['loss']),
+#     np.mean(hist.history['acc']))
+# )
 
-score = model.evaluate(x_test, y_test, verbose=VERBOSE)
-print('test\nloss: {}\taccuracy: {}'.format(score[0], score[1]))
+# score = model.evaluate(x_test, y_test, verbose=VERBOSE)
+# print('test\nloss: {}\taccuracy: {}'.format(score[0], score[1]))

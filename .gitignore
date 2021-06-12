@@ -1,28 +1,28 @@
+# python compiled
+*.pyc
+
 #folders
+__pycache__/
 */__pycache__/
 
-#dataset
-*.pickle
-*.zip
-*tar.gz
-*.csv
+# ignore all but .py files
+datasets/*
+!datasets/*.py
 
-#tex
-*.aux
-*.bbl
-*.blg
-*.log
-*.nav
-*.out
-*.run.xml
-*.snm
-*.synctex.gz
-*.toc
-*.pdf
-
-#specific
-datasets/notmnist/notMNIST_large/
-datasets/notmnist/notMNIST_small/
-
+# outputs
 *.o*
 *.e*
+
+# run scripts
+*.sbatch
+
+# pycharm files
+.idea/
+
+# coverage and pytest
+.coverage
+.pytest_cache
+
+# dataset files
+data/datasets/
+*.pickle
