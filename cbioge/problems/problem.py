@@ -153,7 +153,7 @@ class DNNProblem(BaseProblem):
             model = model_from_json(solution.phenotype)
             model.compile(
                 loss=self.loss, 
-                optimizer=Adam(lr = 1e-4), #self.opt, TODO TEST
+                optimizer=Adam(lr = 1e-4), #self.opt, TODO REVER
                 metrics=self.metrics)
 
             # defines the portion of the dataset being used for 

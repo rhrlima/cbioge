@@ -15,18 +15,21 @@ from cbioge.utils.model import *
 from cbioge.utils import checkpoint as ckpt
 from cbioge.utils.experiments import check_os
 
+import tracemalloc
 
 def run_evolution():
+
+    # TODO memory leak
+    tracemalloc.start(10)
 
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
     base_path = 'exp_unet_test'
-
     # deletes folder and sub-folders for clean run
     if os.path.exists(base_path):
         shutil.rmtree(base_path)
-    ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
+    ckpt.ckpt_folder = ckpt.get_new_unique_path(base_path)
 
     dataset = read_dataset_from_pickle('data/datasets/membrane.pickle')
     parser = Grammar('data/grammars/unet_restricted.json')
@@ -43,7 +46,7 @@ def run_evolution():
 
     algorithm = GrammaticalEvolution(problem, parser)
     algorithm.pop_size = 10
-    algorithm.max_evals = 20
+    algorithm.max_evals = 100
     algorithm.selection = TournamentSelection(t_size=2, maximize=True)
     algorithm.replacement = ElitistReplacement(rate=0.25, maximize=True)
     algorithm.crossover = HalfAndHalfOperator(
@@ -55,7 +58,7 @@ def run_evolution():
     # 1 - log da evolução
     # 2 - log do problema
     # 3 - log da gramatica
-    verbose = 3
+    verbose = 0
     algorithm.verbose = verbose > 0
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2

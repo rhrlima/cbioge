@@ -21,26 +21,18 @@ def run_evolution():
     # check if Windows to limit GPU memory and avoid errors
     check_os()
 
-    from_last_checkpoint = True
     base_path = 'exp_cnn_test'
-    ckpt.ckpt_folder = ckpt.get_latest_or_new(base_path)
-
-    # if from_last_checkpoint:
-    #     latest = ckpt.get_latest(base_path)
-    #     print('last checkpoint found is: ', latest)
-    #     ckpt.ckpt_folder = latest
-    # else:
-    #     # deletes folder and sub-folders for clean run
-    #     if os.path.exists(base_path):
-    #         shutil.rmtree(base_path)
-    #     ckpt.ckpt_folder = os.path.join(base_path, str(os.getpid()))
+    # deletes folder and sub-folders for clean run
+    if os.path.exists(base_path):
+        shutil.rmtree(base_path)
+    ckpt.ckpt_folder = ckpt.get_new_unique_path(base_path)
 
     dataset = read_dataset_from_pickle('data/datasets/cifar10.pickle')
     parser = Grammar('data/grammars/cnn.json')
     problem = CNNProblem(parser, dataset)
 
     problem.epochs = 1
-    problem.batch_size = 32
+    problem.batch_size = 64
     problem.timelimit = 3600 #1h
     problem.workers = 2
     problem.multiprocessing = 1
@@ -51,29 +43,31 @@ def run_evolution():
 
     algorithm = GrammaticalEvolution(problem, parser)
     algorithm.pop_size = 20
-    algorithm.max_evals = 40
+    algorithm.max_evals = 200
     algorithm.selection = TournamentSelection(t_size=2, maximize=True)
     algorithm.replacement = ElitistReplacement(rate=0.25, maximize=True)
     algorithm.crossover = HalfAndHalfOperator(
         op1=DSGECrossover(cross_rate=1.0), 
-        op2=DSGENonterminalMutation(mut_rate=1.0, parser=parser, end_index=4), 
+        op2=DSGENonterminalMutation(mut_rate=1.0, 
+        parser=parser, 
+        end_index=4), 
         rate=0.6)
 
     # 0 - sem log
     # 1 - log da evolução
     # 2 - log do problema
     # 3 - log da gramatica
-    verbose = 1
+    verbose = 0
     algorithm.verbose = verbose > 0
     problem.verbose = verbose > 1
     parser.verbose = verbose > 2
 
-    population = algorithm.execute(checkpoint=from_last_checkpoint)
+    population = algorithm.execute()
 
     # remove and add better post-run
     population.sort(key=lambda x: x.fitness, reverse=True)
-    for s in population:
-        print(s.fitness, s)
+    # for s in population:
+    #     print(s.fitness, s)
 
 
 if __name__ == '__main__':

@@ -1,11 +1,8 @@
 import copy
 
-import numpy as np
-
 class GESolution():
 
     def __init__(self, gen=[], json_data=None):
-
         self.id = None
         self.genotype = gen
         self.phenotype = None
@@ -19,6 +16,12 @@ class GESolution():
 
     def __str__(self):
         return str(self.genotype)
+
+    def __eq__(self, other):
+        return self.genotype == other.genotype
+
+    def __hash__(self):
+        return hash(self.genotype)
 
     def to_json(self):
         return self.__dict__

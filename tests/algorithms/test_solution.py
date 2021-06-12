@@ -1,3 +1,5 @@
+import pytest
+
 from cbioge.algorithms.solution import GESolution
 
 def test_create_solution_from_list():
@@ -17,19 +19,19 @@ def test_create_solutino_from_json():
     solution = GESolution(json_data=json_string)
     assert solution.to_json() == json_string
 
-def test_compare_solutions_from_copy():
-
-    solution = GESolution([[0,0],[0,0,0],[0]])
-    json_string = solution.to_json()
-
-    solution_copy = solution.copy()
-    solution_json = GESolution(json_data=json_string)
-
-    assert (solution is solution_copy) == False
-    assert (solution == solution_copy) == False
-    
-    assert (solution is solution_json) == False
-    assert (solution == solution_json) == False
-
-    assert (solution_copy is solution_json) == False
-    assert (solution_copy == solution_json) == False
+@pytest.mark.parametrize("genA, genB, expected", [
+    ([[0,0],[0,0,0],[0]], [[0,0],[0,0,0],[0]], True),
+    ([[0,0],[0,0,0],[0]], [[0,0],[0,0,0],[1]], False),
+    ([[0,0],[0,0,0],[0]], 'copy', True),
+    ([[0,0],[0,0,0],[0]], 'json', True),
+    ([[0,0],[0,0,0],[0]], None, False),
+    ([[0,0],[0,0,0],[0]], [], False)])
+def test_is_equal2(genA, genB, expected):
+    objA = GESolution(genA)
+    if genB == 'copy':
+        objB = objA.copy()
+    elif genB == 'json':
+        objB = GESolution(json_data=objA.to_json()) 
+    else:
+        objB = GESolution(genB)
+    assert (objA == objB) == expected
