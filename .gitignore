@@ -23,4 +23,4 @@ datasets/*
 cbioge/tests/test_output/
 cbioge/dist
 cbioge/build
-cbioge/tests/dataset/*
+#cbioge/tests/dataset/*
