@@ -23,7 +23,7 @@ def get_latest_pid_or_new(base_path):
     folders = glob.glob(os.path.join(base_path, '*/'))
 
     if folders == []:
-        return get_new_unique_path()
+        return get_new_unique_path(base_path)
 
     folders.sort(reverse=True)
     print(f'latest checkpoint found is {folders[0]}')

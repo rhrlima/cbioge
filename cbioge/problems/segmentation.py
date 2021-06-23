@@ -1,4 +1,3 @@
-from cbioge.problems.problem import DNNProblem
 import os
 import re
 import copy
@@ -11,6 +10,7 @@ from keras.optimizers import *
 from keras.callbacks import *
 
 from cbioge.problems import DNNProblem
+from cbioge.algorithms.solution import GESolution
 
 from cbioge.utils import checkpoint as ckpt
 from cbioge.utils.image import *
@@ -69,7 +69,7 @@ class UNetProblem(DNNProblem):
                     mapping.append(['concat', 3])
                     blocks.remove(['bridge'])
                 mapping.extend(blocks)
-    
+
         return mapping
                 
     def _get_layer_outputs(self, mapping):
@@ -113,10 +113,9 @@ class UNetProblem(DNNProblem):
                 #print(i, 'adjusting number of filters in layer', aux_output)
                 mapping[i+1][1] = aux_output[2]
 
-    def map_genotype_to_phenotype(self, genotype):
+    def map_genotype_to_phenotype(self, solution: GESolution):
 
-        mapping, genotype = self.parser.dsge_recursive_parse(genotype)
-        mapping = self._reshape_mapping(mapping)
+        mapping, genotype = self.parser.dsge_recursive_parse(solution.genotype)
 
         # unet specific
         mapping = self._build_right_side(mapping)

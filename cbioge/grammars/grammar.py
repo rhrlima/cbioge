@@ -1,12 +1,14 @@
-import json
+import json, re
 import numpy as np
 
 
 class Grammar:
 
-    def __init__(self, grammar_file, verbose=False):
+    def __init__(self, grammar_file, verbose=False, max_depth=10):
         self._read_grammar(grammar_file)
+        self.max_depth = max_depth
         self.verbose = verbose
+        self.precision = 5
     
     def _read_grammar(self, grammar_file):
         ''' reads a file expecting a json structure
@@ -48,12 +50,38 @@ class Grammar:
     #     for rule in self.rules:
     #         print(rule)
 
-    # def _parse_special_types(self, value):
-    #     ''' parses special types present in the grammar
-            
-    #         ex: [min, max] is parsed to random between min and max
-    #     '''
-    #     pass
+    def _parse_special_types(self, value):
+        ''' Parses special types present in the grammar.
+
+            Parses a string in the form of "[int, int]" or "[float, float]"
+            to the correct types and return a random between the interval.
+
+            ex: [min, max] is parsed to random between min and max.
+        '''
+
+        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
+        if type(value) is str:
+            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+            if m:
+                min_ = eval(m.group(1))
+                max_ = eval(m.group(2))
+                if type(min_) == int and type(max_) == int:
+                    return np.random.randint(min_, max_)
+                elif type(min_) == float and type(max_) == float:
+                    return round(np.random.uniform(min_, max_), self.precision)
+                else:
+                    raise TypeError('type mismatch')
+        return value
+
+    def _group_mapping(self, mapping):
+        # groups layer name and parameters together
+        new_mapping = []
+        while len(mapping) > 0:
+            if mapping[0] not in self.blocks:
+                raise ValueError('Invalid value present in the grammar:', mapping[0])
+            new_mapping.append(mapping[:len(self.blocks[mapping[0]])])
+            mapping = mapping[len(self.blocks[mapping[0]]):]
+        return new_mapping
 
     def _recursive_parse_call(self, genotype, added, symb, depth):
         ''' recursive method to produce the grammar expansion
@@ -77,7 +105,7 @@ class Grammar:
         
         for s in expansion:
             if s not in self.nonterm:
-                production.append(s)
+                production.append(self._parse_special_types(s))
             else:
                 production += self._recursive_parse_call(genotype, added, s, depth+1)
 
@@ -109,14 +137,14 @@ class Grammar:
 
         return genotype
 
-    def dsge_create_solution(self, max_depth=10):
+    def dsge_create_solution(self, max_depth=None):
         ''' creates a random solution based on the grammar, according to the 
             DSGE method
 
             returns: a list of lists containing integer values that is a valid
             solution related to the grammar
         '''
-
+        max_depth = self.max_depth if max_depth is None else max_depth
         genotype = [[] for _ in range(len(self.nonterm))]
         symb = self.nonterm[0] # assigns initial symbol
 
@@ -168,4 +196,6 @@ class Grammar:
             # adds the values present in the 'added' list, to the original genotype
             genotype[symb].extend(added[symb])
 
-        return list(filter(lambda x: x != '&', production)), genotype
+        mapping = self._group_mapping(list(filter(lambda x: x != '&', production)))
+
+        return mapping, genotype

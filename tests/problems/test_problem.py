@@ -4,7 +4,7 @@ from cbioge.grammars import Grammar
 from cbioge.problems import BaseProblem, DNNProblem
 
 def get_mockup_parser():
-    return Grammar('tests/grammars/test_grammar.json')
+    return Grammar('tests/data/test_grammar.json')
 
 def get_mockup_data_dict():
 
@@ -60,28 +60,3 @@ def test_dnnproblem_none_parser():
 def test_dnnproblem_none_dataset():
     with pytest.raises(AttributeError):
         DNNProblem(get_mockup_parser(), None)
-
-def test_reshape_mapping():
-    mapping = ['conv', 32, 'same', 'conv', 32, 'same', 'dense', 10]
-    problem = DNNProblem(get_mockup_parser(), get_mockup_data_dict())
-    assert problem._reshape_mapping(mapping) == [
-        ['conv', 32, 'same'], 
-        ['conv', 32, 'same'], 
-        ['dense', 10]
-    ]
-
-def test_building_json_model():
-    mapping = ['conv', 32, 'same', 'conv', 32, 'same', 'dense', 10]
-    problem = DNNProblem(get_mockup_parser(), get_mockup_data_dict())
-    mapping = problem._reshape_mapping(mapping)
-    model = problem._base_build(mapping)
-    problem._wrap_up_model(model)
-    assert model == {
-        'class_name': 'Model', 'config': {'layers': [
-            {'class_name': 'Conv2D', 'config': {
-                'filters': 32, 'padding': 'same'}, 'inbound_nodes': [], 'name': 'conv_0'},
-            {'class_name': 'Conv2D', 'config': {
-                'filters': 32, 'padding': 'same'}, 'inbound_nodes': [[['conv_0', 0, 0]]], 'name': 'conv_1'},
-            {'class_name': 'Dense', 'config': {'units': 10}, 
-                'inbound_nodes': [[['conv_1', 0, 0]]], 'name': 'dense_0'}
-        ], 'input_layers': [['conv_0', 0, 0]], 'output_layers': [['dense_0', 0, 0]]}}

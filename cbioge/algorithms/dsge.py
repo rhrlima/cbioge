@@ -64,23 +64,16 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         #     print(f'<{curr_time}> [eval] solution {solution.id} started')
         #     print('genotype:', solution.genotype)
 
-        solution.phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-
+        # performs mapping and evaluates taking the time spent
+        self.problem.map_genotype_to_phenotype(solution)
         start_time = dt.datetime.today()
         self.problem.evaluate(solution)
-        end_time = dt.datetime.today()
-
-        # scores:
-        # 0: loss
-        # 1: accuracy
-        # 2..: others
-        #fitness = scores[1]
+        solution.time = dt.datetime.today() - start_time
 
         # local changes for checkpoint
         #solution.fitness = fitness
         #solution.phenotype = phenotype
         #solution.evaluated = True
-        solution.time = end_time - start_time
         #solution.params = params
 
         ckpt.save_solution(solution)
@@ -207,7 +200,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def print_progress(self):
         curr_time = time.strftime('%x %X')
-        best = self.population[0].genotype
-        best_fit = self.population[0].fitness
+        best = max(self.population, key=lambda x: x.fitness)
         print(f'<{curr_time}> evals: {self.evals}/{self.max_evals}',
-              f'best so far: {best} fitness: {best_fit}')
+              f'best so far: {best.fitness} {best.genotype}')

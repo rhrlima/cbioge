@@ -2,7 +2,7 @@
 	"name": "test_grammar",
 
 	"blocks": {
-		"conv": ["Conv2D", "filters", "padding"],
+		"conv": ["Conv2D", "filters", "kernel_size"],
         "dense": ["Dense", "units"]
 	},
 
@@ -16,14 +16,15 @@
             ["<conv>", "<dense>", "<dense>"]
         ],
 		"<conv>": [
-            ["conv", "<filters>", "<padding>"]
+            ["conv", "<filters>", "<ksize>"]
         ],
 		"<dense>": [
             ["dense", "<units>"]
         ],
-		"<padding>": [
-            ["valid"], 
-            ["same"]
+		"<ksize>": [
+            [2], 
+            [3], 
+            [4]
         ],
 		"<filters>": [
             [16], 

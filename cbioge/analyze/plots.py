@@ -8,7 +8,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from utils import checkpoint as ckpt
+from cbioge.utils import checkpoint as ckpt
 
 
 def natural_key(string_):
@@ -117,6 +117,7 @@ def load_and_plot(folders, tag, labels, best=False, name='plot'):
     #plt.show()
     plt.clf()
 
+
 def load_group_plot(folders, tag, labels, best=False, name='plot'):
 
     for i, f in enumerate(folders):
@@ -152,7 +153,9 @@ if __name__ == '__main__':
 
     markers = ['o-', '*-', 'v-', 'x-', '+-', '--', ',-']
 
-    labels = ['Normal', 'NoMut', 'NoCross']
+    #labels = ['Normal', 'NoMut', 'NoCross']
+
+    #load_and_plot(['small/10484'], 'fitness', ['small'], 'dataset1')
 
     #load_and_plot(['normal', 'nomut', 'nocross'], 'fitness', labels, 'dataset1')
     #load_and_plot(['normal', 'nomut', 'nocross'], 'param', labels, 'dataset1')
@@ -176,8 +179,8 @@ if __name__ == '__main__':
     #load_and_plot(['borders1', 'borders2', 'borders3', 'borders4', 'borders5'], 'fitness', ['B1', 'B2', 'B3', 'B4', 'B5'], True, 'borders-best')
     #load_and_plot(['borders1', 'borders2', 'borders3', 'borders4', 'borders5'], 'fitness', ['B1', 'B2', 'B3', 'B4', 'B5'], False, 'borders-mean')
 
-    load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], True, 'bsds-best')
-    load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], False, 'bsds-mean')
+    #load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], True, 'bsds-best')
+    #load_and_plot(['bsds5001', 'bsds5002', 'bsds5003', 'bsds5004', 'bsds5005'], 'fitness', ['BS1', 'BS2', 'BS3', 'BS4', 'BS5'], False, 'bsds-mean')
 
 
     # load_group_plot(['rand2?', 'tex2?'], 'param', labels, 'dataset2')

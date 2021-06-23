@@ -1,12 +1,12 @@
-import os, re
-
-import numpy as np
+import os
 
 from keras import backend as K # TODO memory leak?
-from keras.models import model_from_json
+from keras.models import Model
 from keras.optimizers import Adam
 
+import cbioge.layers as clayers
 from cbioge.problems.dnn import ModelRunner
+from cbioge.algorithms.solution import GESolution
 from cbioge.utils import checkpoint as ckpt
 
 
@@ -16,10 +16,10 @@ class BaseProblem:
         During the evolution the methods in this class are called.
     '''
 
-    def map_genotype_to_phenotype(self, genotype) -> str:
+    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
         raise NotImplementedError('Not implemented yet.')
 
-    def evaluate(self, solution) -> bool:
+    def evaluate(self, solution: GESolution) -> bool:
         raise NotImplementedError('Not implemented yet.')
 
 
@@ -33,6 +33,7 @@ class DNNProblem(BaseProblem):
         batch_size=10, 
         epochs=1, 
         timelimit=None, 
+        test_eval=False, 
         workers=1, 
         multiprocessing=False, 
         verbose=False):
@@ -44,8 +45,9 @@ class DNNProblem(BaseProblem):
         self.batch_size = batch_size
         self.epochs = epochs
         self.timelimit = timelimit
+        self.test_eval = test_eval
 
-        self.opt = Adam(lr = 1e-4)
+        self.opt = 'adam'
         self.metrics = ['accuracy']
 
         self.workers = workers
@@ -78,35 +80,6 @@ class DNNProblem(BaseProblem):
         self.valid_size = len(self.x_valid)
         self.test_size = len(self.x_test)
 
-    def _reshape_mapping(self, mapping):
-        # groups layer name and parameters together
-        new_mapping = []
-        index = 0
-        while index < len(mapping):
-            block = mapping[index]
-            end = index + len(self.blocks[block])
-            new_mapping.append(mapping[index:end])
-            mapping = mapping[end:]
-        return new_mapping
-
-    def _parse_value(self, value):
-        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
-        ''' parses a string in the form of "[int, int]" or "[float, float]"
-            to the correct types and return a random between the interval
-        '''
-        if type(value) is str:
-            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
-            if m:
-                min_ = eval(m.group(1))
-                max_ = eval(m.group(2))
-                if type(min_) == int and type(max_) == int:
-                    return np.random.randint(min_, max_)
-                elif type(min_) == float and type(max_) == float:
-                    return np.random.uniform(min_, max_)
-                else:
-                    raise TypeError('type mismatch')
-        return value
-
     def _base_build(self, mapping):
 
         self.naming = {}
@@ -134,7 +107,7 @@ class DNNProblem(BaseProblem):
         base_block['class_name'] = self.blocks[block_name][0]
         base_block['name'] = name
         for name, value in zip(self.blocks[block_name][1:], params):
-            base_block['config'][name] = self._parse_value(value)
+            base_block['config'][name] = value
         return base_block
 
     def _wrap_up_model(self, model):
@@ -149,15 +122,18 @@ class DNNProblem(BaseProblem):
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
 
-    def evaluate(self, solution):
+    def evaluate(self, solution: GESolution, save_weights=False) -> bool:
         ''' Evaluates the phenotype
 
             phenotype: json structure containing the network architecture
             weights: network weights (optional)
-
         '''
         try:
-            model = model_from_json(solution.phenotype)
+            model = solution.phenotype
+            if model is None:
+                model = self.map_genotype_to_phenotype(solution)
+
+            #model = model_from_json(solution.phenotype)
             model.compile(
                 loss=self.loss, 
                 optimizer=Adam(lr = 1e-4), #self.opt, TODO REVER
@@ -172,17 +148,25 @@ class DNNProblem(BaseProblem):
             x_test = self.x_test[:self.test_size]
             y_test = self.y_test[:self.test_size]
 
+            # changes the data used for evaluation according to policy
+            x_eval = x_test if self.test_eval else x_valid
+            y_eval = y_test if self.test_eval else y_valid
+
             solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
             runner = ModelRunner(model, path=solution_path, verbose=self.verbose)
             runner.train_model(x_train, y_train, 
-                self.batch_size, 
-                self.epochs, 
-                validation_data=(x_valid, y_valid), 
-                timelimit=self.timelimit)
-            runner.test_model(x_test, y_test, 
-                self.batch_size)
+                batch_size=self.batch_size, 
+                epochs=self.epochs, 
+                timelimit=self.timelimit, 
+                save_weights=save_weights, 
+                verbose=self.verbose)
+            
+            runner.test_model(x_eval, y_eval, 
+                batch_size=self.batch_size, 
+                verbose=self.verbose)
 
             # local changes for checkpoint
+            solution.phenotype = model.to_json()
             solution.fitness = runner.accuracy
             solution.params = runner.params
             solution.evaluated = True

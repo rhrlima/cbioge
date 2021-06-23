@@ -4,6 +4,7 @@ import numpy as np
 
 from cbioge.grammars import Grammar
 from cbioge.problems import UNetProblem
+from cbioge.algorithms.solution import GESolution
 
 def get_mockup_parser():
     return Grammar('data/grammars/unet_restricted.json')
@@ -24,9 +25,10 @@ def get_mockup_data_dict():
 def test_map_genotype_to_phenotype():
     np.random.seed(0)
     parser = get_mockup_parser()
-    genotype = parser.dsge_create_solution()
+    solution = GESolution(parser.dsge_create_solution())
+    print(parser.dsge_recursive_parse(solution.genotype))
     problem = UNetProblem(parser, get_mockup_data_dict())
-    json_model = problem.map_genotype_to_phenotype(genotype)
+    json_model = problem.map_genotype_to_phenotype(solution)
     assert json_model == json.dumps(
         {"class_name": "Model", "config": {"layers": [
         {"class_name": "InputLayer", "name": "input_0", "config": {"batch_input_shape": [None, 32, 32, 3]}, "inbound_nodes": []}, 

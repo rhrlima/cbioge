@@ -23,11 +23,12 @@ class ModelRunner:
         self.accuracy = 0
         self.params = model.count_params() if model is not None else 0
         self.history = None
-        
+
         self.verbose = verbose
         self.ckpt_path = ckpt.ckpt_folder if path is None else path
 
-    def train_model(self, x_train, y_train, batch_size, epochs, save_weights=False, **kwargs):
+    def train_model(self, x_train, y_train, save_weights: bool = False, timelimit: int = None, **kwargs):
+        #, batch_size, epochs, save_weights=False, **kwargs):
         ''' executes the training of a model.
 
             # Parameters
@@ -45,24 +46,26 @@ class ModelRunner:
 
         callbacks = []
 
-        if 'timelimit' in kwargs and kwargs['timelimit'] is not None:
-            ts = TimedStopping(
-                seconds=kwargs['timelimit'], 
-                verbose=self.verbose)
-            callbacks.append(ts)
+        if timelimit is not None:
+            callbacks.append(
+                TimedStopping(seconds=timelimit, verbose=self.verbose))
 
-        validation_data = None
-        if ('validation_data' in kwargs 
-            and kwargs['validation_data'] is tuple 
-            and len(kwargs['validation_data']) == 2):
-                validation_data = kwargs['validation_data']
+        # if type(save_weights) is not bool:
+        #     raise ValueError('Value for paramenter save_weights must be boolean')
+
+        # validation_data = None
+        # if ('validation_data' in kwargs 
+        #     and kwargs['validation_data'] is tuple 
+        #     and len(kwargs['validation_data']) == 2):
+        #         validation_data = kwargs['validation_data']
 
         self.history = self.model.fit(x_train, y_train, 
-            validation_data=validation_data, 
-            batch_size=batch_size, 
-            epochs=epochs, 
-            verbose=self.verbose, 
-            callbacks=callbacks)
+            # validation_data=validation_data, 
+            # batch_size=batch_size, 
+            # epochs=epochs, 
+            # verbose=self.verbose, 
+            callbacks=callbacks, 
+            **kwargs)
 
         if save_weights:
             # only create the folders if we want to save the weights
@@ -72,15 +75,16 @@ class ModelRunner:
             model_path = os.path.join(self.ckpt_path, f'weights.hdf5')
             self.model.save_weights(model_path)
 
-    def test_model(self, x_test, y_test, batch_size, weights_path=None):
+    def test_model(self, x_test, y_test, weights_path=None, **kwargs):
 
         if weights_path is not None:
             self.model.load_weights(weights_path)
 
         self.loss, self.accuracy = self.model.evaluate(
             x_test, y_test, 
-            batch_size=batch_size, 
-            verbose=self.verbose)
+            #batch_size=batch_size, 
+            #verbose=self.verbose
+            **kwargs)
 
     def predict_model(self, x_test, batch_size):
 

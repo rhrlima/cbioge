@@ -13,7 +13,7 @@ import seaborn as sns
 
 from keras.models import model_from_json
 
-from algorithms.solutions import GESolution
+from cbioge.algorithms.solutions import GESolution
 
 
 def ckpt2json(filename):

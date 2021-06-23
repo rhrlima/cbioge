@@ -1,7 +1,7 @@
 import argparse
 import platform
 
-MAX_GPU_MEMORY=0.7
+MAX_GPU_MEMORY=0.8
 
 def _limit_gpu_memory(fraction=MAX_GPU_MEMORY):
     # limits GPU memory to use tensorflow-gpu
@@ -69,3 +69,4 @@ def args_evolution_exp():
     parser.add_argument('-v', '--verbose', default=0, type=int)
 
     return parser.parse_args()
+
