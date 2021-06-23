@@ -4,7 +4,7 @@ install_requires = ['Keras==2.4.3', 'tensorflow==2.3.0',
 	'networkx==2.5', 'scipy==1.4.1', 'spektral==0.6.1', 
 	'pandas==1.1.2', 'numpy==1.18.5', 'scikit-image']
 
-current_vertion = '0.1.0'
+current_vertion = '0.1.1'
 setup(
 	name='cbioge',
 	packages=find_packages(),

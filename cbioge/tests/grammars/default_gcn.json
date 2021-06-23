@@ -5,7 +5,7 @@
 		"input": ["Input", "shape"],
 		"conv": ["conv_type", "units", "activation"],
 		"dropout": ["Dropout", "rate"],
-        "filters": ["filter", "max_degree", "sym_norm"]
+		"filters": ["filter", "max_degree", "sym_norm"]
 	},
 
 	"rules": {
@@ -16,21 +16,21 @@
 			["<layer_c>", "<layer_c>"]
 		],
 		"<dense>": [
-            ["conv", "<conv_type>", "<units>", "softmax"]
-        ],
+			["conv", "<conv_type>", "<units>", "softmax"]
+		],
 		"<conv>": [
-            ["conv", "<conv_type>", "<units>", "<activation>"]
-        ],
-        "<conv_type>": [
-            ["GraphConv"], 
-            ["GraphSageConv"], 
-            ["ARMAConv"], 
-            ["GraphAttention"], 
-            ["APPNP"] 
-        ],
+			["conv", "<conv_type>", "<units>", "<activation>"]
+		],
+		"<conv_type>": [
+			["GraphConv"], 
+			["GraphSageConv"], 
+			["ARMAConv"], 
+			["GraphAttention"], 
+			["APPNP"] 
+		],
 		"<dropout>": [["dropout", "<rate>"]],
 		"<units>": [[32], [64], [128], [256]],
-        "<activation>": ["relu"],
-        "<rate>": [[0.25], [0.33], [0.5]]
+		"<activation>": ["relu"],
+		"<rate>": [[0.25], [0.33], [0.5]]
 	}
 }

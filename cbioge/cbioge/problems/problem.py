@@ -21,6 +21,104 @@ class BaseProblem:
     def evaluate(self, solution) -> bool:
         raise NotImplementedError('Not implemented yet.')
 
+class CoreProblem(BaseProblem):
+
+    def __init__(self,
+        parser,
+        batch_size=10, 
+        epochs=1, 
+        timelimit=None, 
+        workers=1, 
+        multiprocessing=False, 
+        verbose=False, 
+        metrics=['accuracy']):
+
+        self.parser = parser
+        self.blocks = self.parser.blocks
+
+        self.batch_size = batch_size
+        self.epochs = epochs
+        self.timelimit = timelimit
+
+        self.opt = Adam(lr = 1e-4)
+        self.metrics = metrics
+
+        self.workers = workers
+        self.multiprocessing = multiprocessing
+
+        self.verbose = verbose
+
+    def _reshape_mapping(self, mapping):
+        # groups layer name and parameters together
+        new_mapping = []
+        index = 0
+        while index < len(mapping):
+            block = mapping[index]
+            end = index + len(self.blocks[block])
+            new_mapping.append(mapping[index:end])
+            mapping = mapping[end:]
+        return new_mapping
+
+    def _parse_value(self, value):
+        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
+        ''' parses a string in the form of "[int, int]" or "[float, float]"
+            to the correct types and return a random between the interval
+        '''
+        if type(value) is str:
+            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+            if m:
+                min_ = eval(m.group(1))
+                max_ = eval(m.group(2))
+                if type(min_) == int and type(max_) == int:
+                    return np.random.randint(min_, max_)
+                elif type(min_) == float and type(max_) == float:
+                    return np.random.uniform(min_, max_)
+                else:
+                    raise TypeError('type mismatch')
+        return value
+
+    def _base_build(self, mapping):
+
+        self.naming = {}
+
+        model = {'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+
+        for i, layer in enumerate(mapping):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            model['config']['layers'].append(block)
+
+        return model
+
+    def _build_block(self, block_name, params):
+
+        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
+
+        if block_name in self.naming:
+            self.naming[block_name] += 1
+        else:
+            self.naming[block_name] = 0
+        name = f'{block_name}_{self.naming[block_name]}'
+
+        base_block['class_name'] = self.blocks[block_name][0]
+        base_block['name'] = name
+        for name, value in zip(self.blocks[block_name][1:], params):
+            base_block['config'][name] = self._parse_value(value)
+        return base_block
+
+    def _wrap_up_model(self, model):
+        # iterates over layers and add previous layer as input of current one
+        for i, layer in enumerate(model['config']['layers'][1:]):
+            last = model['config']['layers'][i]
+            layer['inbound_nodes'].append([[last['name'], 0, 0]])
+
+        # creates and adds input and output layers to model
+        input_layer = model['config']['layers'][0]['name']
+        output_layer = model['config']['layers'][-1]['name']
+        model['config']['input_layers'].append([input_layer, 0, 0])
+        model['config']['output_layers'].append([output_layer, 0, 0])
+
 
 class DNNProblem(BaseProblem):
     ''' Base class used for Problems related to the automatic design of

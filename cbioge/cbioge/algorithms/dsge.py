@@ -14,26 +14,32 @@ from cbioge.algorithms.ea import BaseEvolutionaryAlgorithm
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
-    def __init__(self, problem, parser):
+    def __init__(self, problem, parser, 
+        seed=None, 
+        pop_size=5, 
+        max_evals=10, 
+        verbose=False, 
+        selection=None, 
+        crossover=None, 
+        mutation=None, 
+        replacement=None):
         super().__init__(problem)
 
         self.parser = parser
 
-        self.seed = None
-        self.pop_size = 5
-        self.max_evals = 100
-        self.training = True
+        self.seed = seed
+        self.pop_size = pop_size
+        self.max_evals = max_evals
 
-        self.selection = None
-        self.crossover = None
-        self.mutation = None
-        self.replacement = None
+        self.selection = selection
+        self.crossover = crossover
+        self.mutation = mutation
+        self.replacement = replacement
+
+        self.verbose = verbose
 
         self.population = None
         self.evals = None
-
-        self.verbose = False
-
         
         np.random.seed(seed=self.seed)
 
@@ -57,36 +63,18 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 print(f'<{curr_time}> [eval] skipping solution {solution.id}. Already evaluated')
             return
 
-        if self.verbose:
-            curr_time = dt.datetime.today().strftime('%x %X')
-            print(f'<{curr_time}> [eval] solution {solution.id} started')
-            print('genotype:', solution.genotype)
-
         solution.phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
 
         start_time = dt.datetime.today()
         self.problem.evaluate(solution)
-        end_time = dt.datetime.today()
-
-        # scores:
-        # 0: loss
-        # 1: accuracy
-        # 2..: others
-        #fitness = scores[1]
-
-        # local changes for checkpoint
-        #solution.fitness = fitness
-        #solution.phenotype = phenotype
-        #solution.evaluated = True
-        solution.time = end_time - start_time
-        #solution.params = params
+        solution.time = dt.datetime.today() - start_time
 
         ckpt.save_solution(solution)
 
         if self.verbose:
             curr_time = dt.datetime.today().strftime('%x %X')
-            print('fitness:', solution.fitness)
-            print(f'<{curr_time}> [eval] solution {solution.id} ended')
+            # print('fitness:', solution.fitness)
+            print(f'<{curr_time}> [eval] solution {solution.id:3} fit {float(solution.fitness):.3} gen {solution}')
 
     def evaluate_population(self, population):
 
@@ -146,7 +134,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
             self.population = self.apply_replacement(offspring_pop)
 
-            self.evals += len(offspring_pop)
+            self.evals += self.pop_size
             offspring_pop.clear()
 
             self.save_state()
@@ -207,5 +195,4 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         curr_time = time.strftime('%x %X')
         best = self.population[0].genotype
         best_fit = self.population[0].fitness
-        print(f'<{curr_time}> evals: {self.evals}/{self.max_evals}',
-              f'best so far: {best} fitness: {best_fit}')
+        print(f'<{curr_time}> evals: {self.evals}/{self.max_evals}', f'best so far: {best} fitness: {best_fit}')

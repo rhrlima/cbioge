@@ -1,5 +1,5 @@
-from cbioge.problems.problem import BaseProblem
-import re, json, sys, os, gc
+from cbioge.problems.problem import CoreProblem
+import re, json, sys, os, gc, logging
 from tensorflow.keras.optimizers import Adam
 from cbioge.utils.graphutils import *
 from keras.layers import Input, Dropout
@@ -9,6 +9,9 @@ from spektral.utils.convolution import localpooling_filter
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
+
+
+logging.basicConfig(level=logging.INFO)
 
 GRAPH_CONVOLUTION_OPTIONS = {
     "GraphConv": GraphConv,
@@ -28,7 +31,7 @@ GRAPH_CONVOLUTION_OPTIONS = {
     'EdgeConv':EdgeConv
 }
 
-class GCNProblem(BaseProblem):
+class GCNProblem(CoreProblem):
 
     def __init__(self, 
         parser, dataset=None, 
@@ -38,7 +41,7 @@ class GCNProblem(BaseProblem):
         workers = 1, multiprocessing = False, 
         training=True,learning_rate=1e-2,
         l2_reg=5e-4 / 2, opt=Adam, 
-        es_patience=30, dropout=.5):
+        es_patience=30, dropout=.5, timelimit=None):
 
         self.parser = parser
         self.loss = loss
@@ -49,27 +52,27 @@ class GCNProblem(BaseProblem):
         self.workers = workers
         self.multiprocessing = multiprocessing
         self.training = training
-        self._initialize_blocks()
         self.learning_rate = learning_rate
         self.l2_reg = l2_reg
         self.opt = opt(lr=self.learning_rate)
         self.es_patience = es_patience
         self.build_method = build_method
         self.dropout = dropout
+        self.dataset = dataset
+        self.timelimit = timelimit
+        super().__init__(
+            parser=self.parser, 
+            batch_size=self.batch_size, 
+            epochs=self.epochs, 
+            timelimit=self.timelimit, 
+            workers=self.workers, 
+            multiprocessing=self.multiprocessing, 
+            verbose=self.verbose, 
+            metrics=self.metrics)
 
-
-    def _initialize_blocks(self):
-        self.blocks = {
-            'input': ['Input', 'shape'],
-            'conv': ['conv_type', 'units', 'activation'],
-            'dropout': ['Dropout', 'rate'],
-            'filters': ['filter', 'max_degree', 'sym_norm']
-        }
-
-    
 
     def read_dataset_from_pickle(self, dataset, data_path):
-        print(f"::::: Reading {data_path}. Pickle file: {dataset}")
+        logging.info(f"::::: Reading {data_path}. Pickle file: {dataset}")
         A, X, y, train_mask, val_mask, test_mask = load_data(dataset_name=dataset, DATA_PATH=data_path)
         #A, X, y, train_mask, val_mask, test_mask = load_data_2(path=data_path, dataset=dataset)
 
@@ -85,139 +88,26 @@ class GCNProblem(BaseProblem):
 
 
     def map_genotype_to_phenotype(self, genotype):
-        self.naming = {}
-        self.mapping = None
-        mapping, genotype = self.parser.dsge_recursive_parse(genotype)
-        if self.verbose: print("dsge_recursive_parse", mapping)
-        mapping = self._reshape_mapping(mapping)
-        if self.verbose: print("_reshape_mapping", mapping)
 
-        mapping = self._build_right_side(mapping)
-        if self.verbose: print(mapping)
-        model = {'class_name': 'Model', 
-            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+        self.mapping, genotype = self.parser.dsge_recursive_parse(genotype)
+        self.mapping = self._reshape_mapping(self.mapping)
+        self.mapping.insert(0, ['input', (None,)]) # input layer
+        self.model = self._base_build(self.mapping)
+        self._wrap_up_model(self.model)
+        return json.dumps(self.model)
 
-        for i, layer in enumerate(mapping):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            model['config']['layers'].append(block)
-
-        self._wrap_up_model(model)
-        self.mapping = mapping
-        return json.dumps(model)
-
-
-
-    def _build_block(self, block_name, params):
-
-        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
-
-        if block_name in self.naming:
-            self.naming[block_name] += 1
-        else:
-            self.naming[block_name] = 0
-        name = f'{block_name}_{self.naming[block_name]}'
-
-        base_block['class_name'] = self.blocks[block_name][0]
-        base_block['name'] = name
-        for key, value in zip(self.blocks[block_name][1:], params):
-            base_block['config'][key] = self._parse_value(value)
-        return base_block
-
-    def _parse_value(self, value):
-        if type(value) is str:
-            m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
-            if m:
-                min_ = eval(m.group(1))
-                max_ = eval(m.group(2))
-                if type(min_) == int and type(max_) == int:
-                    return np.random.randint(min_, max_)
-                elif type(min_) == float and type(max_) == float:
-                    return np.random.uniform(min_, max_)
-                else:
-                    raise TypeError('type mismatch')
-            else:
-                return value
-        else:
-            return value
-
-    def _wrap_up_model(self, model):
-        layers = model['config']['layers']
-        stack = []
-        for i, layer in enumerate(model['config']['layers']):
-            if layer['class_name'] in ['push', 'bridge']: #CHECK
-                stack.append(layers[i-1]) #layer before (conv)
-                model['config']['layers'].remove(layers[i])
-
-        for i, layer in enumerate(layers[1:]):
-
-            last = model['config']['layers'][i]
-            layer['inbound_nodes'].append([[last['name'], 0, 0]])
-
-            if layer['class_name'] == 'Concatenate':
-                other = stack.pop()
-                # print('CONCATENATE', layer['name'], other['name'])
-                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
-
-        input_layer = model['config']['layers'][0]['name']
-        output_layer = model['config']['layers'][-1]['name']
-        model['config']['input_layers'].append([input_layer, 0, 0])
-        model['config']['output_layers'].append([output_layer, 0, 0])
-
-    def _build_right_side(self, mapping):
-
-        blocks = None
-        for block in reversed(mapping):
-            name, params = block[0], block[1:]
-            if name == 'maxpool':
-                if blocks != None:
-                    mapping.append(['upsamp', 2])
-                    mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
-                    if ['bridge'] in blocks:
-                        mapping.append(['concat', 3])
-                        blocks.remove(['bridge'])
-                    mapping.extend(blocks)
-                blocks = []
-            elif blocks != None:
-                blocks.append(block)
-        if blocks != None:
-            if blocks != None:
-                mapping.append(['upsamp', 2])
-                mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
-                if ['bridge'] in blocks:
-                    mapping.append(['concat', 3])
-                    blocks.remove(['bridge'])
-                mapping.extend(blocks)
-        
-        #mapping.insert(1, ['input', self.input_shape]) #input layer retirado, O input é controlado pelo Problem
-        return mapping
-
-    def _reshape_mapping(self, phenotype):
-        new_mapping = []
-
-        index = 0
-        while index < len(phenotype):
-            block = phenotype[index]
-            if block == 'conv':
-                end = index+4
-            else:
-                end = index+2
-            new_mapping.append(phenotype[index:end])
-            phenotype = phenotype[end:]
-
-        return new_mapping
 
     def preprocess(self, first_layer, A):
         fltr = A.astype("f4")
         if first_layer in [GraphSageConv, GraphAttention, GINConv, GatedGraphConv, TAGConv]:
-            print("no preprocessing")
+            logging.info("no preprocessing")
             fltr = A.astype('f4')
         if first_layer in [GraphConv, ChebConv, ARMAConv, GraphConvSkip]:
-            print("preprocessing like framework")
+            logging.info("preprocessing like framework")
             fltr = first_layer.preprocess(A).astype('f4')
 
         if first_layer in [APPNP]:
-            print("using localpooling_filter")
+            logging.info("using localpooling_filter")
             fltr = localpooling_filter(A).astype('f4')
         return fltr
 
@@ -233,8 +123,7 @@ class GCNProblem(BaseProblem):
         try:
             
             K.clear_session()
-            print(self.mapping)
-
+            logging.info(f":: Mapping: {self.mapping}")
 
             model = None
             #build model from self.mapping
@@ -252,16 +141,18 @@ class GCNProblem(BaseProblem):
 
             for _map in self.mapping:
                 block, params = _map[0], _map[1:]
+                if block == 'input':
+                    continue
                 if block == 'dropout':
                     dropout = params[0]
                     X_1 = Dropout(dropout)(X_1)
-                elif block == 'conv':
-                    layer = params[0]
+                elif block in GRAPH_CONVOLUTION_OPTIONS.keys():
+                    layer = block
                     layer = GRAPH_CONVOLUTION_OPTIONS[layer]
                     if not first_layer:
                         first_layer = layer
-                    units = params[1]
-                    activation = params[2]
+                    units = params[0]
+                    activation = params[1]
                     if activation=='softmax':
                         #last layer
                         units = self.n_classes
@@ -312,9 +203,9 @@ class GCNProblem(BaseProblem):
             return scores, count_params
 
         except Exception as e:
-            print('[evaluation]', e)
+            logging.info(f'[evaluation] {e}')
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            logging.info(f'{exc_type}, {fname}, {exc_tb.tb_lineno}')
             return (-1, 0), 0
         

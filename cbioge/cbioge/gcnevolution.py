@@ -23,8 +23,8 @@ class GCNGEEvolution():
 
 		logging.info(":: Build runner GEEvolutionRunner")
 		self.runner.build()
-		logging.info(":: Executiong GE in 3..2...1!")
-		self.population = self.runner.execute_ge()
+		logging.info(":: Executing GE in 3..2...1!")
+		self.population = self.runner.execute()
 		self.problem = self.runner.problem
 		if self.verbose>=1:
 			logging.info("Fitness\t\tPopulation")

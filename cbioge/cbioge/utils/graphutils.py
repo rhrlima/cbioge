@@ -69,31 +69,31 @@ def load_data(dataset_name='cora', DATA_PATH="", normalize_features=True, random
 
     labels = np.array(labels+zero_labels)
     
-    print(f":: Dataset size: {len(x)+len(tx)}")
-    print(f":: X size: {len(x)}")
-    print(f":: Train size: {len(train_idxs)}")
-    print(f":: AllX size: {len(allx)}")
-    print(f":: Validation size: {len(val_idxs)}")
-    print(f":: Test size: {len(test_idxs)}")
-    print(f":: Labels size: {labels.shape}")
-    print(f":: All data size: {all_data_size}")
-    print(f":: Feature size: {features.shape}")
-    print(f":: Adj size: {adj.shape}")
+    logging.info(f":: Dataset size: {len(x)+len(tx)}")
+    logging.info(f":: X size: {len(x)}")
+    logging.info(f":: Train size: {len(train_idxs)}")
+    logging.info(f":: AllX size: {len(allx)}")
+    logging.info(f":: Validation size: {len(val_idxs)}")
+    logging.info(f":: Test size: {len(test_idxs)}")
+    logging.info(f":: Labels size: {labels.shape}")
+    logging.info(f":: All data size: {all_data_size}")
+    logging.info(f":: Feature size: {features.shape}")
+    logging.info(f":: Adj size: {adj.shape}")
     
 
         
     # Row-normalize the features
     if normalize_features:
-        print(':: Pre-processing node features')
+        logging.info(':: Pre-processing node features')
         features = preprocess_features(features)
 
     train_mask = _sample_mask(train_idxs, all_data_size)
     val_mask = _sample_mask(val_idxs, all_data_size)
     test_mask = _sample_mask(test_idxs, all_data_size)
 
-    print(f":: Train mask size: {train_mask.shape}")
-    print(f":: Val mask size: {val_mask.shape}")
-    print(f":: Test mask size: {test_mask.shape}")
+    logging.info(f":: Train mask size: {train_mask.shape}")
+    logging.info(f":: Val mask size: {val_mask.shape}")
+    logging.info(f":: Test mask size: {test_mask.shape}")
     
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
     
