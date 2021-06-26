@@ -1,5 +1,3 @@
-import copy
-
 class GESolution():
 
     def __init__(self, gen=[], json_data=None):
@@ -18,10 +16,12 @@ class GESolution():
         return str(self.genotype)
 
     def __eq__(self, other):
+        if not isinstance(other, GESolution):
+            return False
         return self.genotype == other.genotype
 
-    def __hash__(self):
-        return hash(self.genotype)
+    # def __hash__(self):
+    #     return hash(self.genotype)
 
     def to_json(self):
         return self.__dict__
@@ -30,7 +30,6 @@ class GESolution():
         for key in self.__dict__:
             self.__dict__[key] = json_data[key]
 
-    def copy(self):
-        new_solution = copy.deepcopy(self)
-        new_solution.evaluated = False
-        return new_solution
+    def copy(self, deep=False):
+        if deep: return GESolution(json_data=self.to_json())
+        return GESolution(self.genotype[:])

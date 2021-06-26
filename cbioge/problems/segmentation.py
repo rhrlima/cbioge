@@ -1,49 +1,36 @@
-import os
-import re
-import copy
-import json
-import pickle
+import os, re, copy, json, pickle
 
-from keras.optimizers import Adam
+#from keras.optimizers import Adam
 from keras.models import model_from_json
 from keras.optimizers import *
 from keras.callbacks import *
 
+from cbioge.grammars import Grammar
 from cbioge.problems import DNNProblem
-from cbioge.algorithms.solution import GESolution
+from cbioge.algorithms import GESolution
+from cbioge.utils.image import calculate_output_size
 
-from cbioge.utils import checkpoint as ckpt
-from cbioge.utils.image import *
-from cbioge.utils.model import TimedStopping
+#from cbioge.utils import checkpoint as ckpt
+#from cbioge.utils.model import TimedStopping
 
 
 class UNetProblem(DNNProblem):
     ''' Problem class for problems related to classification tasks for DNNs.
         This class includes methods focused on the design of U-Nets.
     '''
+    def __init__(self, parser: Grammar, dataset: dict, 
+        batch_size=10, 
+        epochs=1, 
+        timelimit=None, 
+        test_eval=False, 
+        verbose=False, 
+        **kwargs):
 
-    def __init__(self, parser, dataset):
-        super().__init__(parser, dataset)
+        super().__init__(parser, dataset,
+            batch_size, epochs, timelimit, test_eval, verbose, **kwargs)
 
         # segmentation specific
         self.loss = 'binary_crossentropy'
-
-    def _wrap_up_model(self, model):
-        # creates a stack with the layers that will have a bridge (concat) connection
-        stack = []
-        for i, layer in enumerate(model['config']['layers']):
-            if layer['class_name'] in ['bridge']: #CHECK
-                stack.append(model['config']['layers'][i-1]) #layer before (conv)
-                model['config']['layers'].remove(model['config']['layers'][i])
-
-        super()._wrap_up_model(model)
-
-        # iterates over the layers looking for the concatenate ones to then 
-        # adds the connection that comes from the bridge (stored in the stack)
-        for i, layer in enumerate(model['config']['layers'][1:]):
-            if layer['class_name'] == 'Concatenate':
-                other = stack.pop()
-                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
 
     def _build_right_side(self, mapping):
 
@@ -71,7 +58,7 @@ class UNetProblem(DNNProblem):
                 mapping.extend(blocks)
 
         return mapping
-                
+
     def _get_layer_outputs(self, mapping):
         outputs = []
         depth = 0
@@ -113,9 +100,68 @@ class UNetProblem(DNNProblem):
                 #print(i, 'adjusting number of filters in layer', aux_output)
                 mapping[i+1][1] = aux_output[2]
 
+    def _base_build(self, mapping):
+
+        self.naming = {}
+
+        model = {'class_name': 'Model', 
+            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
+
+        for i, layer in enumerate(mapping):
+            block_name, params = layer[0], layer[1:]
+            block = self._build_block(block_name, params)
+            model['config']['layers'].append(block)
+
+        return model
+
+    def _build_block(self, block_name, params):
+
+        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
+
+        if block_name in self.naming:
+            self.naming[block_name] += 1
+        else:
+            self.naming[block_name] = 0
+        name = f'{block_name}_{self.naming[block_name]}'
+
+        base_block['class_name'] = self.blocks[block_name][0]
+        base_block['name'] = name
+        for name, value in zip(self.blocks[block_name][1:], params):
+            base_block['config'][name] = value
+        return base_block
+
+    # def _wrap_up_model(self, model):
+    #     # iterates over layers and add previous layer as input of current one
+    #     for i, layer in enumerate(model['config']['layers'][1:]):
+    #         last = model['config']['layers'][i]
+    #         layer['inbound_nodes'].append([[last['name'], 0, 0]])
+
+    #     # creates and adds input and output layers to model
+    #     input_layer = model['config']['layers'][0]['name']
+    #     output_layer = model['config']['layers'][-1]['name']
+    #     model['config']['input_layers'].append([input_layer, 0, 0])
+    #     model['config']['output_layers'].append([output_layer, 0, 0])
+
+    def _wrap_up_model(self, model):
+        # creates a stack with the layers that will have a bridge (concat) connection
+        stack = []
+        for i, layer in enumerate(model['config']['layers']):
+            if layer['class_name'] in ['bridge']: #CHECK
+                stack.append(model['config']['layers'][i-1]) #layer before (conv)
+                model['config']['layers'].remove(model['config']['layers'][i])
+
+        super()._wrap_up_model(model)
+
+        # iterates over the layers looking for the concatenate ones to then 
+        # adds the connection that comes from the bridge (stored in the stack)
+        for i, layer in enumerate(model['config']['layers'][1:]):
+            if layer['class_name'] == 'Concatenate':
+                other = stack.pop()
+                layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
+
     def map_genotype_to_phenotype(self, solution: GESolution):
 
-        mapping, genotype = self.parser.dsge_recursive_parse(solution.genotype)
+        mapping = self.parser.dsge_recursive_parse(solution.genotype)
 
         # unet specific
         mapping = self._build_right_side(mapping)
@@ -130,4 +176,5 @@ class UNetProblem(DNNProblem):
 
         self._wrap_up_model(model)
 
-        return json.dumps(model)
+        # return json.dumps(model)
+        return model_from_json(json.dumps(model))

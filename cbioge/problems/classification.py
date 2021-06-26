@@ -1,3 +1,4 @@
+from cbioge.grammars.grammar import Grammar
 import keras.layers
 from keras.models import Model
 from keras.utils import np_utils
@@ -10,18 +11,16 @@ class CNNProblem(DNNProblem):
     ''' Problem class for problems related to classification tasks for DNNs.
         This class includes methods focused on the design of CNNs.
     '''
-
-    def __init__(self, parser, dataset,
+    def __init__(self, parser: Grammar, dataset: dict,
         batch_size=10, 
         epochs=1, 
         timelimit=None, 
         test_eval=False, 
-        workers=1, 
-        multiprocessing=False, 
-        verbose=False):
+        verbose=False, 
+        **kwargs):
 
         super().__init__(parser, dataset,
-            batch_size, epochs, timelimit, test_eval, workers, multiprocessing, verbose)
+            batch_size, epochs, timelimit, test_eval, verbose, **kwargs)
 
         # classification specific
         self.loss = 'categorical_crossentropy'
@@ -40,27 +39,12 @@ class CNNProblem(DNNProblem):
         self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
         self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
 
-    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
-
-        # apply the parse and updates the genotype
-        mapping, genotype = self.parser.dsge_recursive_parse(solution.genotype)
-        solution.genotype = genotype
-        return self.sequential_build(mapping)
-
-        # mapping.insert(0, ['input', (None,)+self.input_shape]) # input layer
-        # mapping.append(['dense', self.num_classes, 'softmax']) # output layer
-        # model = self._base_build(mapping)
-        # self._wrap_up_model(model)
-        # return json.dumps(model)
-        # return self.sequential_build(mapping)
-
-    def sequential_build(self, mapping: list) -> Model:
+    def _sequential_build(self, mapping: list) -> Model:
 
         layers = []
-        
-        # input
-        layers.append(keras.layers.Input(shape=self.input_shape))
 
+        # input layer
+        layers.append(keras.layers.Input(shape=self.input_shape))
         for block in mapping:
             b_name, values = block[0], block[1:]
             l = clayers._get_layer(self.parser.blocks[b_name][0],
@@ -68,7 +52,7 @@ class CNNProblem(DNNProblem):
             config = {param: value for param, value in zip(self.parser.blocks[b_name][1:], values)}
             layers.append(l.from_config(config))
 
-        # classifier
+        # classifier layers
         layers.append(keras.layers.Flatten())
         layers.append(keras.layers.Dense(self.num_classes, activation='softmax'))
 
@@ -81,7 +65,19 @@ class CNNProblem(DNNProblem):
 
             return Model(inputs=in_layer, outputs=out_layer)
         except Exception as e:
-            #print(e)
             print('[problem.mapping] invalid model\n', e)
             return None
+
+    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
+
+        # classification problems apply a sequential build
+        return self._sequential_build(
+            self.parser.dsge_recursive_parse(solution.genotype))
+
+        # mapping.insert(0, ['input', (None,)+self.input_shape]) # input layer
+        # mapping.append(['dense', self.num_classes, 'softmax']) # output layer
+        # model = self._base_build(mapping)
+        # self._wrap_up_model(model)
+        # return json.dumps(model)
+        # return self.sequential_build(mapping)
         

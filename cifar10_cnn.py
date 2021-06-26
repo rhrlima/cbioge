@@ -12,12 +12,13 @@ from cbioge.algorithms.mutation import DSGENonterminalMutation
 from cbioge.algorithms.operators import ElitistReplacement, HalfAndHalfOperator
 
 from cbioge.utils import checkpoint as ckpt
+from cbioge.utils import experiments as exp
 from cbioge.utils.experiments import check_os
 
 def run_evolution():
 
     # defines the checkpoint folder
-    ckpt.ckpt_folder = 'c10cnn'
+    ckpt.ckpt_folder = exp.get_simple_args('c10cnn').checkpoint
 
     problem = CNNProblem(
         Grammar('data/grammars/cnn3.json'), 
@@ -26,12 +27,12 @@ def run_evolution():
         epochs=1, 
         workers=2, 
         multiprocessing=True)
-    problem.train_size = 4500
-    problem.valid_size = 500
+    problem.train_size = 10
+    problem.valid_size = 10
 
     algorithm = GrammaticalEvolution(problem, problem.parser, 
         pop_size=20, 
-        max_evals=40, 
+        max_evals=1000, 
         selection=TournamentSelection(t_size=5, maximize=True), 
         crossover=HalfAndHalfOperator(
             op1=DSGECrossover(cross_rate=1.0), 
@@ -44,7 +45,10 @@ def run_evolution():
 
     population.sort(key=lambda x: x.fitness, reverse=True)
     for s in population:
-        print(f'{s.fitness:.4}', s)
+        print(f'{float(s.fitness):.3f}', s)
+
+    print('UNIQUE SOLUTIONS', len(algorithm.all_solutions))
+
 
 if __name__ == '__main__':
     logging.getLogger('tensorflow').disabled = True

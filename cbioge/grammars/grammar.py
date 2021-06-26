@@ -198,4 +198,4 @@ class Grammar:
 
         mapping = self._group_mapping(list(filter(lambda x: x != '&', production)))
 
-        return mapping, genotype
+        return mapping#, genotype

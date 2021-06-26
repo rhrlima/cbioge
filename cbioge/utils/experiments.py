@@ -27,6 +27,12 @@ def str2bool(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
+def get_simple_args(default_folder='checkpoints'):
+    args = argparse.ArgumentParser(prog='simple_args')
+    args.add_argument('-c', '--checkpoint', type=str, default=default_folder)
+    return args.parse_args()
+
+
 def args_evolution_exp():
 
     ''' default parameters used in a experiment that runs

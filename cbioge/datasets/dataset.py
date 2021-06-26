@@ -129,6 +129,12 @@ class DataGenerator(keras.utils.Sequence):
         return x, y
 
 
+def Dataset():
+
+    def __init__(self, data_dict):
+        pass
+
+
 def read_dataset_from_pickle(pickle_file):
     ''' Reads a dataset stored in a pickle file. Expects a pickle file 
         containing a dict structure.
@@ -137,6 +143,10 @@ def read_dataset_from_pickle(pickle_file):
         data = pickle.load(f)
 
     return data
+
+
+def read_dataset_from_npy(npy_file):
+    pass
 
 
 def read_dataset_from_directory(path):

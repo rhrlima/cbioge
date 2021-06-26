@@ -1,7 +1,9 @@
+from cbioge.grammars.grammar import Grammar
 import os
 
+import keras.optimizers
 from keras import backend as K # TODO memory leak?
-from keras.models import Model
+from keras.models import Model, model_from_json
 from keras.optimizers import Adam
 
 import cbioge.layers as clayers
@@ -15,7 +17,6 @@ class BaseProblem:
         problem class must have to be used with the evolutionary algorithms. 
         During the evolution the methods in this class are called.
     '''
-
     def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
         raise NotImplementedError('Not implemented yet.')
 
@@ -28,15 +29,13 @@ class DNNProblem(BaseProblem):
         deep neural networks. Specific behavior must be implemented in child
         classes after calling the super() funcions.
     '''
-
-    def __init__(self, parser, dataset, 
+    def __init__(self, parser: Grammar, dataset: dict, 
         batch_size=10, 
         epochs=1, 
         timelimit=None, 
         test_eval=False, 
-        workers=1, 
-        multiprocessing=False, 
-        verbose=False):
+        verbose=False, 
+        **kwargs):
 
         self.parser = parser
         self._read_dataset(dataset)
@@ -50,8 +49,13 @@ class DNNProblem(BaseProblem):
         self.opt = 'adam'
         self.metrics = ['accuracy']
 
-        self.workers = workers
-        self.multiprocessing = multiprocessing
+        if 'workers' in kwargs:
+            self.workers = kwargs['workers']
+            kwargs.pop('workers')
+
+        if 'multiprocessing' in kwargs:
+            self.multiprocessing = kwargs['multiprocessing']
+            kwargs.pop('multiprocessing')
 
         self.verbose = verbose
 
@@ -80,48 +84,6 @@ class DNNProblem(BaseProblem):
         self.valid_size = len(self.x_valid)
         self.test_size = len(self.x_test)
 
-    def _base_build(self, mapping):
-
-        self.naming = {}
-
-        model = {'class_name': 'Model', 
-            'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
-
-        for i, layer in enumerate(mapping):
-            block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
-            model['config']['layers'].append(block)
-
-        return model
-
-    def _build_block(self, block_name, params):
-
-        base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
-
-        if block_name in self.naming:
-            self.naming[block_name] += 1
-        else:
-            self.naming[block_name] = 0
-        name = f'{block_name}_{self.naming[block_name]}'
-
-        base_block['class_name'] = self.blocks[block_name][0]
-        base_block['name'] = name
-        for name, value in zip(self.blocks[block_name][1:], params):
-            base_block['config'][name] = value
-        return base_block
-
-    def _wrap_up_model(self, model):
-        # iterates over layers and add previous layer as input of current one
-        for i, layer in enumerate(model['config']['layers'][1:]):
-            last = model['config']['layers'][i]
-            layer['inbound_nodes'].append([[last['name'], 0, 0]])
-
-        # creates and adds input and output layers to model
-        input_layer = model['config']['layers'][0]['name']
-        output_layer = model['config']['layers'][-1]['name']
-        model['config']['input_layers'].append([input_layer, 0, 0])
-        model['config']['output_layers'].append([output_layer, 0, 0])
-
     def evaluate(self, solution: GESolution, save_weights=False) -> bool:
         ''' Evaluates the phenotype
 
@@ -129,15 +91,25 @@ class DNNProblem(BaseProblem):
             weights: network weights (optional)
         '''
         try:
-            model = solution.phenotype
-            if model is None:
+            # not mapped or invalid
+            if solution.phenotype is None:
                 model = self.map_genotype_to_phenotype(solution)
+
+            # already saved as json string
+            elif solution.phenotype is str:
+                model = model_from_json(solution.phenotype)
 
             #model = model_from_json(solution.phenotype)
             model.compile(
                 loss=self.loss, 
-                optimizer=Adam(lr = 1e-4), #self.opt, TODO REVER
+                optimizer=self.opt, # TODO REVER
                 metrics=self.metrics)
+            
+            # if self.opt is str:
+            #     # move on
+            #     pass
+            # elif isinstance(self.opt, keras.optimizers.Optimizer):
+            #     opt = self.opt.get
 
             # defines the portion of the dataset being used for 
             # training, validation, and test
@@ -152,34 +124,38 @@ class DNNProblem(BaseProblem):
             x_eval = x_test if self.test_eval else x_valid
             y_eval = y_test if self.test_eval else y_valid
 
+            # defines the folder for saving the model if requested
             solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
+            # instance the runner
             runner = ModelRunner(model, path=solution_path, verbose=self.verbose)
+            # runs training
             runner.train_model(x_train, y_train, 
                 batch_size=self.batch_size, 
                 epochs=self.epochs, 
                 timelimit=self.timelimit, 
                 save_weights=save_weights, 
                 verbose=self.verbose)
-            
+            # runs evaluations (on validation or test)
             runner.test_model(x_eval, y_eval, 
                 batch_size=self.batch_size, 
                 verbose=self.verbose)
 
-            # local changes for checkpoint
+            # updates the solution information
             solution.phenotype = model.to_json()
             solution.fitness = runner.accuracy
             solution.params = runner.params
             solution.evaluated = True
 
-            # clears everything so memory wont stack up
+            # clears keras session so memory wont stack up
             K.clear_session()
 
             return True
 
         except Exception as e:
-            print('[evaluation]', e)
+            print('[evaluation] A problem was found during the evaluation.\n', e)
             solution.fitness = -1
             solution.params = 0
             solution.evaluated = True
+            solution.phenotype = None
 
             return False

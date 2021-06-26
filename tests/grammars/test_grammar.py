@@ -53,8 +53,7 @@ def test_group_mapping():
 def test_dsge_create_solution():
     np.random.seed(0)
     grammar = Grammar('tests/data/test_grammar.json')
-    assert grammar.dsge_create_solution() == [
-        [4], [0, 0], [0], [1, 1], [1, 0], [1]]
+    assert grammar.dsge_create_solution() == [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
 
 def test_dsge_create_solution_with_max_depth():
     np.random.seed(48)
@@ -74,22 +73,26 @@ def test_dsge_recursive_parse():
     np.random.seed(0)
     grammar = Grammar('tests/data/test_grammar.json')
     genotype = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
-    assert grammar.dsge_recursive_parse(genotype) == (
-        [['conv', 32, 3], ['conv', 16, 3], ['dense', 64]],
-        [[4], [0, 0], [0], [1, 1], [1, 0], [1]])
+    assert grammar.dsge_recursive_parse(genotype) == ([['conv', 32, 3], ['conv', 16, 3], ['dense', 64]])
 
 def test_dsge_create_solution_adding_values():
     np.random.seed(0)
     grammar = Grammar('tests/data/test_grammar.json', True)
+    original = [[4], [0], [0], [1], [1], [1]]
     solution = [[4], [0], [0], [1], [1], [1]]
-    assert grammar.dsge_recursive_parse(solution) == (
-        [['conv', 32, 3], ['conv', 16, 3], ['dense', 64]],
-        [[4], [0, 0], [0], [1, 1], [1, 0], [1]])
+    expected = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
+    assert grammar.dsge_recursive_parse(solution) == ([['conv', 32, 3], ['conv', 16, 3], ['dense', 64]])
+    assert original != solution
+    assert original != expected
+    assert solution == expected
 
 def test_dsge_create_solution_removing_values():
     np.random.seed(0)
     grammar = Grammar('tests/data/test_grammar.json')
+    original = [[4, 0, 0, 0], [0, 0], [0], [1, 1], [1, 0], [1]]
     solution = [[4, 0, 0, 0], [0, 0], [0], [1, 1], [1, 0], [1]]
-    assert grammar.dsge_recursive_parse(solution) == (
-        [['conv', 32, 3], ['conv', 16, 3], ['dense', 64]],
-        [[4], [0, 0], [0], [1, 1], [1, 0], [1]])
+    expected = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
+    assert grammar.dsge_recursive_parse(solution) == ([['conv', 32, 3], ['conv', 16, 3], ['dense', 64]])
+    assert original != solution
+    assert original != expected
+    assert solution == expected
