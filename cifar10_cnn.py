@@ -1,28 +1,22 @@
-import logging, os, warnings
-warnings.filterwarnings("ignore")
-
-from cbioge.datasets.dataset import read_dataset_from_pickle
+from cbioge.datasets import Dataset
 from cbioge.grammars import Grammar
 from cbioge.problems import CNNProblem
-
-from cbioge.algorithms.dsge import GrammaticalEvolution
+from cbioge.algorithms import GrammaticalEvolution
 from cbioge.algorithms.selection import TournamentSelection
 from cbioge.algorithms.crossover import DSGECrossover
 from cbioge.algorithms.mutation import DSGENonterminalMutation
 from cbioge.algorithms.operators import ElitistReplacement, HalfAndHalfOperator
-
+from cbioge.utils.experiments import check_os, get_simple_args
 from cbioge.utils import checkpoint as ckpt
-from cbioge.utils import experiments as exp
-from cbioge.utils.experiments import check_os
 
 def run_evolution():
 
     # defines the checkpoint folder
-    ckpt.ckpt_folder = exp.get_simple_args('c10cnn').checkpoint
+    ckpt.ckpt_folder = get_simple_args('c10cnn').checkpoint
 
     problem = CNNProblem(
         Grammar('data/grammars/cnn3.json'), 
-        read_dataset_from_pickle('data/datasets/cifar10.pickle'), 
+        Dataset.from_pickle('data/datasets/cifar10_clean.pickle', valid_split=0.1), 
         batch_size=128, 
         epochs=1, 
         workers=2, 
@@ -47,11 +41,9 @@ def run_evolution():
     for s in population:
         print(f'{float(s.fitness):.3f}', s)
 
-    print('UNIQUE SOLUTIONS', len(algorithm.all_solutions))
+    print('UNIQUE SOLUTIONS', len(algorithm.unique_solutions))
 
 
 if __name__ == '__main__':
-    logging.getLogger('tensorflow').disabled = True
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     check_os()
     run_evolution()

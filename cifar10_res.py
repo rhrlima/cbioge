@@ -1,6 +1,3 @@
-import logging, os, warnings
-warnings.filterwarnings("ignore")
-
 from cbioge.datasets.dataset import read_dataset_from_pickle
 from cbioge.grammars import Grammar
 from cbioge.problems import CNNProblem
@@ -47,12 +44,9 @@ def run_evolution():
     for s in population:
         print(f'{float(s.fitness):.2f}', s)
 
-    print('UNIQUE SOLUTIONS', len(algorithm.all_solutions))
+    print('UNIQUE SOLUTIONS', len(algorithm.unique_solutions))
 
 
 if __name__ == '__main__':
-    logging.getLogger('tensorflow').disabled = True
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     check_os()
     run_evolution()
-    #test_validity()

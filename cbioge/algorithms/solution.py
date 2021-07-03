@@ -1,3 +1,5 @@
+import copy
+
 class GESolution():
 
     def __init__(self, gen=[], json_data=None):
@@ -6,8 +8,9 @@ class GESolution():
         self.phenotype = None
         self.fitness = -1
         self.evaluated = False
-        self.time = None
-        self.params = None
+        #self.time = None
+        #self.params = None
+        self.data = {}
 
         if json_data is not None:
             self.initialize_from_json(json_data)
@@ -31,5 +34,5 @@ class GESolution():
             self.__dict__[key] = json_data[key]
 
     def copy(self, deep=False):
-        if deep: return GESolution(json_data=self.to_json())
-        return GESolution(self.genotype[:])
+        if deep: return copy.deepcopy(self)
+        return GESolution(copy.deepcopy(self.genotype))
