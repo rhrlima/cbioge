@@ -21,10 +21,9 @@
 		"<conv>" : [["conv", "<filters>", "<ksize>", "<strides>", "<padding>", "<activation>"]],
 		"<dense>" : [["dense", "<units>", "<activation>"]],
 		"<dropout>" : [["dropout", "<rate>"]],
-
 		"<pool>" : [["<pool_type>", "<ksize>", "<strides>", "<padding>"]],
-		"<pool_type>" : [["maxpool"], ["avgpool"]],
 
+		"<pool_type>" : [["maxpool"], ["avgpool"]],
 		"<activation>" : [["relu"], ["selu"], ["elu"], ["tanh"], ["sigmoid"], ["linear"]],
 		"<padding>" : [["valid"], ["same"]],
 		"<filters>" : [[16], [32], [64], [128], [256], [512]],

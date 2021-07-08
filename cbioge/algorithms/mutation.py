@@ -42,7 +42,7 @@ class DSGEMutation(GeneticOperator):
         self.mut_rate = mut_rate
         self.parser = parser
 
-        self.start_index = None
+        self.start_index = 0
         self.end_index = None
 
     def __str__(self):
@@ -50,42 +50,44 @@ class DSGEMutation(GeneticOperator):
         return 'DSGE Point Mutation'
 
     def execute(self, solution):
-        if self.start_index is None:
-            self.start_index = 0
+
+        offspring = solution.copy()
+        if np.random.rand() > self.mut_rate:
+            return offspring
+
         if self.end_index is None:
             self.end_index = len(solution.genotype)
 
-        solution_copy = solution.copy()
-
-        block_idx = np.random.randint(self.start_index, self.end_index)
-
-        genes_len = len(solution.genotype[block_idx])
+        # get one random block from the solution
+        genes_len = 0
         while genes_len == 0:
-            #print('not enough genes')
             block_idx = np.random.randint(self.start_index, self.end_index)
-            genes_len = len(solution.genotype[block_idx])
+            genes_len = len(offspring.genotype[block_idx])
 
+        # get one random value from the block
         gene_idx = np.random.randint(0, genes_len)
 
-        if np.random.rand() < self.mut_rate:
-            symb = self.parser.nonterm[block_idx] # symbol on the gene index
-            max_value = len(self.parser.rules[symb]) # options for the symb
-            #print('values', max_value)
-            if max_value > 1:
-                curr_value = solution.genotype[block_idx][gene_idx]
-                new_value = solution.genotype[block_idx][gene_idx]
-                while new_value == curr_value:
-                    new_value = np.random.randint(0, max_value)
-                solution_copy.genotype[block_idx][gene_idx] = new_value
-                #print('mutou', curr_value, 'para', new_value)
-        return solution_copy
+        # symbol on the gene index
+        symb = self.parser.nonterm[block_idx]
+
+        # max options for the symb
+        max_value = len(self.parser.rules[symb])
+
+        if max_value > 1:
+            curr_value = offspring.genotype[block_idx][gene_idx]
+            new_value = curr_value
+            while new_value == curr_value:
+                new_value = np.random.randint(0, max_value)
+            offspring.genotype[block_idx][gene_idx] = new_value
+        
+        return offspring
 
 
 class DSGETerminalMutation(DSGEMutation):
 
     '''Changes a value for a new valid one, starting from a given index'''
 
-    def __init__(self, mut_rate, parser, start_index):
+    def __init__(self, parser, start_index, mut_rate=1.0):
         super().__init__(mut_rate, parser)
         
         self.start_index = start_index
@@ -99,7 +101,7 @@ class DSGENonterminalMutation(DSGEMutation):
 
     '''Changes a value for a new valid one, restricted to and index'''
 
-    def __init__(self, mut_rate, parser, end_index):
+    def __init__(self, parser, end_index, mut_rate=1.0):
         super().__init__(mut_rate, parser)
 
         self.end_index = end_index

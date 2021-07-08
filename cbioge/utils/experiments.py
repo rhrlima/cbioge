@@ -30,6 +30,8 @@ def str2bool(value):
 def get_simple_args(default_folder='checkpoints'):
     args = argparse.ArgumentParser(prog='simple_args')
     args.add_argument('-c', '--checkpoint', type=str, default=default_folder)
+    args.add_argument('-o', '--output', type=str, default='out.log')
+    args.add_argument('-e', '--error', type=str, default='err.log')
     return args.parse_args()
 
 
@@ -75,4 +77,3 @@ def args_evolution_exp():
     parser.add_argument('-v', '--verbose', default=0, type=int)
 
     return parser.parse_args()
-

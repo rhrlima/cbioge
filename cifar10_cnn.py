@@ -16,30 +16,29 @@ def run_evolution():
 
     problem = CNNProblem(
         Grammar('data/grammars/cnn3.json'), 
-        Dataset.from_pickle('data/datasets/cifar10_clean.pickle', valid_split=0.1), 
+        Dataset.from_pickle('data/datasets/cifar10_clean.pickle', 
+            train_size=5000, 
+            valid_split=0.1), 
         batch_size=128, 
-        epochs=1, 
+        epochs=50, 
         workers=2, 
-        multiprocessing=True)
-    problem.train_size = 10
-    problem.valid_size = 10
+        use_multiprocessing=True)
 
-    algorithm = GrammaticalEvolution(problem, problem.parser, 
+    algorithm = GrammaticalEvolution(problem, 
         pop_size=20, 
-        max_evals=1000, 
+        max_evals=500, 
         selection=TournamentSelection(t_size=5, maximize=True), 
         crossover=HalfAndHalfOperator(
-            op1=DSGECrossover(cross_rate=1.0), 
-            op2=DSGENonterminalMutation(mut_rate=1.0, parser=problem.parser, end_index=9), 
+            op1=DSGECrossover(), 
+            op2=DSGENonterminalMutation(parser=problem.parser, end_index=9), 
             rate=0.6), 
-        replacement=ElitistReplacement(rate=0.25, maximize=True), 
-        verbose=True)
+        replacement=ElitistReplacement(rate=0.25, maximize=True))
 
     population = algorithm.execute(checkpoint=True)
 
     population.sort(key=lambda x: x.fitness, reverse=True)
     for s in population:
-        print(f'{float(s.fitness):.3f}', s)
+        print(s.id, f'{float(s.fitness): .2f}', s)
 
     print('UNIQUE SOLUTIONS', len(algorithm.unique_solutions))
 

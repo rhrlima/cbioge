@@ -5,6 +5,8 @@ import pickle
 import numpy as np
 
 import keras
+from keras.utils import np_utils
+
 import skimage.io as io
 
 from cbioge.utils.image import *
@@ -21,7 +23,6 @@ class DataGenerator(keras.utils.Sequence):
         ------file0
         ------file1
     '''
-
     def __init__(self, path, input_shape, batch_size=32, data_aug=None, shuffle=True):
         self.path = path
         self.input_shape = input_shape
@@ -129,10 +130,107 @@ class DataGenerator(keras.utils.Sequence):
         return x, y
 
 
-def Dataset():
+class Dataset():
 
-    def __init__(self, data_dict):
-        pass
+    def __init__(self, data_dict, **kwargs):
+        self.input_shape = data_dict['input_shape']
+
+        self.x_train = data_dict['x_train']
+        self.y_train = data_dict['y_train']
+
+        self.x_test = data_dict['x_test']
+        self.y_test = data_dict['y_test']
+
+        if 'train_size' in kwargs:
+            self.train_size = kwargs['train_size']
+        else:
+            self.train_size = len(self.x_train)
+
+        if 'test_size' in kwargs:
+            self.test_size = kwargs['test_size']
+        else:
+            self.test_size = len(self.x_test)
+
+        # adds a valid set if data is present in dict
+        if 'x_valid' in data_dict and 'y_valid' in data_dict:
+            self.x_valid = data_dict['x_valid']
+            self.y_valid = data_dict['y_valid']
+            self.valid_size = len(self.x_valid)
+
+        # creates a valid set using a portion of the training set
+        elif 'valid_split' in kwargs and 'valid_size' not in kwargs:
+            kwargs['valid_size'] = int(self.train_size * kwargs['valid_split'])
+            self.train_size -= kwargs['valid_size']
+            #kwargs.pop('valid_split')
+
+        # creates a valid set using a sample of the training set
+        if 'valid_size' in kwargs:
+            self.valid_size = kwargs['valid_size']
+            self.x_valid, self.y_valid, self.x_train, self.y_train = self.split(
+                self.x_train, self.y_train, self.valid_size)
+            #kwargs.pop('valid_size')
+
+        # adds the number of classes if key exists in dict
+        # reshapes labels to be categorical
+        if 'num_classes' in data_dict:
+            self.num_classes = data_dict['num_classes']
+            self.y_train = np_utils.to_categorical(self.y_train, self.num_classes)
+            self.y_test = np_utils.to_categorical(self.y_test, self.num_classes)
+            if hasattr(self, 'y_valid'):
+                self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
+
+    @classmethod
+    def from_pickle(cls, pickle_file, **kwargs):
+        with open(pickle_file, 'rb') as f:
+            data_dict = pickle.load(f)
+        return cls(data_dict, **kwargs)
+
+    def split(self, data, labels, split_size=None, split=None):
+        '''Splits the array into two arrays of data.
+
+        # Parameters
+        data: list of data
+        labels: list of labels
+        split_size: integer value related to the split size
+
+        # Return
+        two sets of data grouped as (data_a, labels_a), (data_b, labelb_b)\n
+        data_a and labels_a have len() of split_size\n
+        data_b and labels_b have the remainder of data\n
+        '''
+        data_a = data[:split_size]
+        data_b = data[split_size:]
+        label_a = labels[:split_size]
+        label_b = labels[split_size:]
+        return data_a, label_a, data_b, label_b
+
+    def shuffle(self, data, labels):
+        '''Shuffles a pair of data and labels to keep consistency
+        '''
+        indexes = np.random.permutation(np.arange(len(data)))
+        return data[indexes], labels[indexes]
+
+    def get_data(self, set_name, sample_size=None, shuffle=False):
+        if set_name == 'train':
+            x_data = self.x_train
+            y_data = self.y_train
+            d_size = self.train_size
+        elif set_name == 'valid':
+            x_data = self.x_valid
+            y_data = self.y_valid
+            d_size = self.valid_size
+        elif set_name == 'test':
+            x_data = self.x_test
+            y_data = self.y_test
+            d_size = self.test_size
+
+        if sample_size is not None:
+            d_size = sample_size
+
+        if shuffle:
+            x_data, y_data = self.shuffle(x_data, y_data)
+
+        return x_data[:d_size], y_data[:d_size]
 
 
 def read_dataset_from_pickle(pickle_file):

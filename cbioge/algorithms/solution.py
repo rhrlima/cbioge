@@ -21,7 +21,7 @@ class GESolution():
     def __eq__(self, other):
         if not isinstance(other, GESolution):
             return False
-        return self.genotype == other.genotype
+        return self.to_json() == other.to_json()
 
     # def __hash__(self):
     #     return hash(self.genotype)

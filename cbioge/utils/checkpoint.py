@@ -30,35 +30,45 @@ def get_latest_pid_or_new(base_path):
     return folders[0]
 
 
-def save_solution(solution):
-
-    json_solution = solution.to_json()
-    filename = solution_name.format(solution.id)
-
-    save_data(json_solution, filename)
+def natural_key(string_):
+    # very helpful to sort file names that contain numbers
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
 
-def save_population(population):
+def get_most_recent(name_pattern):
+    data_files = glob.glob(os.path.join(ckpt_folder, name_pattern))
 
-    for solution in population:
-        save_solution(solution)
-
-
-def load_solutions():
-
-    solution_files = glob.glob(os.path.join(ckpt_folder, solution_name.format('*')))
-    solution_files.sort()
-
-    solutions = []
-    for file in solution_files:
-        data = load_data(file)
-        s = GESolution(json_data=data)
-        # if s.fitness is None: # TODO REVER
-        #     s.fitness = -1
-        solutions.append(s)
+    if data_files == []:
+        return None
+    else:
+        # returns the file containing the higher number in its name
+        data_files.sort(key=lambda x: natural_key(x), reverse=True)
+        return data_files[0]
 
 
-    return solutions
+# def load_solution(solution_id):
+#     filename = solution_name.format(solution_id)
+#     return load_data(filename)
+
+
+# def save_population(population):
+
+#     for solution in population:
+#         save_solution(solution)
+
+
+# def load_solutions():
+
+#     solution_files = glob.glob(os.path.join(ckpt_folder, solution_name.format('*')))
+#     solution_files.sort()
+
+#     solutions = []
+#     for file in solution_files:
+#         data = load_data(file)
+#         s = GESolution(json_data=data)
+#         solutions.append(s)
+
+#     return solutions
 
 
 def save_data(data, filename):
@@ -77,17 +87,11 @@ def save_data(data, filename):
 
 
 def load_data(filename):
-
     with open(filename, 'rb') as f:
-        data = pickle.load(f)
-    return data
+        return pickle.load(f)
 
 
-def delete_solution_checkpoints(name_pattern):
-    solution_files = glob.glob(os.path.join(ckpt_folder, name_pattern))
-    [os.remove(file) for file in solution_files]
-
-
-def natural_key(string_):
-
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
+def delete_data(name_pattern):
+    # deletes all files that matches the name pattern
+    data_files = glob.glob(os.path.join(ckpt_folder, name_pattern))
+    [os.remove(file) for file in data_files]

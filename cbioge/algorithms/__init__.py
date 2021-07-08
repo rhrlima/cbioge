@@ -20,26 +20,5 @@ from .mutation import DSGENonterminalMutation
 from .operators import ReplaceWorst
 from .operators import ElitistReplacement
 
-__all__ = [
-    'GESolution', 
-
-    'RandomSearch', 
-    'GrammaticalEvolution',
-
-    'TournamentSelection',
-    
-    'OnePointCrossover',
-    'DSGECrossover',
-    'DSGEGeneCrossover',
-
-    'PointMutation',
-    'DSGEMutation',
-    'DSGETerminalMutation',
-    'DSGENonterminalMutation',
-
-    'GEPrune',
-    'GEDuplication',
-    
-    'ReplaceWorst',
-    'ElitistReplacement',
-]
+from .ea import BaseEvolutionaryAlgorithm
+from .dsge import GrammaticalEvolution

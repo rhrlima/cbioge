@@ -30,8 +30,16 @@ def test_reading_grammar_attributes_rules():
             ["<conv>", "<conv>", "<dense>"], 
             ["<conv>", "<dense>", "<dense>"]
         ],
-        "<conv>" : [ ["conv", "<filters>", "<ksize>"] ],
-        "<dense>" : [ ["dense", "<units>"] ],
+        "<conv>" : [
+            ["conv", "<filters>", "<ksize>"], 
+            ["conv", "<filters>", "<ksize>"], 
+            ["conv", "<filters>", "<ksize>"]
+        ],
+        "<dense>" : [
+            ["dense", "<units>"], 
+            ["dense", "<units>"], 
+            ["dense", "<units>"]
+        ],
         "<ksize>" : [ [2], [3], [4]],
         "<filters>" : [ [16], [32] ],
         "<units>" : [ [32], [64] ]}
@@ -53,21 +61,15 @@ def test_group_mapping():
 def test_dsge_create_solution():
     np.random.seed(0)
     grammar = Grammar('tests/data/test_grammar.json')
-    assert grammar.dsge_create_solution() == [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
+    genotype = grammar.dsge_create_solution()
+    print(genotype)
+    assert genotype == [[4], [1, 1], [2], [1, 0], [0, 0], [0]]
 
 def test_dsge_create_solution_with_max_depth():
-    np.random.seed(48)
-    grammar = Grammar('tests/data/test_grammar.json', True)
-    #print(grammar.dsge_create_solution(max_depth=2))
+    np.random.seed(312)
+    grammar = Grammar('tests/data/test_grammar.json', verbose=True)
     genotype = grammar.dsge_create_solution(max_depth=2)
-    print(genotype)
-    assert genotype == [
-        [0, 3, 0, 0, 2, 0, 4, 3, 2], 
-        [0, 0, 0, 0], 
-        [0, 0, 0, 0, 0], 
-        [0, 2, 2, 2], 
-        [1, 1, 0, 0], 
-        [1, 0, 0, 0, 0]]
+    assert genotype == [[0, 4, 3], [2, 2, 1], [2, 0], [0, 0, 1], [1, 0, 0], [0, 1]]
 
 def test_dsge_recursive_parse():
     np.random.seed(0)
@@ -80,8 +82,9 @@ def test_dsge_create_solution_adding_values():
     grammar = Grammar('tests/data/test_grammar.json', True)
     original = [[4], [0], [0], [1], [1], [1]]
     solution = [[4], [0], [0], [1], [1], [1]]
-    expected = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
-    assert grammar.dsge_recursive_parse(solution) == ([['conv', 32, 3], ['conv', 16, 3], ['dense', 64]])
+    expected = [[4], [0, 0], [0], [1, 1], [1, 1], [1]]
+    mapping = grammar.dsge_recursive_parse(solution)
+    assert mapping == ([['conv', 32, 3], ['conv', 32, 3], ['dense', 64]])
     assert original != solution
     assert original != expected
     assert solution == expected

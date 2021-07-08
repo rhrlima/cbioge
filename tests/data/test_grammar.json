@@ -16,9 +16,13 @@
             ["<conv>", "<dense>", "<dense>"]
         ],
 		"<conv>": [
+            ["conv", "<filters>", "<ksize>"], 
+            ["conv", "<filters>", "<ksize>"], 
             ["conv", "<filters>", "<ksize>"]
         ],
 		"<dense>": [
+            ["dense", "<units>"], 
+            ["dense", "<units>"], 
             ["dense", "<units>"]
         ],
 		"<ksize>": [

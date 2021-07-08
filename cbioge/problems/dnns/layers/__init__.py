@@ -2,10 +2,6 @@ import keras.layers
 
 from .layers import ResBlock
 
-__all__ = [
-    'ResBlock',
-]
-
 def _get_layer(blocK_name, layers_database=[keras.layers]):
     for db in layers_database:
         try:

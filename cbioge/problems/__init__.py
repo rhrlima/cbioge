@@ -1,17 +1,5 @@
-from cbioge.problems.dnn import ModelRunner
-from cbioge.problems.problem import BaseProblem, DNNProblem
-from cbioge.problems.classification import CNNProblem
-from cbioge.problems.segmentation import UNetProblem
-
-__all__ = [
-    'ModelRunner',
-
-	'BaseProblem',
-    'DNNProblem',    
-	
-    'CNNProblem',
-    'UNetProblem',
-
-    'SymbolicRegressionProblem',
-    'StringMatchProblem',
-]
+from .dnn import ModelRunner
+from .problem import BaseProblem
+from .problem import DNNProblem
+from .classification import CNNProblem
+from .segmentation import UNetProblem

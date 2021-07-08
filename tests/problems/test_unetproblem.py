@@ -1,26 +1,23 @@
-import json
-
-import numpy as np
+import pytest
 
 from cbioge.grammars import Grammar
+from cbioge.datasets import Dataset
 from cbioge.problems import UNetProblem
-from cbioge.algorithms.solution import GESolution
+from cbioge.algorithms import GESolution
 
 def get_mockup_parser():
     return Grammar('data/grammars/unet_restricted.json')
 
 def get_mockup_data_dict():
 
-    return {
+    return Dataset({
         'x_train': [], 
         'y_train': [], 
-        'x_valid': [], 
-        'y_valid': [], 
         'x_test': [], 
         'y_test': [], 
-        'input_shape': (32,32,3), 
+        'input_shape': (32, 32, 1), 
         'num_classes': 1
-    }
+    })
 
 def test_map_genotype_to_phenotype():
     # np.random.seed(0)
@@ -45,3 +42,19 @@ def test_map_genotype_to_phenotype():
     #     {"class_name": "Conv2D", "name": "conv_6", "config": {"filters": 1, "kernel_size": 1, "strides": 1, "padding": "same", "activation": "sigmoid"}, "inbound_nodes": [[["conv_5", 0, 0]]]}], 
     #     "input_layers": [["input_0", 0, 0]], "output_layers": [["conv_6", 0, 0]]}})
     assert True
+
+@pytest.mark.parametrize('grammar_file', [
+    'data/grammars/unet_restricted.json'
+])
+def test_invalid_models_tolerance(grammar_file):
+    parser = Grammar(grammar_file)
+    problem = UNetProblem(parser, get_mockup_data_dict())
+
+    num_models = 100
+    invalid = 0
+    for _ in range(num_models):
+        solution = GESolution(parser.dsge_create_solution())
+        problem.map_genotype_to_phenotype(solution)
+        if solution.phenotype is None: invalid += 1
+
+    assert invalid/num_models <= 0.5

@@ -37,13 +37,13 @@ class DSGECrossover(GeneticOperator):
         The cut point will always be selected acording to the sub-lists and not
         the values inside those lists.
 
-        Ex:
+        Ex: cut = 1
         [ [0, 0], | [0, 0], [0, 0] ] parent 1
         [ [1, 1], | [1, 1], [1, 1] ] parent 2
         [ [0, 0], | [1, 1], [1, 1] ] offspring
     '''
 
-    def __init__(self, cross_rate):
+    def __init__(self, cross_rate=1.0):
         self.cross_rate = cross_rate
 
     def __str__(self):
@@ -77,28 +77,45 @@ class DSGECrossover(GeneticOperator):
 
 class DSGEGeneCrossover(GeneticOperator):
     ''' One-point gene crossover adapted to the DSGE encoding.
-        The cut point can include the values inside sub-lists.
+        An individual cut will happen for each sub-list of the solution.
 
-        | = possible cut points
-        [ | [0, 0], | [0, 0], | [0, 0] | ]
+        Ex: cuts = [0, 1, 2]
+        [ [|0, 0], [0,| 0], [0, 0|] ] parent 1
+        [ [|1, 1], [1,| 1], [1, 1|] ] parent 2
+        [ [ 1, 1], [0,  1], [0, 0 ] ] offspring
     '''
 
-    def __init__(self, cross_rate):
+    def __init__(self, cross_rate=1.0):
         self.cross_rate = cross_rate
 
     def __str__(self):
         return 'DSGE Gene Crossover'
 
-    def execute(self, parents, cut=None):
-        off1 = parents[0].copy()
-        off2 = parents[1].copy()
-        if np.random.rand() < self.cross_rate:
-            p1 = off1.genotype[:]
-            p2 = off2.genotype[:]
-            for i, _ in enumerate(p1):
-                min_len = min(len(p1[i]), len(p2[i]))
-                if min_len > 0:
-                    if cut is None:
-                        cut = np.random.randint(0, min_len)
-                    off1.genotype[i] = p1[i][:cut] + p2[i][cut:]
-        return off1
+    def execute(self, parents, cuts=None):
+        offspring = parents[0].copy()
+
+        # crossover is not applied
+        if np.random.rand() > self.cross_rate:
+            return offspring
+
+        # off1 = parents[0].copy()
+        # off2 = parents[1].copy()
+        # if np.random.rand() < self.cross_rate:
+
+        gen_p1 = parents[0].genotype[:]
+        gen_p2 = parents[1].genotype[:]
+
+        offspring.genotype.clear()
+        cut_index = 0
+        for p1, p2 in zip(gen_p1, gen_p2):
+            # min_len = min(len(p1[i]), len(p2[i]))
+            # if min_len > 0:
+            if cuts is None:
+                min_len = min(len(p1), len(p2))
+                cut = np.random.randint(0, min_len)
+            else:
+                cut = cuts[cut_index]
+
+            offspring.genotype.append(p1[:cut] + p2[cut:])
+
+        return offspring
