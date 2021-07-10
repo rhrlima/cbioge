@@ -22,3 +22,7 @@ data/datasets/
 *.egg*
 build/
 dist/
+
+# temp
+temp/
+experiments/
