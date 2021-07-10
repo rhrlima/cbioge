@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 import pytest, pickle
@@ -24,9 +25,10 @@ def get_mockup_dataset(keys=None):
 
 def get_mockup_pickle_file():
     pickle_file = 'cbioge/assets/datasets/pickle_dataset.pickle'
-    data = get_mockup_dataset()
-    with open(pickle_file, 'wb') as f:
-        pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+    if not os.path.exists(pickle_file):
+        data = get_mockup_dataset()
+        with open(pickle_file, 'wb') as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
     return pickle_file
 
 def test_load_dataset_from_dict():
