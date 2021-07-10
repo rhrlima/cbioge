@@ -17,3 +17,8 @@ data/datasets/
 
 # temp or experiment files
 *.log
+
+# lib setup
+*.egg*
+build/
+dist/

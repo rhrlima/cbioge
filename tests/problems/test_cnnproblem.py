@@ -17,7 +17,7 @@ def get_mockup_data_dict():
     })
 
 def test_map_genotype_to_phenotype():
-    parser = Grammar('tests/data/test_grammar.json')
+    parser = Grammar('cbioge/assets/grammars/test_grammar.json')
     solution = GESolution([[5], [0], [0, 0], [2], [0], [0, 1]])
     mapping = [['conv', 16, 4], ['dense', 32], ['dense', 64]]
 
@@ -29,9 +29,9 @@ def test_map_genotype_to_phenotype():
     assert model.count_params() == model2.count_params()
 
 @pytest.mark.parametrize('grammar_file', [
-    'tests/data/test_grammar.json', 
-    'data/grammars/cnn3.json',
-    'data/grammars/res_cnn.json', 
+    'cbioge/assets/grammars/test_grammar.json', 
+    'cbioge/assets//grammars/cnn3.json',
+    'cbioge/assets/grammars/res_cnn.json', 
 ])
 def test_invalid_models_tolerance(grammar_file):
     parser = Grammar(grammar_file)

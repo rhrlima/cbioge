@@ -9,7 +9,7 @@ from cbioge.algorithms import DSGETerminalMutation
 from cbioge.algorithms import DSGENonterminalMutation
 
 def get_mockup_parser():
-    return Grammar('tests/data/test_grammar.json')
+    return Grammar('cbioge/assets/grammars/test_grammar.json')
 
 @pytest.mark.parametrize("gen, expected, seed", [
     ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 

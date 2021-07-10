@@ -5,8 +5,6 @@ from cbioge.datasets import Dataset
 from cbioge.problems import UNetProblem
 from cbioge.algorithms import GESolution
 
-def get_mockup_parser():
-    return Grammar('data/grammars/unet_restricted.json')
 
 def get_mockup_data_dict():
 
@@ -44,7 +42,7 @@ def test_map_genotype_to_phenotype():
     assert True
 
 @pytest.mark.parametrize('grammar_file', [
-    'data/grammars/unet_restricted.json'
+    'cbioge/assets/grammars/unet_restricted.json'
 ])
 def test_invalid_models_tolerance(grammar_file):
     parser = Grammar(grammar_file)
