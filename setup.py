@@ -12,9 +12,12 @@ install_requires = [
 ]
 
 current_vertion = '0.1.1'
+
 setup(
 	name='cbioge',
-	packages=find_packages(include=['cbioge']),
+	#packages=find_packages(include=['cbioge']),
+    packages=find_packages(where="cbioge"),
+	package_dir={"": "cbioge"},
 	version=current_vertion,
 	description='CBio lib for grammar evolution',
 	author='CBio Group',
