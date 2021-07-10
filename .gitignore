@@ -1,10 +1,10 @@
-# python compiled and folders
-*.pyc
-__pycache__/
-
 # pycharm/vscode files
 .idea/
 .vscode/
+
+# python compiled and folders
+*.pyc
+__pycache__/
 
 # coverage and pytest
 .coverage
@@ -14,3 +14,6 @@ __pycache__/
 data/datasets/
 *.pickle
 *.ckpt
+
+# temp or experiment files
+*.log

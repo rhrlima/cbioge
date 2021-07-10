@@ -1,4 +1,4 @@
-import json, re
+import json, logging, re
 import numpy as np
 
 
@@ -9,6 +9,7 @@ class Grammar:
         self.max_depth = max_depth
         self.verbose = verbose
         self.precision = 5
+        self.logger = logging.getLogger('cbioge')
     
     def _read_grammar(self, grammar_file):
         ''' reads a file expecting a json structure
@@ -58,7 +59,6 @@ class Grammar:
 
             ex: [min, max] is parsed to random between min and max.
         '''
-
         # TODO buscar maneira melhor de representar rand(min, max) na gramatica
         if type(value) is str:
             m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
@@ -70,7 +70,7 @@ class Grammar:
                 elif type(min_) == float and type(max_) == float:
                     return round(np.random.uniform(min_, max_), self.precision)
                 else:
-                    raise TypeError('type mismatch')
+                    raise TypeError('Type mismatch:', value)
         return value
 
     def _group_mapping(self, mapping):
@@ -89,7 +89,6 @@ class Grammar:
             receives the current state of the genotype, the list
             of added values (if needed), the current symbol and depth
         '''
-
         production = []
        
         if genotype[self.nonterm.index(symb)] == []:
@@ -98,7 +97,7 @@ class Grammar:
             genotype[self.nonterm.index(symb)].append(value)
 
             if self.verbose:
-                print('[parse] not enough values. Adding:', value, 'to', symb)
+                self.logger.debug(f'Not enough values. Adding: {value} to {symb}')
 
         value = genotype[self.nonterm.index(symb)].pop(0)
         expansion = self.rules[symb][value]
@@ -118,21 +117,22 @@ class Grammar:
 
         # if expansion is recursive, pick another option
         if depth > max_depth and symb in expansion:
-            #raise ValueError('MAX DEPTH')
-            if self.verbose:
-                print('[create] WARNING. Max depth reached and next expansion is recursive.')
-                print(depth, symb, expansion, end=' ')
+            # if self.verbose:
+                #print('[create] WARNING. Max depth reached and next expansion is recursive.')
+                #print(depth, symb, expansion, end=' ')
+            old_expansion = expansion
             while symb in expansion:
                 value = np.random.randint(0, len(self.rules[symb]))
                 expansion = self.rules[symb][value]
             if self.verbose:
-                print('changed to:', symb, expansion)
+                self.logger.warning('Max depth reached and next expansion is recursive.')
+                self.logger.warning(f'{depth} {symb} {old_expansion} changed to: {expansion}')
+                #print('changed to:', symb, expansion)
 
         genotype[self.nonterm.index(symb)].append(value)
 
         for curr_symb in expansion:
             if curr_symb in self.nonterm:
-                #self.dsge_create_solution(max_depth, genotype, s, depth+1)
                 self._recursive_create_call(max_depth, genotype, curr_symb, depth+1)
 
         return genotype
@@ -155,10 +155,7 @@ class Grammar:
 
         for curr_symb in expansion:
             if curr_symb in self.nonterm:
-                #self.dsge_create_solution(max_depth, gen, s, depth+1)
                 self._recursive_create_call(max_depth, genotype, curr_symb)
-
-        #print(depth)
 
         return genotype
 
@@ -179,15 +176,9 @@ class Grammar:
         added = [[] for _ in range(len(self.nonterm))]
         symb = self.nonterm[0]
 
-        production = self._recursive_parse_call(genotype=gen_cpy, added=added, 
-            symb=symb, depth=0)
-
-        if self.verbose:
-            print('-----')
-            print('production', production)
-            print('genetype', genotype)
-            print('remover', gen_cpy)
-            print('added', added)
+        production = self._recursive_parse_call(genotype=gen_cpy, 
+                                                added=added, 
+                                                symb=symb, depth=0)
 
         for symb in range(len(genotype)):
             # removes the values left off during the expansion, from the original genotype
@@ -197,5 +188,11 @@ class Grammar:
             genotype[symb].extend(added[symb])
 
         mapping = self._group_mapping(list(filter(lambda x: x != '&', production)))
+
+        if self.verbose:
+            self.logger.debug(f'Genotype: {genotype}')
+            self.logger.debug(f'Mapping: {mapping}')
+            self.logger.debug(f'Added: {added}')
+            self.logger.debug(f'Removed: {gen_cpy}')
 
         return mapping#, genotype

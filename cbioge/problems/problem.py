@@ -8,7 +8,6 @@ from keras.models import Model, model_from_json
 from cbioge.algorithms import GESolution
 from cbioge.datasets import Dataset
 from cbioge.grammars import Grammar
-from cbioge.problems import ModelRunner
 from cbioge.utils import checkpoint as ckpt
 from .dnns.utils.callback import TimedStopping
 
