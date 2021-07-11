@@ -1,11 +1,4 @@
-''' Module responsible for helping manage the save and load of data for checkpoints
-
-    Experiments will be stored in a folder named 'checkpoints' by default
-'''
-
 import glob, os, re, pickle
-
-from cbioge.algorithms.solution import GESolution
 
 ckpt_folder = 'checkpoints'
 data_name = 'data_{0}.ckpt'

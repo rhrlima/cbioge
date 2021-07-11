@@ -1,7 +1,12 @@
+import os
 import argparse
 import platform
 
+from . import checkpoint as ckpt
+from . import logging as cbio_logging
+
 MAX_GPU_MEMORY=0.8
+
 
 def _limit_gpu_memory(fraction=MAX_GPU_MEMORY):
     # limits GPU memory to use tensorflow-gpu
@@ -27,12 +32,22 @@ def str2bool(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-def get_simple_args(default_folder='checkpoints'):
+def basic_setup(default_folder='checkpoints', log=False):
     args = argparse.ArgumentParser(prog='simple_args')
     args.add_argument('-c', '--checkpoint', type=str, default=default_folder)
     args.add_argument('-o', '--output', type=str, default='out.log')
     args.add_argument('-e', '--error', type=str, default='err.log')
-    return args.parse_args()
+
+    parser = args.parse_args()
+
+    ckpt.ckpt_folder = parser.checkpoint
+
+    if not os.path.exists(ckpt.ckpt_folder):
+        os.makedirs(ckpt.ckpt_folder)
+
+    cbio_logging.setup(log_lvl='DEBUG', 
+        out_file=os.path.join(ckpt.ckpt_folder, parser.output), 
+        err_file=os.path.join(ckpt.ckpt_folder, parser.error))
 
 
 def args_evolution_exp():

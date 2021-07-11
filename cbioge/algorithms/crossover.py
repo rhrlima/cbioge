@@ -1,6 +1,6 @@
-from cbioge.algorithms.solution import GESolution
 import numpy as np
 
+from .solution import GESolution
 from .operators import GeneticOperator
 
 

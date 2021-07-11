@@ -5,7 +5,6 @@ from cbioge.datasets import Dataset
 from cbioge.problems import UNetProblem
 from cbioge.algorithms import GESolution
 
-
 def get_mockup_data_dict():
 
     return Dataset({

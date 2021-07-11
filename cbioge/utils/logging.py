@@ -1,6 +1,4 @@
-import os, sys, logging
-
-from . import checkpoint as ckpt
+import sys, logging
 
 _out_file = 'out.log'#os.path.join(ckpt.ckpt_folder, 'out.log')
 _err_file = 'err.log'#os.path.join(ckpt.ckpt_folder, 'err.log')

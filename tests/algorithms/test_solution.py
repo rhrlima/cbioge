@@ -1,6 +1,8 @@
 import pytest
 
-from cbioge.algorithms import GESolution
+from cbioge.algorithms.solution import GESolution
+#from .cbioge.algorithms import GESolution
+#from src.cbioge.algorithms import GESolution
 
 def test_create_solution_from_list():
     solution = GESolution([[0,0],[0,0,0],[0]])
