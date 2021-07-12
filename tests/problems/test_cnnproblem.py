@@ -28,6 +28,7 @@ def test_map_genotype_to_phenotype():
     assert solution.data['mapping'] == mapping
     assert model.count_params() == model2.count_params()
 
+@pytest.mark.slow
 @pytest.mark.parametrize('grammar_file', [
     'cbioge/assets/grammars/test_grammar.json', 
     'cbioge/assets//grammars/cnn3.json',

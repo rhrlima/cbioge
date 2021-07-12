@@ -81,7 +81,8 @@ class DNNProblem(BaseProblem):
             else: x_eval, y_eval = self.dataset.get_data('valid')
 
             # defines the folder for saving the model if requested
-            solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
+            solution_path = f'solution_{solution.id}_weights.h5'
+            #solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
 
             # runs training
             start_time = dt.datetime.today()
@@ -100,8 +101,8 @@ class DNNProblem(BaseProblem):
                 **self.kwargs)
 
             # updates the solution information
-            solution.evaluated = True
             solution.fitness = accuracy
+            solution.evaluated = True
             solution.data['time'] = dt.datetime.today() - start_time
 
             # clears keras session so memory wont stack up
@@ -110,8 +111,7 @@ class DNNProblem(BaseProblem):
             return True
 
         except Exception as e:
-            #print('[evaluation] A problem was found during the evaluation.\n', e)
-            self.logger.exception('A problem was found during the evaluation.')
+            self.logger.exception('A problem was found during evaluation.')
             solution.fitness = -1
             solution.evaluated = True
 
@@ -143,9 +143,9 @@ class DNNProblem(BaseProblem):
 
         if save_weights and save_path is not None:
             # only create the folders if we want to save the weights
-            if  not os.path.exists(save_path): os.makedirs(save_path)
-            model_path = os.path.join(save_path, f'weights.hdf5')
-            model.save_weights(model_path)
+            # if  not os.path.exists(save_path): os.makedirs(save_path)
+            # model_path = os.path.join(save_path, f'weights.hdf5')
+            model.save_weights(os.path.join(ckpt.ckpt_folder, save_path))
         
         return history
 

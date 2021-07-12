@@ -1,9 +1,8 @@
-import os
-import argparse
-import platform
+import os, argparse, platform
 
 from . import checkpoint as ckpt
 from . import logging as cbio_logging
+
 
 MAX_GPU_MEMORY=0.8
 
@@ -45,9 +44,10 @@ def basic_setup(default_folder='checkpoints', log=False):
     if not os.path.exists(ckpt.ckpt_folder):
         os.makedirs(ckpt.ckpt_folder)
 
-    cbio_logging.setup(log_lvl='DEBUG', 
-        out_file=os.path.join(ckpt.ckpt_folder, parser.output), 
-        err_file=os.path.join(ckpt.ckpt_folder, parser.error))
+    if log:
+        cbio_logging.setup(log_lvl='DEBUG', 
+            out_file=os.path.join(ckpt.ckpt_folder, parser.output), 
+            err_file=os.path.join(ckpt.ckpt_folder, parser.error))
 
 
 def args_evolution_exp():

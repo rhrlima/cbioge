@@ -40,6 +40,7 @@ def test_map_genotype_to_phenotype():
     #     "input_layers": [["input_0", 0, 0]], "output_layers": [["conv_6", 0, 0]]}})
     assert True
 
+@pytest.mark.slow
 @pytest.mark.parametrize('grammar_file', [
     'cbioge/assets/grammars/unet_restricted.json'
 ])
