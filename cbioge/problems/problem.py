@@ -71,9 +71,7 @@ class DNNProblem(BaseProblem):
         try:
             model = model_from_json(solution.phenotype)
 
-            model.compile(loss=self.loss, 
-                          optimizer=self.opt,
-                          metrics=self.metrics)
+            model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
 
             # defines the portions of data used for training and eval
             x_train, y_train = self.dataset.get_data('train')
@@ -86,7 +84,7 @@ class DNNProblem(BaseProblem):
 
             # runs training
             start_time = dt.datetime.today()
-            self.train_model(model, x_train, y_train, 
+            history = self.train_model(model, x_train, y_train, 
                 batch_size=self.batch_size, 
                 epochs=self.epochs, 
                 save_weights=save_weights, 
@@ -95,7 +93,7 @@ class DNNProblem(BaseProblem):
                 **self.kwargs)
 
             # runs evaluations (on validation or test)
-            _, accuracy = self.test_model(model, x_eval, y_eval, 
+            loss, accuracy = self.test_model(model, x_eval, y_eval, 
                 batch_size=self.batch_size, 
                 verbose=self.verbose, 
                 **self.kwargs)
@@ -104,6 +102,9 @@ class DNNProblem(BaseProblem):
             solution.fitness = accuracy
             solution.evaluated = True
             solution.data['time'] = dt.datetime.today() - start_time
+            solution.data['acc'] = accuracy
+            solution.data['loss'] = loss
+            solution.data['history'] = history.history
 
             # clears keras session so memory wont stack up
             K.clear_session()

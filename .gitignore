@@ -13,10 +13,12 @@ __pycache__/
 # dataset and solution files
 data/datasets/
 *.pickle
-*.ckpt
 
 # temp or experiment files
+*.ckpt
 *.log
+*.hdf5
+*.h5
 
 # lib setup
 *.egg*

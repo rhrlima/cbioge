@@ -108,7 +108,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.save_state()
             self.print_progress()
 
-        return self.population
+        return max(self.population, key=lambda x: x.fitness)
 
     def save_state(self):
 

@@ -28,8 +28,12 @@ def natural_key(string_):
     return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
 
-def get_most_recent(name_pattern):
-    data_files = glob.glob(os.path.join(ckpt_folder, name_pattern))
+def get_most_recent(name_pattern, folder=None):
+
+    if folder is None:
+        folder = ckpt_folder
+
+    data_files = glob.glob(os.path.join(folder, name_pattern))
 
     if data_files == []:
         return None

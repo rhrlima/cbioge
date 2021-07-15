@@ -30,8 +30,12 @@ class GESolution():
         return self.__dict__
 
     def initialize_from_json(self, json_data):
+        if type(json_data) is not dict:
+            return
+
         for key in self.__dict__:
-            self.__dict__[key] = json_data[key]
+            if key in json_data:
+                self.__dict__[key] = json_data[key]
 
     def copy(self, deep=False):
         if deep: return copy.deepcopy(self)
