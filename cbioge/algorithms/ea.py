@@ -46,9 +46,6 @@ class BaseEvolutionaryAlgorithm:
             self.mutation = kwargs['mutation']
             kwargs.pop('mutation')
 
-        # default attributes
-        self.population = None
-        self.evals = None
         self.verbose = verbose
 
         np.random.seed(seed=self.seed)
@@ -91,7 +88,9 @@ class BaseEvolutionaryAlgorithm:
 
     def load_solution(self, solution_id):
         try:
-            file_name = ckpt.solution_name.format(solution_id)
-            return GESolution(json_data=ckpt.load_data(file_name))
+            return GESolution(
+                json_data=ckpt.load_data(
+                    ckpt.solution_name.format(solution_id)
+                ))
         except Exception as e:
             return None

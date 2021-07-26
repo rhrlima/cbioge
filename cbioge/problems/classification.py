@@ -13,17 +13,18 @@ class CNNProblem(DNNProblem):
         This class includes methods focused on the design of CNNs.
     '''
     def __init__(self, parser: Grammar, dataset: Dataset,
-        batch_size=10, 
+        batch_size=32, 
         epochs=1, 
+        opt='adam', 
+        loss='categorical_crossentropy', 
+        metrics=['accuracy'], 
         test_eval=False, 
         verbose=False, 
-        **kwargs):
+        train_args={}, 
+        test_args={}):
 
-        super().__init__(parser, dataset, 
-            batch_size, epochs, test_eval, verbose, **kwargs)
-
-        # classification specific
-        self.loss = 'categorical_crossentropy'
+        super().__init__(parser, dataset, batch_size, epochs, opt, loss, 
+            metrics, test_eval, verbose, train_args, test_args)
 
     def _sequential_build(self, mapping: list) -> Model:
 

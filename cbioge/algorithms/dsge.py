@@ -1,5 +1,3 @@
-import os, glob, logging, datetime as dt
-
 from ..algorithms import GESolution
 from ..algorithms import BaseEvolutionaryAlgorithm
 from ..utils import checkpoint as ckpt
@@ -14,9 +12,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         verbose=False, 
         **kwargs):
         super().__init__(problem, seed, pop_size, max_evals, verbose, **kwargs)
-
-        # diversity
-        self.unique_solutions = []
 
     def create_solution(self) -> GESolution:
         return GESolution(self.problem.parser.dsge_create_solution())
@@ -34,6 +29,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         return population
 
     def evaluate_solution(self, solution: GESolution):
+
         # skip solutions already executed
         if solution.evaluated:
             if self.verbose:
@@ -45,11 +41,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.problem.map_genotype_to_phenotype(solution)
         self.problem.evaluate(solution)
 
+        solution.evaluated = True
+
         # updates the solution file
         self.save_solution(solution)
 
         if self.verbose:
-            log_text = f'Solution {solution.id:4} fit: {float(solution.fitness):.2f} gen: {solution}'
+            log_text = f'Solution {solution.id} fit: {float(solution.fitness):.2f} gen: {solution}'
             self.logger.debug(log_text)
 
     def evaluate_population(self, population):
@@ -65,15 +63,18 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def execute(self, checkpoint=False):
 
-        if checkpoint:
-            self.load_state()
+        self.evals = 0
+        self.population = []
+        self.unique_solutions = []
 
-        if not self.population or not self.evals:
+        if checkpoint: self.load_state()
+
+        if len(self.population) == 0:
             self.population = self.create_population(self.pop_size)
             self.evaluate_population(self.population)
             self.evals = len(self.population)
             self.save_state()
-        
+
         self.print_progress()
 
         offspring_pop = []
@@ -82,6 +83,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             # creates a new population from recombining the current one
             index = 0
             while len(offspring_pop) < self.pop_size:
+
                 # tries to load solution if starting from checkpoint
                 offspring = self.load_solution(self.evals + index)
 
@@ -109,17 +111,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.print_progress()
 
         return max(self.population, key=lambda x: x.fitness)
-
+    
     def save_state(self):
 
         data = {
             'evals': self.evals,
             'population': [s.to_json() for s in self.population],
             'unique': self.unique_solutions,
-            #'selection': self.selection,
-            #'crossover': self.crossover,
-            #'mutation': self.mutation,
-            #'replacement': self.replacement
         }
 
         file_name = ckpt.data_name.format(self.evals)
@@ -127,28 +125,29 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         # remove solution files already evaluated if data ckpt exists
         if saved: 
-            ckpt.delete_data(ckpt.solution_name.format('*'))
+            for i in range(self.evals):
+                ckpt.delete_data(ckpt.solution_name.format(i))
             self.logger.debug(f'Checkpoint [{file_name}] created.')
 
     def load_state(self):
+        '''Tries to continue the evolution from the last checkpoint'''
 
-        last_ckpt = ckpt.get_most_recent(ckpt.data_name.format('*'))
-        if last_ckpt is None:
+        # searches for data checkpoints
+        data_ckpts = ckpt.get_files_with_name(ckpt.data_name.format('*'))
+
+        if len(data_ckpts) == 0:
             self.logger.debug('No checkpoint found.')
-            self.evals = None
-            self.population = None
             return
 
+        last_ckpt = max(data_ckpts, key=lambda c: ckpt.natural_key(c))
         data = ckpt.load_data(last_ckpt)
 
         self.evals = data['evals']
-        self.population = [GESolution(json_data=s) for s in data['population']]
-        if 'unique' in data: self.unique_solutions = data['unique']
+        self.population = [
+            GESolution(json_data=s) for s in data['population']
+        ]
 
-        #self.selection = data['selection']
-        #self.crossover = data['crossover']
-        #self.mutation = data['mutation']
-        #self.replacement = data['replacement']
+        if 'unique' in data: self.unique_solutions = data['unique']
 
         self.logger.debug(f'Latest checkpoint file found: {last_ckpt}')
         self.logger.debug(f'Current evals: {self.evals}/{self.max_evals}')

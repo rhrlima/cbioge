@@ -35,7 +35,8 @@ class GESolution():
 
         for key in self.__dict__:
             if key in json_data:
-                self.__dict__[key] = json_data[key]
+                #self.__dict__[key] = json_data[key]
+                self.__setattr__(key, json_data[key])
 
     def copy(self, deep=False):
         if deep: return copy.deepcopy(self)

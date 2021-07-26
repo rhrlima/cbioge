@@ -1,3 +1,11 @@
+'''module responsible for the checkpoint system
+
+it helps with saving/loading information that is used by the lib, assuming that
+every save/load will be performed on the checkpoint folder
+
+also includes some util functions that might be used in some other places.
+'''
+
 import glob, os, re, pickle
 
 ckpt_folder = 'checkpoints'
@@ -30,8 +38,7 @@ def natural_key(string_):
 
 def get_most_recent(name_pattern, folder=None):
 
-    if folder is None:
-        folder = ckpt_folder
+    if folder is None: folder = ckpt_folder
 
     data_files = glob.glob(os.path.join(folder, name_pattern))
 
@@ -43,39 +50,19 @@ def get_most_recent(name_pattern, folder=None):
         return data_files[0]
 
 
-# def load_solution(solution_id):
-#     filename = solution_name.format(solution_id)
-#     return load_data(filename)
-
-
-# def save_population(population):
-
-#     for solution in population:
-#         save_solution(solution)
-
-
-# def load_solutions():
-
-#     solution_files = glob.glob(os.path.join(ckpt_folder, solution_name.format('*')))
-#     solution_files.sort()
-
-#     solutions = []
-#     for file in solution_files:
-#         data = load_data(file)
-#         s = GESolution(json_data=data)
-#         solutions.append(s)
-
-#     return solutions
+def get_files_with_name(name_pattern, folder=None):
+    files = glob.glob(os.path.join(folder or ckpt_folder, name_pattern))
+    return [os.path.basename(f) for f in files]
 
 
 def save_data(data, filename):
+    # try saving the data in the checkpoint folder
     try:
-        if not os.path.exists(ckpt_folder):
-            os.makedirs(ckpt_folder)
+        # should not be necessary
+        # if not os.path.exists(ckpt_folder):
+        #     os.makedirs(ckpt_folder)
 
-        complete_path = os.path.join(ckpt_folder, filename)
-
-        with open(complete_path, 'wb') as f:
+        with open(os.path.join(ckpt_folder, filename), 'wb') as f:
             pickle.dump(data, f)
         return True
     except:
@@ -83,8 +70,9 @@ def save_data(data, filename):
         return False
 
 
-def load_data(filename):
-    with open(filename, 'rb') as f:
+def load_data(file_name):
+    # loads the file stored in the checkpoint folder
+    with open(os.path.join(ckpt_folder, file_name), 'rb') as f:
         return pickle.load(f)
 
 

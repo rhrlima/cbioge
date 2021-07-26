@@ -9,7 +9,6 @@ from cbioge.algorithms import GESolution
 from cbioge.datasets import Dataset
 from cbioge.grammars import Grammar
 from cbioge.utils import checkpoint as ckpt
-from .dnns.utils.callback import TimedStopping
 
 
 class BaseProblem:
@@ -40,74 +39,83 @@ class DNNProblem(BaseProblem):
     def __init__(self, parser: Grammar, dataset: Dataset, 
         batch_size=10, 
         epochs=1, 
+        opt='adam', 
+        loss='categorical_crossentropy', 
+        metrics=['accuracy'], 
         test_eval=False, 
         verbose=False, 
-        **kwargs):
+        train_args={}, 
+        test_args={}):
 
         super().__init__(parser, verbose)
 
-        # if dataset is None:
-        #     raise AttributeError('Dataset cannot be None')
         self.dataset = dataset
 
         self.batch_size = batch_size
         self.epochs = epochs
         self.test_eval = test_eval
 
-        self.opt = 'adam'
-        self.metrics = ['accuracy']
+        self.loss = loss
+        self.opt = self._parse_opt(opt)
+        self.metrics = metrics
 
-        self.kwargs = kwargs
+        self.train_args = train_args
+        self.test_args = test_args
+
+
+    def _parse_opt(self, opt):
+        if type(opt) == str: return opt
+        return {'class': opt.__class__, 'config': opt.get_config()}
+
+    def _get_opt(self):
+        if type(self.opt) == str: return self.opt
+        return self.opt['class'].from_config(self.opt['config'])
 
     def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
         raise NotImplementedError('Not implemented yet.')
 
-    def evaluate(self, solution: GESolution, save_weights=False) -> bool:
-        ''' Evaluates the phenotype
-
-            phenotype: json structure containing the network architecture
-            weights: network weights (optional)
-        '''
+    def evaluate(self, solution: GESolution) -> bool:
+        '''Evaluates a solution by executing the training and calculating the 
+        fitness on the validation or test'''
         try:
             model = model_from_json(solution.phenotype)
 
-            model.compile(loss=self.loss, optimizer=self.opt, metrics=self.metrics)
+            model.compile(
+                loss=self.loss, 
+                optimizer=self._get_opt(), #TODO GAMBI MASTER
+                metrics=self.metrics)
 
             # defines the portions of data used for training and eval
             x_train, y_train = self.dataset.get_data('train')
-            if self.test_eval: x_eval, y_eval = self.dataset.get_data('test')
-            else: x_eval, y_eval = self.dataset.get_data('valid')
 
             # defines the folder for saving the model if requested
-            solution_path = f'solution_{solution.id}_weights.h5'
-            #solution_path = os.path.join(ckpt.ckpt_folder, f'solution_{solution.id}')
+            # solution_path = f'solution_{solution.id}_weights.h5'
 
             # runs training
             start_time = dt.datetime.today()
             history = self.train_model(model, x_train, y_train, 
                 batch_size=self.batch_size, 
                 epochs=self.epochs, 
-                save_weights=save_weights, 
-                save_path=solution_path, 
                 verbose=self.verbose, 
-                **self.kwargs)
+                **self.train_args)
 
-            # runs evaluations (on validation or test)
-            loss, accuracy = self.test_model(model, x_eval, y_eval, 
-                batch_size=self.batch_size, 
-                verbose=self.verbose, 
-                **self.kwargs)
+            loss = history.history['val_loss'][-1]
+            accuracy = history.history['val_acc'][-1]
+
+            if self.test_eval:
+                x_eval, y_eval = self.dataset.get_data('test')
+                # runs evaluations (on validation or test)
+                loss, accuracy = self.test_model(model, x_eval, y_eval, 
+                    batch_size=self.batch_size, 
+                    verbose=self.verbose, 
+                    **self.test_args)
 
             # updates the solution information
             solution.fitness = accuracy
-            solution.evaluated = True
             solution.data['time'] = dt.datetime.today() - start_time
             solution.data['acc'] = accuracy
             solution.data['loss'] = loss
             solution.data['history'] = history.history
-
-            # clears keras session so memory wont stack up
-            K.clear_session()
 
             return True
 
@@ -118,49 +126,43 @@ class DNNProblem(BaseProblem):
 
             return False
 
-    def train_model(self, model, x_train, y_train, save_weights=False, save_path=None, **kwargs):
+        finally:
+            K.clear_session()
+
+    def train_model(self, model, x_train, y_train, save_path=None, **kwargs):
         ''' executes the training of a model.
 
             # Parameters
             x_train: training data
             y_train: training labels
-            batch_size: size of the batches used during training
-            epochs: number of epochs the training will be executed
+            save_path: if value is different from None, the model weights will be saved
 
             # Optional parameters
-            validation_data: Data on which to evaluate the loss and any model 
-            metrics at the end of each epoch. Expects:
-            - tuple (x_val, y_val)
-            timelimit: max time (in seconds the model will be trained)
+            follows the same keras model.fit parameters
         '''
-        callbacks = []
 
-        if 'timelimit' in kwargs:
-            callbacks.append(
-                TimedStopping(seconds=kwargs['timelimit'], verbose=self.verbose))
+        #model.load_weights(os.path.join(ckpt.ckpt_folder, 'weights.h5'))
 
+        history = model.fit(x_train, y_train, **kwargs)
 
-        history = model.fit(x_train, y_train, callbacks=callbacks, **kwargs)
-
-        if save_weights and save_path is not None:
-            # only create the folders if we want to save the weights
-            # if  not os.path.exists(save_path): os.makedirs(save_path)
-            # model_path = os.path.join(save_path, f'weights.hdf5')
+        if save_path is not None:
             model.save_weights(os.path.join(ckpt.ckpt_folder, save_path))
         
         return history
 
-    def test_model(self, model, x_test, y_test, weights_path=None, **kwargs):
+    def test_model(self, model, x_test, y_test, **kwargs):
 
-        if weights_path is not None: model.load_weights(weights_path)
+        if 'weights_path' in kwargs:
+            model.load_weights(kwargs['weights_path'])
+            kwargs.pop('weights_path')
 
         return model.evaluate(x_test, y_test, **kwargs)
 
-    def predict_model(self, model, x_pred, save_pred=False, save_path=None, **kwargs):
+    def predict_model(self, model, x_pred, save_path=None, **kwargs):
 
         predictions = model.predict(x_pred, **kwargs)
 
-        if save_pred and save_path is not None:
+        if save_path is not None:
             if  not os.path.exists(save_path): os.makedirs(save_path)
             pred_path = os.path.join(save_path, 'predictions.npy')
             np.save(pred_path, predictions)

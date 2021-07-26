@@ -9,8 +9,6 @@ date_format = '%x %X'
 
 def setup(out_file=_out_file, err_file=_err_file, log_lvl=logging.INFO):
 
-    print('calling setup', out_file, err_file)
-
     logger = logging.getLogger('cbioge')
 
     logger.setLevel(log_lvl)

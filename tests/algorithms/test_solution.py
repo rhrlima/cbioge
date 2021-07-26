@@ -12,8 +12,8 @@ def test_create_solution_from_json():
     json_string = {
         'id': None, 
         'genotype': [[1, 1], [1, 1, 1], [1]], 
-        'phenotype': None, 
-        'fitness': -1, 
+        'phenotype': {'a': 123}, 
+        'fitness': 200, 
         'evaluated': False, 
         'data': {
             'time': None, 
@@ -22,6 +22,50 @@ def test_create_solution_from_json():
     }
     solution = GESolution(json_data=json_string)
     assert solution.to_json() == json_string
+    assert solution.fitness == 200
+    assert json_string['fitness'] == 200
+
+def test_create_solution_from_incomplete_json():
+    json_string = {
+        'id': None, 
+        'genotype': [[1, 1], [1, 1, 1], [1]], 
+        'phenotype': None, 
+        'evaluated': False, 
+        'data': {
+            'params': None
+        }
+    }
+    solution = GESolution(json_data=json_string)
+    json_data = solution.to_json()
+    assert json_data != json_string
+    assert len(json_data.keys()) > len(json_string.keys())
+    assert 'fitness' not in json_string
+    assert 'fitness' in json_data
+
+def test_create_solution_from_incomplete_json2():  
+    json_string = {
+        'id': None, 
+        'genotype': [], 
+        'phenotype': None, 
+        'fitness': -1, 
+        'evaluated': False, 
+        'data': {}
+    }
+    solution = GESolution(json_data=None)
+    assert solution.to_json() == json_string
+
+def test_create_empty_solution():  
+    json_string = {
+        'id': None, 
+        'genotype': [], 
+        'phenotype': None, 
+        'fitness': -1, 
+        'evaluated': False, 
+        'data': {}
+    }
+    solution = GESolution()
+    assert solution.to_json() == json_string
+
 
 @pytest.mark.parametrize("genA, genB, expected", [
     ([[0,0],[0,0,0],[0]], [[0,0],[0,0,0],[0]], True),

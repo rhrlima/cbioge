@@ -15,16 +15,16 @@ class UNetProblem(DNNProblem):
     def __init__(self, parser: Grammar, dataset: Dataset, 
         batch_size=10, 
         epochs=1, 
-        #timelimit=None, 
+        opt='adam', 
+        loss='binary_crossentropy', 
+        metrics=['accuracy'], 
         test_eval=False, 
         verbose=False, 
-        **kwargs):
+        train_args={}, 
+        test_args={}):
 
-        super().__init__(parser, dataset, 
-            batch_size, epochs, test_eval, verbose, **kwargs)
-
-        # segmentation specific
-        self.loss = 'binary_crossentropy'
+        super().__init__(parser, dataset, batch_size, epochs, opt, loss, 
+            metrics, test_eval, verbose, train_args, test_args)
 
     def _build_right_side(self, mapping):
         blocks = None
