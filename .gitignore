@@ -4,7 +4,7 @@
 
 # python compiled and folders
 *.pyc
-__pycache__/
+*/__pycache__/
 
 # coverage and pytest
 .coverage
@@ -26,6 +26,8 @@ build/
 dist/
 
 # temp
-temp/
 experiments/
-examples/
+tmp*/
+tmp*.*
+best_sgd/
+TODO
