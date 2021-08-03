@@ -3,6 +3,7 @@ from cbioge.utils.coreutil import contains, create_dir
 import numpy as np
 from cbioge.grammars.grammar import Grammar
 from cbioge.problems.gcnProblem import GCNProblem
+from cbioge.problems.multipleProblem import MultipleProblem
 from cbioge.algorithms.selection import SimilaritySelection, TournamentSelection
 from cbioge.algorithms.crossover import OnePointCrossover, DSGECrossover, DSGEGeneCrossover
 from cbioge.algorithms.mutation import PointMutation, DSGEMutation, DSGETerminalMutation, DSGENonTerminalMutation
@@ -18,7 +19,7 @@ mandatory_params = ['dataset_path', 'dataset', 'output', 'grammar']
 
 class GEEvolutionRunner():
     def __init__(self, args):
-        logging.info(f"Params: {args}")
+        logging.info(f":: GEEvolutionRunner Params: {args}")
         try:
             if not contains(mandatory_params, args.keys()):
                 raise RuntimeError(f"We need mandatory params: f{mandatory_params}")
@@ -232,6 +233,35 @@ class GEEvolutionRunner():
         logging.info(f":: nonterm: {self.parser.nonterm} ")
         logging.info(f":: metrics: {self.metrics} ")
 
+        if self.problem_model == GCNProblem:
+            self.build_gcnProblem()
+
+        elif self.problem_model == MultipleProblem:
+            self.build_multipleProblem()
+
+        return "SUCCESS"
+
+    def build_multipleProblem(self):
+        logging.info(f":: Building problem (MultipleProblem)")
+        self.problem = MultipleProblem(parser=self.parser, verbose=True, timelimit = self.timelimit,
+            epochs = self.epochs, workers = self.workers,
+            multiprocessing = self.multiprocess,
+            metrics = self.metrics)
+        logging.info(f":: Reading dataset")
+        self.problem.read_dataset_from_pickle(dataset=self.dataset, data_path=self.dataset_path)
+        self.algorithm = GrammaticalEvolution(
+            self.problem, self.parser, 
+            pop_size=self.pop,
+            max_evals=self.evals, 
+            selection=TournamentSelection(t_size=self.t_size, maximize=self.tournament_maximize), 
+            crossover=HalfAndHalfOperator(
+                op1=DSGECrossover(cross_rate=self.crossrate), 
+                op2=DSGENonterminalMutation(mut_rate=self.mutrate, parser=self.parser, end_index=4), 
+                rate=0.6), 
+            replacement=ElitistReplacement(rate=self.elitismrate, maximize=True), 
+            verbose=True)
+
+    def build_gcnProblem(self):
         logging.info(f":: Building problem (GCNProblem)")
         self.problem = GCNProblem(parser=self.parser, verbose=True, timelimit = self.timelimit,
             epochs = self.epochs, workers = self.workers,
@@ -256,9 +286,9 @@ class GEEvolutionRunner():
                 rate=0.6), 
             replacement=ElitistReplacement(rate=self.elitismrate, maximize=True), 
             verbose=True)
-        return "SUCCESS"
-    
+
     def execute(self):
         self.population = self.algorithm.execute()
         self.population.sort(key=lambda x: x.fitness, reverse=True)
+        return "SUCCESS"
 

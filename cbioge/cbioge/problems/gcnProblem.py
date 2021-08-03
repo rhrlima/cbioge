@@ -2,6 +2,7 @@ from cbioge.problems.problem import CoreProblem
 import re, json, sys, os, gc, logging
 from tensorflow.keras.optimizers import Adam
 from cbioge.utils.graphutils import *
+from cbioge.utils.constants import *
 from keras.layers import Input, Dropout
 from spektral.layers import *
 from keras.regularizers import l2
@@ -12,24 +13,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 
 logging.basicConfig(level=logging.INFO)
-
-GRAPH_CONVOLUTION_OPTIONS = {
-    "GraphConv": GraphConv,
-    'ChebConv': ChebConv,
-    'GraphSageConv':GraphSageConv,
-    'ARMAConv':ARMAConv,
-    'EdgeConditionedConv':EdgeConditionedConv,
-    'GraphAttention':GraphAttention,
-    'GraphConvSkip':GraphConvSkip,
-    'APPNP':APPNP,
-    'GINConv':GINConv,
-    'DiffusionConv':DiffusionConv,
-    'GatedGraphConv':GatedGraphConv,
-    'AGNNConv':AGNNConv,
-    'TAGConv':TAGConv,
-    'CrystalConv':CrystalConv,
-    'EdgeConv':EdgeConv
-}
 
 class GCNProblem(CoreProblem):
 
@@ -97,31 +80,9 @@ class GCNProblem(CoreProblem):
         return json.dumps(self.model)
 
 
-    def preprocess(self, first_layer, A):
-        fltr = A.astype("f4")
-        if first_layer in [GraphSageConv, GraphAttention, GINConv, GatedGraphConv, TAGConv]:
-            logging.info("no preprocessing")
-            fltr = A.astype('f4')
-        if first_layer in [GraphConv, ChebConv, ARMAConv, GraphConvSkip]:
-            logging.info("preprocessing like framework")
-            fltr = first_layer.preprocess(A).astype('f4')
-
-        if first_layer in [APPNP]:
-            logging.info("using localpooling_filter")
-            fltr = localpooling_filter(A).astype('f4')
-        return fltr
-
 
     def evaluate(self, phenotype=None):
-        if self.build_method:
-            return self.build_method(
-                mapping=self.mapping, 
-                optmizer=self.opt,
-                metrics=self.metrics,
-                epochs=self.epochs,
-                es_patience=self.es_patience)
         try:
-            
             K.clear_session()
             logging.info(f":: Mapping: {self.mapping}")
 

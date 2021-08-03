@@ -1,36 +1,34 @@
 {
-	"name": "test_gcn_grammar",
+	"name": "gcn_grammar",
 
 	"blocks": {
 		"input": ["Input", "shape"],
-		"conv": ["conv_type", "units", "activation"],
-		"dropout": ["Dropout", "rate"],
-		"filters": ["filter", "max_degree", "sym_norm"]
+		"GraphConv": ["GraphConv", "units", "activation"],
+		"GraphSageConv": ["GraphSageConv", "units", "activation"],
+		"GraphAttention": ["GraphAttention", "units", "activation"],
+		"ARMAConv": ["ARMAConv", "units", "activation"],
+		"APPNP": ["APPNP", "units", "activation"],
+		"dropout": ["Dropout", "rate"]
 	},
 
 	"rules": {
-		"<gcn>" : ["<layer_c>", "<conv>", "<dense>"],
+		"<gcn>" : [["<conv>", "<layer_c>", "<dense>"]],
 		"<layer_c>": [
 			["<conv>"],
 			["<dropout>"],
 			["<layer_c>", "<layer_c>"]
 		],
-		"<dense>": [
-			["conv", "<conv_type>", "<units>", "softmax"]
-		],
-		"<conv>": [
-			["conv", "<conv_type>", "<units>", "<activation>"]
-		],
-		"<conv_type>": [
-			["GraphConv"], 
-			["GraphSageConv"], 
-			["ARMAConv"], 
-			["GraphAttention"], 
-			["APPNP"] 
-		],
+		"<dense>": [["<conv_type>", "<units>", "<dense_activation>"]],
+		"<conv>": [["<conv_type>", "<units>", "<activation>"]],
+		"<conv_type>": [["GraphConv"], 
+						["GraphSageConv"], 
+						["GraphAttention"], 
+						["ARMAConv"], 
+						["APPNP"]],
 		"<dropout>": [["dropout", "<rate>"]],
 		"<units>": [[32], [64], [128], [256]],
-		"<activation>": ["relu"],
+		"<activation>": [["relu"], ["sigmoid"]],
+		"<dense_activation>": [["softmax"]],
 		"<rate>": [[0.25], [0.33], [0.5]]
 	}
 }

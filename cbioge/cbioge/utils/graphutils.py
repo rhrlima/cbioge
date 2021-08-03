@@ -7,6 +7,9 @@ from spektral.utils.io import load_binary
 import logging, os
 import pandas as pd
 import codecs
+from spektral.utils.convolution import localpooling_filter
+
+logging.basicConfig(level=logging.INFO)
 
 def calculate_output_size(img_shape, k, s, p):
     ''' width, height, kernel, padding, stride'''
@@ -19,6 +22,20 @@ def calculate_output_size(img_shape, k, s, p):
     oh = ((h - k + 2 * p) // s) + 1
     return (int(ow), int(oh))
 
+
+def preprocess(self, first_layer, A):
+    fltr = A.astype("f4")
+    if first_layer in [GraphSageConv, GraphAttention, GINConv, GatedGraphConv, TAGConv]:
+        logging.info("no preprocessing")
+        fltr = A.astype('f4')
+    if first_layer in [GraphConv, ChebConv, ARMAConv, GraphConvSkip]:
+        logging.info("preprocessing like framework")
+        fltr = first_layer.preprocess(A).astype('f4')
+
+    if first_layer in [APPNP]:
+        logging.info("using localpooling_filter")
+        fltr = localpooling_filter(A).astype('f4')
+    return fltr
 
 def encode_onehot(labels):
     classes = set(labels)
