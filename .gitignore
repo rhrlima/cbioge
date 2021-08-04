@@ -4,7 +4,7 @@
 
 # python compiled and folders
 *.pyc
-*/__pycache__/
+**/__pycache__/
 
 # coverage and pytest
 .coverage

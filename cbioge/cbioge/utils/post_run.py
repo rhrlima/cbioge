@@ -24,7 +24,7 @@ def get_best_from_checkpoint(folder=None):
 
     if last_ckpt is None: raise ValueError(f'No checkpoint found.')
 
-    data = ckpt.load_data(last_ckpt)
+    data = ckpt.load_data(last_ckpt, folder)
 
     json_data = max(data['population'], key=lambda x: x['fitness'])
 

@@ -1,7 +1,7 @@
 import sys, logging
 
-_out_file = 'out.log'#os.path.join(ckpt.ckpt_folder, 'out.log')
-_err_file = 'err.log'#os.path.join(ckpt.ckpt_folder, 'err.log')
+_out_file = 'out.log'
+_err_file = 'err.log'
 
 log_format = '%(asctime)s %(levelname)s: %(message)s'
 date_format = '%x %X'

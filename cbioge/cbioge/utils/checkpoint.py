@@ -38,16 +38,13 @@ def natural_key(string_):
 
 def get_most_recent(name_pattern, folder=None):
 
-    if folder is None: folder = ckpt_folder
+    data_files = glob.glob(os.path.join(folder or ckpt_folder, name_pattern))
 
-    data_files = glob.glob(os.path.join(folder, name_pattern))
-
-    if data_files == []:
+    if len(data_files) == 0:
         return None
-    else:
-        # returns the file containing the higher number in its name
-        data_files.sort(key=lambda x: natural_key(x), reverse=True)
-        return data_files[0]
+
+    # returns the file containing the higher number in its name
+    return os.path.basename(max(data_files, key=lambda f: natural_key(f)))
 
 
 def get_files_with_name(name_pattern, folder=None):
@@ -58,10 +55,6 @@ def get_files_with_name(name_pattern, folder=None):
 def save_data(data, filename):
     # try saving the data in the checkpoint folder
     try:
-        # should not be necessary
-        # if not os.path.exists(ckpt_folder):
-        #     os.makedirs(ckpt_folder)
-
         with open(os.path.join(ckpt_folder, filename), 'wb') as f:
             pickle.dump(data, f)
         return True
@@ -70,9 +63,9 @@ def save_data(data, filename):
         return False
 
 
-def load_data(file_name):
+def load_data(file_name, folder=None):
     # loads the file stored in the checkpoint folder
-    with open(os.path.join(ckpt_folder, file_name), 'rb') as f:
+    with open(os.path.join(folder or ckpt_folder, file_name), 'rb') as f:
         return pickle.load(f)
 
 
