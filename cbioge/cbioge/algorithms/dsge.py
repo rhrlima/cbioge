@@ -10,11 +10,15 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         pop_size=10, 
         max_evals=20, 
         verbose=False, 
-        **kwargs):
-        super().__init__(problem, seed, pop_size, max_evals, verbose, **kwargs)
+        selection=None, 
+        replacement=None, 
+        crossover=None, 
+        mutation=None):
 
-    def create_solution(self) -> GESolution:
-        return GESolution(self.problem.parser.dsge_create_solution())
+        super().__init__(problem, seed, pop_size, max_evals, verbose, selection, 
+            replacement, crossover, mutation)
+
+        self.unique_solutions = list()
 
     def create_population(self, size):
         population = []
@@ -63,10 +67,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
     def execute(self, checkpoint=False):
 
-        self.evals = 0
-        self.population = []
-        self.unique_solutions = []
-
         if checkpoint: self.load_state()
 
         if len(self.population) == 0:
@@ -113,6 +113,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         return max(self.population, key=lambda x: x.fitness)
     
     def save_state(self):
+        '''Saves the current population of the evolution'''
 
         data = {
             'evals': self.evals,
@@ -120,6 +121,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             'unique': self.unique_solutions,
         }
 
+        # creates the data checkpoint
         file_name = ckpt.data_name.format(self.evals)
         saved = ckpt.save_data(data, file_name)
 
@@ -144,7 +146,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.evals = data['evals']
         self.population = [
-            GESolution(json_data=s) for s in data['population']
+            GESolution.from_json(s) for s in data['population']
         ]
 
         if 'unique' in data: self.unique_solutions = data['unique']

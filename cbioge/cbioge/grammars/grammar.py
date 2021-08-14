@@ -32,24 +32,25 @@ class Grammar:
         self.rules = data['rules']
         self.nonterm = list(self.rules.keys())
 
-        # self._validate_grammar()
+        self._validate_grammar()
 
-    # def _validate_grammar(self):
-    #     ''' checks for inconsitencies in the grammar file:
-    #         - missing rules
-    #         - missing blocks
-    #         - unused rules
-    #         - unused blocks
-    #     '''
-    #     # missing rules using defined blocks
-    #     print('### blocks')
-    #     for block in self.blocks:
-    #         print(block)
+    def _validate_grammar(self):
+        ''' checks for inconsitencies in the grammar file:
+            - missing rules
+            - missing blocks
+            - unused rules
+            - unused blocks
+        '''
+        # # missing rules using defined blocks
+        # print('### blocks')
+        # for block in self.blocks:
+        #     print(block)
         
-    #     # missing blocks using defined rules
-    #     print('### rules')
-    #     for rule in self.rules:
-    #         print(rule)
+        # # missing blocks using defined rules
+        # print('### rules')
+        # for rule in self.rules:
+        #     print(rule)
+        return True
 
     def _parse_special_types(self, value):
         ''' Parses special types present in the grammar.
@@ -137,7 +138,7 @@ class Grammar:
 
         return genotype
 
-    def dsge_create_solution(self, max_depth=None):
+    def create_solution(self, max_depth=None):
         ''' creates a random solution based on the grammar, according to the 
             DSGE method
 
@@ -159,7 +160,7 @@ class Grammar:
 
         return genotype
 
-    def dsge_recursive_parse(self, genotype):
+    def recursive_parse(self, genotype):
         ''' performs the initial call for the grammar expansion according to the
             DSGE method
 

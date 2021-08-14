@@ -1,15 +1,17 @@
-import pytest
+import os
 
+import pytest
 import numpy as np
 
 from cbioge.grammars import Grammar
 from cbioge.algorithms import GESolution
-from cbioge.algorithms import DSGEMutation
-from cbioge.algorithms import DSGETerminalMutation
-from cbioge.algorithms import DSGENonterminalMutation
+from cbioge.algorithms import PointMutation
+from cbioge.algorithms import TerminalMutation
+from cbioge.algorithms import NonterminalMutation
 
 def get_mockup_parser():
-    return Grammar('cbioge/assets/grammars/test_grammar.json')
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    return Grammar(os.path.join(base_dir, 'assets', 'test_grammar.json'))
 
 @pytest.mark.parametrize("gen, expected, seed", [
     ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 
@@ -19,14 +21,14 @@ def get_mockup_parser():
     ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 
      [[0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 99)
 ])
-def test_DSGEMutation(gen, expected, seed):
+def test_PointMutation(gen, expected, seed):
     
     np.random.seed(seed)
 
     solution = GESolution(gen)
 
     parser = get_mockup_parser()
-    offspring = DSGEMutation(1.0, parser).execute(solution)
+    offspring = PointMutation(parser).execute(solution)
 
     assert gen != expected
     assert solution.genotype == gen

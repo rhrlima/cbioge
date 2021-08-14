@@ -14,7 +14,7 @@ def setup(out_file=_out_file, err_file=_err_file, log_lvl=logging.INFO):
     logger.setLevel(log_lvl)
 
     sout_handler = logging.StreamHandler(sys.stdout)
-    #serr_handler = logging.StreamHandler(sys.stderr)
+    # serr_handler = logging.StreamHandler(sys.stderr)
     fout_handler = logging.FileHandler(out_file)
     ferr_handler = logging.FileHandler(err_file)
 

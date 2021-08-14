@@ -1,8 +1,6 @@
 import pytest
 
-from cbioge.algorithms.solution import GESolution
-#from .cbioge.algorithms import GESolution
-#from src.cbioge.algorithms import GESolution
+from cbioge.algorithms import GESolution
 
 def test_create_solution_from_list():
     solution = GESolution([[0,0],[0,0,0],[0]])
@@ -20,7 +18,7 @@ def test_create_solution_from_json():
             'params': None
         }
     }
-    solution = GESolution(json_data=json_string)
+    solution = GESolution.from_json(json_string)
     assert solution.to_json() == json_string
     assert solution.fitness == 200
     assert json_string['fitness'] == 200
@@ -35,7 +33,7 @@ def test_create_solution_from_incomplete_json():
             'params': None
         }
     }
-    solution = GESolution(json_data=json_string)
+    solution = GESolution.from_json(json_string)
     json_data = solution.to_json()
     assert json_data != json_string
     assert len(json_data.keys()) > len(json_string.keys())
@@ -51,7 +49,7 @@ def test_create_solution_from_incomplete_json2():
         'evaluated': False, 
         'data': {}
     }
-    solution = GESolution(json_data=None)
+    solution = GESolution.from_json(None)
     assert solution.to_json() == json_string
 
 def test_create_empty_solution():  
@@ -79,7 +77,7 @@ def test_eq_override(genA, genB, expected):
     if genB == 'copy':
         objB = objA.copy()
     elif genB == 'json':
-        objB = GESolution(json_data=objA.to_json())
+        objB = GESolution.from_json(objA.to_json())
     else:
         objB = GESolution(genB)
     

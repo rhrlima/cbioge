@@ -1,4 +1,6 @@
+import typing
 import os, logging, datetime as dt
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -11,23 +13,24 @@ from cbioge.grammars import Grammar
 from cbioge.utils import checkpoint as ckpt
 
 
-class BaseProblem:
+class BaseProblem(ABC):
     ''' This BaseProblem class should be used as a reference of what a 
         problem class must have to be used with the evolutionary algorithms. 
         During the evolution the methods in this class are called.
     '''
-    def __init__(self, parser: Grammar, verbose=False):
-        if parser is None:
-            raise AttributeError('Grammar parser cannot be None')
+    def __init__(self, parser: Grammar, verbose: bool=False):
+        if parser is None: raise AttributeError('Grammar parser cannot be None')
 
         self.parser = parser
         self.verbose = verbose
         self.logger = logging.getLogger('cbioge')
 
-    def map_genotype_to_phenotype(self, solution):
+    @abstractmethod
+    def map_genotype_to_phenotype(self, solution: GESolution):
         raise NotImplementedError('Not implemented yet.')
 
-    def evaluate(self, solution):
+    @abstractmethod
+    def evaluate(self, solution: GESolution):
         raise NotImplementedError('Not implemented yet.')
 
 
@@ -119,7 +122,7 @@ class DNNProblem(BaseProblem):
 
             return True
 
-        except Exception as e:
+        except Exception:
             self.logger.exception('A problem was found during evaluation.')
             solution.fitness = -1
             solution.evaluated = True

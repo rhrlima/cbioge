@@ -1,176 +1,46 @@
-import os
-import glob
-import time
-import datetime as dt
-
-import numpy as np
-
-from multiprocessing import Pool
-
-from ..utils import checkpoint as ckpt
-from .solution import GESolution
-from .ea import BaseEvolutionaryAlgorithm
+from ..algorithms import GESolution
+from .dsge import GrammaticalEvolution
 
 
-class RandomGrammaticalEvolution(BaseEvolutionaryAlgorithm):
+class RandomGrammaticalEvolution(GrammaticalEvolution):
 
-    def __init__(self, problem, parser):
-        super(RandomGrammaticalEvolution, self).__init__(problem)
+    def __init__(self, problem, 
+        seed=None, 
+        pop_size=10, 
+        max_evals=20, 
+        verbose=False):
 
-        self.parser = parser
+        super().__init__(problem, seed, pop_size, max_evals, verbose)
 
-        self.seed = None
+    def execute(self, checkpoint: bool=False) -> GESolution:
 
-        self.pop_size = 5
-        self.max_evals = 100
-        self.training = True
+        self.evals = 0
+        self.population = []
+        self.unique_solutions = []
 
-        self.selection = None
-        self.crossover = None
-        self.mutation = None
-        self.replacement = None
-
-        self.population = None
-        self.evals = None
-
-        self.verbose = False
-
-        np.random.seed(seed=self.seed)
-
-    def create_solution(self):
-
-        return GESolution(self.parser.dsge_create_solution())
-
-    def create_population(self, size):
-        population = []
-        for i in range(size):
-            solution = self.create_solution()
-            solution.id = i
-            population.append(solution)
-        return population
-
-    def evaluate_solution(self, solution):
-
-        if solution.evaluated:
-            if self.verbose:
-                curr_time = time.strftime('%x %X')
-                print(f'<{curr_time}> [eval] skipping solution {solution.id}. Already evaluated')
-            return
-
-        if self.verbose:
-            curr_time = dt.datetime.today().strftime('%x %X')
-            print(f'<{curr_time}> [eval] solution {solution.id} started')
-            print('genotype:', solution.genotype)
-
-        phenotype = self.problem.map_genotype_to_phenotype(solution.genotype)
-
-        start_time = dt.datetime.today()
-        scores, params = self.problem.evaluate(phenotype)
-        end_time = dt.datetime.today()
-
-        # scores:
-        # 0: loss
-        # 1: accuracy
-        # 2..: others
-        fitness = scores[1]
-
-        # local changes for checkpoint
-        solution.fitness = fitness
-        solution.phenotype = phenotype
-        solution.evaluated = True
-        solution.time = end_time - start_time
-        solution.params = params
-
-        ckpt.save_solution(solution)
-
-        if self.verbose:
-            curr_time = dt.datetime.today().strftime('%x %X')
-            print('fitness:', solution.fitness)
-            print(f'<{curr_time}> [eval] solution {solution.id} ended')
-
-    def evaluate_population(self, population):
-
-        for s in population:
-            self.evaluate_solution(s)
-
-    def execute(self, checkpoint=False):
-
-        if checkpoint:
-            self.load_state()
-
-        if not self.population or not self.evals:
-            self.population = self.create_population(self.pop_size)
-            ckpt.save_population(self.population)
-
-            self.evaluate_population(self.population)
-            self.evals = len(self.population)
-            self.save_state()
+        if checkpoint: self.load_state()
 
         self.print_progress()
 
-        offspring_pop = ckpt.load_solutions()
+        offspring_pop = list()
         while self.evals < self.max_evals:
 
-            if offspring_pop == []:
-                offspring_pop = self.create_population(self.pop_size)
+            # creates a new population from recombining the current one
+            index = 0
+            while len(offspring_pop) < self.pop_size:
+                solution = self.create_solution()
+                solution.id = self.evals + index
+                offspring_pop.append(solution)
+                index += 1
 
             self.evaluate_population(offspring_pop)
-            self.population = self.replacement.execute(self.population, offspring_pop)
 
-            self.evals += len(offspring_pop)
-            offspring_pop = []
+            self.population = self.apply_replacement(offspring_pop)
+
+            self.evals += self.pop_size
+            offspring_pop.clear()
 
             self.save_state()
             self.print_progress()
 
-        return self.population
-
-    def save_state(self):
-
-        data = {
-            'evals': self.evals,
-            'population': [s.to_json() for s in self.population],
-            'selection': self.selection,
-            'crossover': self.crossover,
-            'mutation': self.mutation,
-            'replacement': self.replacement}
-
-        filename = f'data_{self.evals}.ckpt'
-        saved = ckpt.save_data(data, filename)
-
-        # remove solution files already evaluated if data ckpt exists
-        if saved: ckpt.delete_solution_checkpoints('solution_*.ckpt')
-        
-    def load_state(self):
-
-        folder = ckpt.ckpt_folder
-
-        data_files = glob.glob(os.path.join(folder, 'data_*.ckpt'))
-        if data_files == []:
-            print('[checkpoint] no checkpoint found')
-            self.evals = None
-            self.population = None
-            return
-
-        data_files.sort(key=lambda x: ckpt.natural_key(x), reverse=True)
-        data = ckpt.load_data(data_files[0])
-
-        print(f'[checkpoint] starting from checkpoint: {data_files[0]}')
-        self.evals = data['evals']
-        self.population = [GESolution(json_data=json_data) for json_data in data['population']]
-        self.selection = data['selection']
-        self.crossover = data['crossover']
-        self.mutation = data['mutation']
-        self.replacement = data['replacement']
-
-        # temp
-        for s in self.population:
-            if s.fitness is None:
-                s.fitness = -1
-
-    def print_progress(self):
-        curr_time = time.strftime('%x %X')
-        best = self.population[0].genotype
-        best_fit = self.population[0].fitness
-        print(f'<{curr_time}> evals: {self.evals}/{self.max_evals}',
-              f'best so far: {best} fitness: {best_fit}')
+        return max(self.population, key=lambda x: x.fitness)

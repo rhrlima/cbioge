@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from cbioge.algorithms import GESolution
@@ -16,8 +17,12 @@ def get_mockup_data_dict():
         'num_classes': 1
     })
 
+def get_mockup_parser():
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    return os.path.join(base_dir, 'assets', 'test_grammar.json')
+
 def test_map_genotype_to_phenotype():
-    parser = Grammar('cbioge/assets/grammars/test_grammar.json')
+    parser = Grammar(get_mockup_parser())
     solution = GESolution([[5], [0], [0, 0], [2], [0], [0, 1]])
     mapping = [['conv', 16, 4], ['dense', 32], ['dense', 64]]
 
@@ -27,22 +32,3 @@ def test_map_genotype_to_phenotype():
 
     assert solution.data['mapping'] == mapping
     assert model.count_params() == model2.count_params()
-
-@pytest.mark.slow
-@pytest.mark.parametrize('grammar_file', [
-    'cbioge/assets/grammars/test_grammar.json', 
-    'cbioge/assets//grammars/cnn3.json',
-    'cbioge/assets/grammars/res_cnn.json', 
-])
-def test_invalid_models_tolerance(grammar_file):
-    parser = Grammar(grammar_file)
-    problem = CNNProblem(parser, get_mockup_data_dict())
-
-    num_models = 100
-    invalid = 0
-    for _ in range(num_models):
-        solution = GESolution(parser.dsge_create_solution())
-        problem.map_genotype_to_phenotype(solution)
-        if solution.phenotype is None: invalid += 1
-
-    assert invalid/num_models <= 0.5

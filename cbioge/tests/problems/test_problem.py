@@ -1,10 +1,12 @@
+import os
 import pytest
 
 from cbioge.grammars import Grammar
 from cbioge.problems import BaseProblem, DNNProblem
 
 def get_mockup_parser():
-    return Grammar('cbioge/assets/grammars/test_grammar.json')
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    return os.path.join(base_dir, 'assets', 'test_grammar.json')
 
 def get_mockup_data_dict():
 
@@ -19,18 +21,13 @@ def get_mockup_data_dict():
     }
 
 def test_isinstance_of_dnnproblem():
-    parser = get_mockup_parser()
+    parser = Grammar(get_mockup_parser())
     dataset = get_mockup_data_dict()
     problem = DNNProblem(parser, dataset)
     assert isinstance(problem, DNNProblem)
 
 def test_is_dnnproblem_subclass_of_problem():
     assert issubclass(DNNProblem, BaseProblem) == True
-
-def test_baseproblem_has_functions():
-    problem = BaseProblem(get_mockup_parser())
-    assert hasattr(problem, 'map_genotype_to_phenotype')
-    assert hasattr(problem, 'evaluate')
 
 def test_dnnproblem_none_parser():
     with pytest.raises(AttributeError):

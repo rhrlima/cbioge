@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 from ..algorithms import GESolution
 from . import checkpoint as ckpt
 
+
 LOGGER = logging.getLogger('cbioge')
+
 
 def run_solution(problem, solution):
 
@@ -28,7 +30,7 @@ def get_best_from_checkpoint(folder=None):
 
     json_data = max(data['population'], key=lambda x: x['fitness'])
 
-    return GESolution(json_data=json_data)
+    return GESolution.from_json(json_data)
 
 
 def plot_history(history, folder=None, name='plot.png'):

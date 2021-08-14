@@ -1,53 +1,25 @@
 import numpy as np
 
-from .operators import GeneticOperator
+from .operators import MutationOperator
 
 
-class PointMutation(GeneticOperator):
-
-    ''' Point Mutation changes a list of solutions by selecting a random
-        point and generating a new value for that position (repeate for
-        each solution)
-
-        mut_rate: chance to apply the operator
-        min_value: min possible value for the solution
-        max_value: max possible value for the solution
-    '''
-
-    def __init__(self, mut_rate, min_value=0, max_value=1):
-        self.mut_rate = mut_rate
-        self.min_value = min_value
-        self.max_value = max_value
-
-    def __str__(self):
-        return 'Point Mutation'
-
-    def execute(self, offspring):
-        if np.random.rand() < self.mut_rate:
-            for off in offspring:
-                index = np.random.randint(0, len(off.genotype))
-                off.genotype[index] = np.random.randint(
-                    self.min_value, self.max_value)
-
-
-class DSGEMutation(GeneticOperator):
-
+class PointMutation(MutationOperator):
     '''Changes one value for a new valid one
 
         mut_rate: chance to apply the operator
         parser: parser object needed to replace the values
     '''
 
-    def __init__(self, mut_rate, parser):
-        self.mut_rate = mut_rate
+    def __init__(self, parser, mut_rate=1.0, start_index=0, end_index=None):
         self.parser = parser
+        self.mut_rate = mut_rate
 
-        self.start_index = 0
-        self.end_index = None
+        self.start_index = start_index
+        self.end_index = end_index
 
     def __str__(self):
 
-        return 'DSGE Point Mutation'
+        return 'Point Mutation'
 
     def execute(self, solution):
 
@@ -83,33 +55,24 @@ class DSGEMutation(GeneticOperator):
         return offspring
 
 
-class DSGETerminalMutation(DSGEMutation):
-
+class TerminalMutation(PointMutation):
     '''Changes a value for a new valid one, starting from a given index'''
 
-    def __init__(self, parser, start_index, mut_rate=1.0):
-        super().__init__(mut_rate, parser)
-        
-        self.start_index = start_index
+    def __init__(self, parser, mut_rate=1.0, start_index=0):
+        super().__init__(mut_rate, parser, 
+            start_index=start_index)
 
     def __str__(self):
 
-        return 'DSGE Terminal Mutation'
+        return 'Terminal Point Mutation'
 
 
-class DSGENonterminalMutation(DSGEMutation):
+class NonterminalMutation(PointMutation):
+    '''Changes a value for a new valid one, up to a given index'''
 
-    '''Changes a value for a new valid one, restricted to and index'''
-
-    def __init__(self, parser, end_index, mut_rate=1.0):
-        super().__init__(mut_rate, parser)
-
-        self.end_index = end_index
+    def __init__(self, parser, mut_rate=1.0, end_index=None):
+        super().__init__(parser, mut_rate, end_index=end_index)
 
     def __str__(self):
 
-        return 'DSGE Nonterminal Mutation'
-
-class DSGENonTerminalMutation(DSGEMutation):
-
-    pass
+        return 'Nonterminal Point Mutation'

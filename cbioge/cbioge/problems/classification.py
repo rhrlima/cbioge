@@ -1,11 +1,13 @@
-import keras.layers
-from keras.models import Model
+from typing import List
 
+from keras.layers import Input, Flatten, Dense
+from keras.models import Model
+ 
 from .dnns import layers as clayers
-from cbioge.datasets import Dataset
-from cbioge.grammars import Grammar
-from cbioge.problems import DNNProblem
-from cbioge.algorithms import GESolution
+from ..datasets import Dataset
+from ..grammars import Grammar
+from ..problems import DNNProblem
+from ..algorithms import GESolution
 
 
 class CNNProblem(DNNProblem):
@@ -26,22 +28,21 @@ class CNNProblem(DNNProblem):
         super().__init__(parser, dataset, batch_size, epochs, opt, loss, 
             metrics, test_eval, verbose, train_args, test_args)
 
-    def _sequential_build(self, mapping: list) -> Model:
+    def _sequential_build(self, mapping: List[List[int]]) -> Model:
 
-        layers = []
+        layers = list()
 
         # input layer
-        layers.append(keras.layers.Input(shape=self.dataset.input_shape))
+        layers.append(Input(shape=self.dataset.input_shape))
         for block in mapping:
             b_name, values = block[0], block[1:]
-            l = clayers._get_layer(self.parser.blocks[b_name][0],
-                [keras.layers, clayers.layers])
+            l = clayers._get_layer(self.parser.blocks[b_name][0], [clayers])
             config = {param: value for param, value in zip(self.parser.blocks[b_name][1:], values)}
             layers.append(l.from_config(config))
 
         # classifier layers
-        layers.append(keras.layers.Flatten())
-        layers.append(keras.layers.Dense(self.dataset.num_classes, activation='softmax'))
+        layers.append(Flatten())
+        layers.append(Dense(self.dataset.num_classes, activation='softmax'))
 
         try:
             # connecting the layers (functional API)
@@ -51,7 +52,7 @@ class CNNProblem(DNNProblem):
                 out_layer = l(out_layer)
 
             return Model(inputs=in_layer, outputs=out_layer)
-        except Exception as e:
+        except Exception:
             self.logger.exception('Invalid model')
             return None
 
@@ -61,7 +62,7 @@ class CNNProblem(DNNProblem):
         if 'mapping' in solution.data: mapping = solution.data['mapping']
 
         # creates mapping using the grammar
-        else: mapping = self.parser.dsge_recursive_parse(solution.genotype)
+        else: mapping = self.parser.recursive_parse(solution.genotype)
 
         # creates the model
         model = self._sequential_build(mapping)

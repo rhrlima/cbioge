@@ -1,11 +1,11 @@
 import json
 
 from keras.models import Model, model_from_json
-from cbioge.datasets import Dataset
-from cbioge.grammars import Grammar
-from cbioge.problems import DNNProblem
-from cbioge.algorithms import GESolution
-from cbioge.utils.image import calculate_output_size
+
+from ..datasets import Dataset
+from ..grammars import Grammar
+from ..problems import DNNProblem
+from ..algorithms import GESolution
 
 
 class UNetProblem(DNNProblem):
@@ -52,19 +52,30 @@ class UNetProblem(DNNProblem):
 
         return mapping
 
+    def _calculate_output_size(self, img_shape, k, s, p):
+        '''(width, height), kernel, stride, padding'''
+        index = 1 if len(img_shape) == 4 else 0
+        w = img_shape[index]
+        h = img_shape[index+1]
+
+        p = 0 if p == 'valid' else (k-1) / 2
+        ow = ((w - k + 2 * p) // s) + 1
+        oh = ((h - k + 2 * p) // s) + 1
+        return (int(ow), int(oh))
+
     def _get_layer_outputs(self, mapping):
         outputs = []
         depth = 0
-        for i, block in enumerate(mapping):
+        for _, block in enumerate(mapping):
             name, params = block[0], block[1:]
             if name == 'input':
                 output_shape = self.dataset.input_shape
             elif name == 'conv':
-                output_shape = calculate_output_size(output_shape, *params[1:4])
+                output_shape = self._calculate_output_size(output_shape, *params[1:4])
                 output_shape += (params[0],)
             elif name in ['maxpool', 'avgpool']:
                 depth += 1
-                temp = calculate_output_size(output_shape, *params[:3])
+                temp = self._calculate_output_size(output_shape, *params[:3])
                 output_shape = temp + (output_shape[2],)
             elif name == 'upsamp':
                 depth -= 1
@@ -72,12 +83,11 @@ class UNetProblem(DNNProblem):
                 output_shape = (output_shape[0] * factor, output_shape[1] * factor, output_shape[2])
             elif name == 'concat':
                 output_shape = (output_shape[0], output_shape[1], output_shape[2]*2)
-            # print('\t'*depth, i, output_shape, block)
             outputs.append(output_shape)
         return outputs
 
     def _non_recursive_repair(self, mapping):
-        # changes the kernel size from pooling layers to keep image dimensions
+        # changes the kernel size of pooling layers to keep image dimensions
         # as valid values (avoid reducing the size to less than 1x1)
         outputs = self._get_layer_outputs(mapping)
         stack = []
@@ -89,8 +99,6 @@ class UNetProblem(DNNProblem):
                 aux_output = stack.pop()
                 if aux_output[:-1] == (1, 1):
                     mapping[i][1] = 1
-                    #print(i, 'changing upsamp to 1x')
-                #print(i, 'adjusting number of filters in layer', aux_output)
                 mapping[i+1][1] = aux_output[2]
 
     def _build_block(self, block_name, params):
@@ -148,47 +156,9 @@ class UNetProblem(DNNProblem):
 
         return model
 
-    # def _wrap_up_model(self, model):
-    #     # iterates over layers and add previous layer as input of current one
-    #     for i, layer in enumerate(model['config']['layers'][1:]):
-    #         last = model['config']['layers'][i]
-    #         layer['inbound_nodes'].append([[last['name'], 0, 0]])
-
-    #     # creates and adds input and output layers to model
-    #     input_layer = model['config']['layers'][0]['name']
-    #     output_layer = model['config']['layers'][-1]['name']
-    #     model['config']['input_layers'].append([input_layer, 0, 0])
-    #     model['config']['output_layers'].append([output_layer, 0, 0])
-
-    # def _wrap_up_model(self, model):
-    #     # creates a stack with the layers that will have a bridge (concat) connection
-    #     stack = []
-    #     for i, layer in enumerate(model['config']['layers']):
-    #         if layer['class_name'] in ['bridge']: #CHECK
-    #             stack.append(model['config']['layers'][i-1]) #layer before (conv)
-    #             model['config']['layers'].remove(model['config']['layers'][i])
-
-    #     # iterates over layers and add previous layer as input of current one
-    #     for i, layer in enumerate(model['config']['layers'][1:]):
-    #         last = model['config']['layers'][i]
-    #         layer['inbound_nodes'].append([[last['name'], 0, 0]])
-
-    #     # creates and adds input and output layers to model
-    #     input_layer = model['config']['layers'][0]['name']
-    #     output_layer = model['config']['layers'][-1]['name']
-    #     model['config']['input_layers'].append([input_layer, 0, 0])
-    #     model['config']['output_layers'].append([output_layer, 0, 0])
-
-    #     # iterates over the layers looking for the concatenate ones to then 
-    #     # adds the connection that comes from the bridge (stored in the stack)
-    #     for i, layer in enumerate(model['config']['layers'][1:]):
-    #         if layer['class_name'] == 'Concatenate':
-    #             other = stack.pop()
-    #             layer['inbound_nodes'][0].insert(0, [other['name'], 0, 0])
-
     def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
 
-        mapping = self.parser.dsge_recursive_parse(solution.genotype)
+        mapping = self.parser.recursive_parse(solution.genotype)
 
         # build right part of the network based on the left
         mapping = self._build_right_side(mapping)
@@ -204,9 +174,7 @@ class UNetProblem(DNNProblem):
         # build the json structure of the model
         model = self._build(mapping)
 
-        #self._wrap_up_model(model)
-
-        # return json.dumps(model)
+        # creates the model from json
         model = model_from_json(json.dumps(model))
 
         if model is not None:

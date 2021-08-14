@@ -1,24 +1,16 @@
 from .solution import GESolution
 
-# from .rs import RandomSearch
-# from .ge import GrammaticalEvolution
+from .ea import BaseEvolutionaryAlgorithm
+from .dsge import GrammaticalEvolution
 
 from .selection import TournamentSelection
 
-# from .crossover import OnePointCrossover
-from .crossover import DSGECrossover
-from .crossover import DSGEGeneCrossover
+from .crossover import OnePointCrossover
+from .crossover import GeneCrossover
 
-# from .mutation import PointMutation
-from .mutation import DSGEMutation
-from .mutation import DSGETerminalMutation
-from .mutation import DSGENonterminalMutation
+from .mutation import PointMutation
+from .mutation import TerminalMutation
+from .mutation import NonterminalMutation
 
-# from .operators import GEPrune
-# from .operators import GEDuplication
-
-from .operators import ReplaceWorst
-from .operators import ElitistReplacement
-
-from .ea import BaseEvolutionaryAlgorithm
-from .dsge import GrammaticalEvolution
+from .replacement import ReplaceWorst
+from .replacement import ElitistReplacement

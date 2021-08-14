@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from .solution import GESolution
-from .operators import ReplaceWorst
+from .replacement import ReplaceWorst
 from .selection import TournamentSelection
 from ..utils import checkpoint as ckpt
 
@@ -15,44 +15,32 @@ class BaseEvolutionaryAlgorithm:
         pop_size=5, 
         max_evals=10, 
         verbose=False, 
-        **kwargs):
+        selection=TournamentSelection(2, 2, maximize=True), 
+        replacement=ReplaceWorst(maximize=True), 
+        crossover=None, 
+        mutation=None):
 
         self.problem = problem
-        self.maximize = False
 
         self.seed = seed
         self.pop_size = pop_size
         self.max_evals = max_evals
 
-        # default operators
-        self.selection = TournamentSelection(2, 2, maximize=self.maximize)
-        self.replacement = ReplaceWorst(maximize=self.maximize)
-        self.crossover = None
-        self.mutation = None
-
-        if 'selection' in kwargs:
-            self.selection = kwargs['selection']
-            kwargs.pop('selection')
-        
-        if 'replacement' in kwargs:
-            self.replacement = kwargs['replacement']
-            kwargs.pop('replacement')
-
-        if 'crossover' in kwargs:
-            self.crossover = kwargs['crossover']
-            kwargs.pop('crossover')
-
-        if 'mutation' in kwargs:
-            self.mutation = kwargs['mutation']
-            kwargs.pop('mutation')
+        self.selection = selection
+        self.replacement = replacement
+        self.crossover = crossover
+        self.mutation = mutation
 
         self.verbose = verbose
+
+        self.evals = 0
+        self.population = list()
 
         np.random.seed(seed=self.seed)
         self.logger = logging.getLogger('cbioge')
 
     def create_solution(self):
-        raise NotImplementedError('Not implemented yet.')
+        return GESolution(self.problem.parser.create_solution())
 
     def evaluate_solution(self, solution):
         raise NotImplementedError('Not implemented yet.')
@@ -88,9 +76,8 @@ class BaseEvolutionaryAlgorithm:
 
     def load_solution(self, solution_id):
         try:
-            return GESolution(
-                json_data=ckpt.load_data(
-                    ckpt.solution_name.format(solution_id)
-                ))
-        except Exception as e:
+            return GESolution.from_json(
+                        ckpt.load_data(ckpt.solution_name.format(solution_id)))
+        except Exception:
+            self.logger.warning(f'Solution id: {solution_id} not found!')
             return None

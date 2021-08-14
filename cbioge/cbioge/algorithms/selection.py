@@ -1,6 +1,6 @@
 import numpy as np
 
-from .operators import GeneticOperator
+from .operators import SelectionOperator
 
 
 def get_n_random(population, n_size):
@@ -12,7 +12,7 @@ def get_n_random(population, n_size):
     return pool
 
 
-class TournamentSelection(GeneticOperator):
+class TournamentSelection(SelectionOperator):
 
     ''' Tournament Selection picks N random solutions,
         the best solution among these N is added to list of parents.
@@ -42,10 +42,11 @@ class TournamentSelection(GeneticOperator):
             pool.sort(key=lambda s: s.fitness, reverse=self.maximize)
             if pool[0] not in parents:
                 parents.append(pool[0])
+
         return parents
 
 
-class SimilaritySelection(GeneticOperator):
+class SimilaritySelection(SelectionOperator):
 
     def __init__(self, n_parents=2, t_size=2, maximize=False):
         self.n_parents = n_parents
@@ -61,4 +62,5 @@ class SimilaritySelection(GeneticOperator):
         while len(parents) < self.n_parents:
             pool = get_n_random(population, self.t_size)
             pool.sort(key=lambda s: s.fitness, reverse=self.maximize)
-        return parents
+
+        raise NotImplementedError('Not yet implemented.')
