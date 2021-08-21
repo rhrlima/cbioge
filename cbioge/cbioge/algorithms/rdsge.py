@@ -1,4 +1,4 @@
-from ..algorithms import GESolution
+from ..algorithms import Solution
 from .dsge import GrammaticalEvolution
 
 
@@ -12,7 +12,7 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
 
         super().__init__(problem, seed, pop_size, max_evals, verbose)
 
-    def execute(self, checkpoint: bool=False) -> GESolution:
+    def execute(self, checkpoint: bool=False) -> Solution:
 
         self.evals = 0
         self.population = []

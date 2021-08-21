@@ -6,13 +6,13 @@ from .operators import MutationOperator
 class PointMutation(MutationOperator):
     '''Changes one value for a new valid one
 
-        mut_rate: chance to apply the operator
-        parser: parser object needed to replace the values
-    '''
+    mut_rate: chance to apply the operator
+    parser: parser object needed to replace the values'''
 
     def __init__(self, parser, mut_rate=1.0, start_index=0, end_index=None):
+        super().__init__(mut_rate)
+
         self.parser = parser
-        self.mut_rate = mut_rate
 
         self.start_index = start_index
         self.end_index = end_index
@@ -59,8 +59,7 @@ class TerminalMutation(PointMutation):
     '''Changes a value for a new valid one, starting from a given index'''
 
     def __init__(self, parser, mut_rate=1.0, start_index=0):
-        super().__init__(mut_rate, parser, 
-            start_index=start_index)
+        super().__init__(parser, mut_rate, start_index=start_index)
 
     def __str__(self):
 

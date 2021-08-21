@@ -3,7 +3,7 @@ import pytest
 from cbioge.grammars import Grammar
 from cbioge.datasets import Dataset
 from cbioge.problems import UNetProblem
-from cbioge.algorithms import GESolution
+from cbioge.algorithms import Solution
 
 def get_mockup_data_dict():
 

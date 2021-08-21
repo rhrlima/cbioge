@@ -1,4 +1,4 @@
-from ..algorithms import GESolution
+from ..algorithms import Solution
 from ..algorithms import BaseEvolutionaryAlgorithm
 from ..utils import checkpoint as ckpt
 
@@ -20,8 +20,8 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.unique_solutions = list()
 
-    def create_population(self, size):
-        population = []
+    def create_population(self, size: int):
+        population = list()
         index = 0
         while len(population) < size:
             solution = self.create_solution()
@@ -32,7 +32,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 index += 1
         return population
 
-    def evaluate_solution(self, solution: GESolution):
+    def evaluate_solution(self, solution: Solution):
 
         # skip solutions already executed
         if solution.evaluated:
@@ -132,7 +132,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.logger.debug(f'Checkpoint [{file_name}] created.')
 
     def load_state(self):
-        '''Tries to continue the evolution from the last checkpoint'''
+        '''Loads the last generation saved as checkpoint'''
 
         # searches for data checkpoints
         data_ckpts = ckpt.get_files_with_name(ckpt.data_name.format('*'))
@@ -146,12 +146,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.evals = data['evals']
         self.population = [
-            GESolution.from_json(s) for s in data['population']
+            Solution.from_json(s) for s in data['population']
         ]
 
         if 'unique' in data: self.unique_solutions = data['unique']
 
-        self.logger.debug(f'Latest checkpoint file found: {last_ckpt}')
-        self.logger.debug(f'Current evals: {self.evals}/{self.max_evals}')
-        self.logger.debug(f'Population size: {len(self.population)}')
-        self.logger.debug(f'Unique solutions: {len(self.unique_solutions)}')
+        if self.verbose:
+            self.logger.debug(f'Latest checkpoint file found: {last_ckpt}')
+            self.logger.debug(f'Current evals: {self.evals}/{self.max_evals}')
+            self.logger.debug(f'Population size: {len(self.population)}')
+            self.logger.debug(f'Unique solutions: {len(self.unique_solutions)}')

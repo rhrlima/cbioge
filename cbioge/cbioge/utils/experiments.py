@@ -11,19 +11,19 @@ def _limit_gpu_memory(fraction=MAX_GPU_MEMORY):
     '''Limits GPU memory to use tensorflow-gpu'''
     import tensorflow as tf
     from keras.backend.tensorflow_backend import set_session
-    config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = fraction
-    set_session(tf.Session(config=config))
+    tfconfig = tf.ConfigProto()
+    tfconfig.gpu_options.per_process_gpu_memory_fraction = fraction
+    set_session(tf.Session(config=tfconfig))
 
 
-def check_os():
-    '''Checks OS to limit GPU memory and avoid errors'''
+def check_os(): # TODO remove
+    # Checks OS to limit GPU memory and avoid errors
     if platform.system() == 'Windows':
         _limit_gpu_memory()
 
 
-def basic_setup(default_folder=ckpt.ckpt_folder, log=False):
-    ''' Uses argparse to add some basic flags when running from command line
+def basic_setup(default_folder=ckpt.ckpt_folder, external_log=False):
+    '''Uses argparse to add some basic flags when running from command line
 
     This basic setup adds:
     *   -c/--checkpoint : defines the checkpoints folder
@@ -36,7 +36,7 @@ def basic_setup(default_folder=ckpt.ckpt_folder, log=False):
     args.add_argument('-c', '--checkpoint', type=str, default=default_folder)
     args.add_argument('-o', '--output', type=str, default='out.log')
     args.add_argument('-e', '--error', type=str, default='err.log')
-    args.add_argument('-l', '--log', type=bool, default=log)
+    args.add_argument('-l', '--log', type=bool, default=external_log)
 
     parser = args.parse_args()
 
@@ -45,7 +45,6 @@ def basic_setup(default_folder=ckpt.ckpt_folder, log=False):
     if not os.path.exists(ckpt.ckpt_folder):
         os.makedirs(ckpt.ckpt_folder)
 
-    if log is not None:
-        cbio_logging.setup(log_lvl='DEBUG', 
-            out_file=os.path.join(ckpt.ckpt_folder, parser.output), 
-            err_file=os.path.join(ckpt.ckpt_folder, parser.error))
+    cbio_logging.setup(external_log, 
+        out_file=os.path.join(ckpt.ckpt_folder, parser.output), 
+        err_file=os.path.join(ckpt.ckpt_folder, parser.error))

@@ -5,7 +5,7 @@ from keras.models import Model, model_from_json
 from ..datasets import Dataset
 from ..grammars import Grammar
 from ..problems import DNNProblem
-from ..algorithms import GESolution
+from ..algorithms import Solution
 
 
 class UNetProblem(DNNProblem):
@@ -156,7 +156,7 @@ class UNetProblem(DNNProblem):
 
         return model
 
-    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
+    def map_genotype_to_phenotype(self, solution: Solution) -> Model:
 
         mapping = self.parser.recursive_parse(solution.genotype)
 

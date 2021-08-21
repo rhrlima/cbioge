@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from cbioge.algorithms import GESolution
+from cbioge.algorithms import Solution
 from cbioge.grammars import Grammar
 from cbioge.datasets import Dataset
 from cbioge.problems import CNNProblem
@@ -23,7 +23,7 @@ def get_mockup_parser():
 
 def test_map_genotype_to_phenotype():
     parser = Grammar(get_mockup_parser())
-    solution = GESolution([[5], [0], [0, 0], [2], [0], [0, 1]])
+    solution = Solution([[5], [0], [0, 0], [2], [0], [0, 1]])
     mapping = [['conv', 16, 4], ['dense', 32], ['dense', 64]]
 
     problem = CNNProblem(parser, get_mockup_data_dict())

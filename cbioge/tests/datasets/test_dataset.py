@@ -24,7 +24,8 @@ def get_mockup_dataset(keys=None):
     return {k: data[k] for k in keys}
 
 def get_mockup_pickle_file():
-    pickle_file = 'cbioge/assets/datasets/pickle_dataset.pickle'
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    pickle_file = os.path.join(base_dir, 'assets', 'pickle_dataset.pickle')
     if not os.path.exists(pickle_file):
         data = get_mockup_dataset()
         with open(pickle_file, 'wb') as f:

@@ -1,4 +1,4 @@
-from .solution import GESolution
+from .solution import Solution
 
 from .ea import BaseEvolutionaryAlgorithm
 from .dsge import GrammaticalEvolution

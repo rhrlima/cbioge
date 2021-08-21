@@ -1,9 +1,9 @@
 import pytest
 
-from cbioge.algorithms import GESolution
+from cbioge.algorithms import Solution
 
 def test_create_solution_from_list():
-    solution = GESolution([[0,0],[0,0,0],[0]])
+    solution = Solution([[0,0],[0,0,0],[0]])
     assert solution.genotype == [[0,0],[0,0,0],[0]]
 
 def test_create_solution_from_json():
@@ -18,7 +18,7 @@ def test_create_solution_from_json():
             'params': None
         }
     }
-    solution = GESolution.from_json(json_string)
+    solution = Solution.from_json(json_string)
     assert solution.to_json() == json_string
     assert solution.fitness == 200
     assert json_string['fitness'] == 200
@@ -33,7 +33,7 @@ def test_create_solution_from_incomplete_json():
             'params': None
         }
     }
-    solution = GESolution.from_json(json_string)
+    solution = Solution.from_json(json_string)
     json_data = solution.to_json()
     assert json_data != json_string
     assert len(json_data.keys()) > len(json_string.keys())
@@ -49,7 +49,7 @@ def test_create_solution_from_incomplete_json2():
         'evaluated': False, 
         'data': {}
     }
-    solution = GESolution.from_json(None)
+    solution = Solution.from_json(None)
     assert solution.to_json() == json_string
 
 def test_create_empty_solution():  
@@ -61,7 +61,7 @@ def test_create_empty_solution():
         'evaluated': False, 
         'data': {}
     }
-    solution = GESolution()
+    solution = Solution()
     assert solution.to_json() == json_string
 
 
@@ -73,18 +73,18 @@ def test_create_empty_solution():
     ([[0,0],[0,0,0],[0]], None, False),
     ([[0,0],[0,0,0],[0]], [], False)])
 def test_eq_override(genA, genB, expected):
-    objA = GESolution(genA)
+    objA = Solution(genA)
     if genB == 'copy':
         objB = objA.copy()
     elif genB == 'json':
-        objB = GESolution.from_json(objA.to_json())
+        objB = Solution.from_json(objA.to_json())
     else:
-        objB = GESolution(genB)
+        objB = Solution(genB)
     
     assert (objA == objB) == expected
 
 def test_modified_copy():
-    solA = GESolution([[0], [0], [0], [0]])
+    solA = Solution([[0], [0], [0], [0]])
     solB = solA.copy()
 
     assert solA == solB
@@ -97,7 +97,7 @@ def test_modified_copy():
 
 def test_modified_deepcopy():
 
-    solA = GESolution([[0], [0], [0], [0]])
+    solA = Solution([[0], [0], [0], [0]])
     solB = solA.copy(deep=True)
 
     assert solA == solB
@@ -111,8 +111,8 @@ def test_modified_deepcopy():
 
 def test_solution_in_list():
 
-    aux_list = [GESolution([[0], [0], [0], [0]])]
-    new_solution = GESolution([[0], [0], [0], [0]])
+    aux_list = [Solution([[0], [0], [0], [0]])]
+    new_solution = Solution([[0], [0], [0], [0]])
 
     ref_solution = aux_list[0]
     cpy_solution = aux_list[0].copy()

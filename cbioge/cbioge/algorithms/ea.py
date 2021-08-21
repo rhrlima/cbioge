@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from .solution import GESolution
+from .solution import Solution
 from .replacement import ReplaceWorst
 from .selection import TournamentSelection
 from ..utils import checkpoint as ckpt
@@ -40,7 +40,7 @@ class BaseEvolutionaryAlgorithm:
         self.logger = logging.getLogger('cbioge')
 
     def create_solution(self):
-        return GESolution(self.problem.parser.create_solution())
+        return Solution(self.problem.parser.create_solution())
 
     def evaluate_solution(self, solution):
         raise NotImplementedError('Not implemented yet.')
@@ -76,8 +76,9 @@ class BaseEvolutionaryAlgorithm:
 
     def load_solution(self, solution_id):
         try:
-            return GESolution.from_json(
-                        ckpt.load_data(ckpt.solution_name.format(solution_id)))
+            return Solution.from_json(
+                ckpt.load_data(ckpt.solution_name.format(solution_id)))
         except Exception:
-            self.logger.warning(f'Solution id: {solution_id} not found!')
+            if self.verbose:
+                self.logger.warning(f'Solution id: {solution_id} not found!')
             return None

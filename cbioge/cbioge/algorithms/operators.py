@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractclassmethod
 
 import numpy as np
@@ -5,11 +6,22 @@ import numpy as np
 
 class GeneticOperator(ABC):
 
+    def __init__(self):
+        self.logger = logging.getLogger('cbioge')
+
     def export(self):
         return {'name': self.__str__(), 'config': self.__dict__}
 
 
 class CrossoverOperator(GeneticOperator):
+
+    def __init__(self, cross_rate):
+        super().__init__()
+
+        if not (0.0 <= cross_rate <= 1.0):
+            raise ValueError(f'Crossover rate must be between 0 and 1: {cross_rate}')
+
+        self.cross_rate = cross_rate
 
     @abstractclassmethod
     def execute(self, parents):
@@ -17,6 +29,14 @@ class CrossoverOperator(GeneticOperator):
 
 
 class MutationOperator(GeneticOperator):
+
+    def __init__(self, mut_rate):
+        super().__init__()
+
+        if not (0.0 <= mut_rate <= 1.0):
+            raise ValueError(f'Mutation rate must be between 0 and 1: {mut_rate}')
+
+        self.mut_rate = mut_rate
 
     @abstractclassmethod
     def execute(self, solution):
@@ -66,8 +86,10 @@ class HalfAndChoiceOperator(GeneticOperator):
 
         if np.random.rand() < self.h_rate:
             offspring = self.h_op.execute(parents)
+
         else:
             offspring = parents[0].copy()
+
             rand = np.random.rand()
             for i in range(len(self.o_ops)):
                 if rand < np.sum(self.o_rate[:i+1]):

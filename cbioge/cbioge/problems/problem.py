@@ -7,7 +7,7 @@ import numpy as np
 from keras import backend as K
 from keras.models import Model, model_from_json
 
-from cbioge.algorithms import GESolution
+from cbioge.algorithms import Solution
 from cbioge.datasets import Dataset
 from cbioge.grammars import Grammar
 from cbioge.utils import checkpoint as ckpt
@@ -26,11 +26,11 @@ class BaseProblem(ABC):
         self.logger = logging.getLogger('cbioge')
 
     @abstractmethod
-    def map_genotype_to_phenotype(self, solution: GESolution):
+    def map_genotype_to_phenotype(self, solution: Solution):
         raise NotImplementedError('Not implemented yet.')
 
     @abstractmethod
-    def evaluate(self, solution: GESolution):
+    def evaluate(self, solution: Solution):
         raise NotImplementedError('Not implemented yet.')
 
 
@@ -74,10 +74,10 @@ class DNNProblem(BaseProblem):
         if type(self.opt) == str: return self.opt
         return self.opt['class'].from_config(self.opt['config'])
 
-    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
+    def map_genotype_to_phenotype(self, solution: Solution) -> Model:
         raise NotImplementedError('Not implemented yet.')
 
-    def evaluate(self, solution: GESolution) -> bool:
+    def evaluate(self, solution: Solution) -> bool:
         '''Evaluates a solution by executing the training and calculating the 
         fitness on the validation or test'''
         try:

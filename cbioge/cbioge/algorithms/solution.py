@@ -1,6 +1,6 @@
 import copy
 
-class GESolution():
+class Solution():
 
     def __init__(self, 
         genotype=[], 
@@ -21,7 +21,7 @@ class GESolution():
         return str(self.genotype)
 
     def __eq__(self, other):
-        if not isinstance(other, GESolution):
+        if not isinstance(other, Solution):
             return False
         return self.to_json() == other.to_json()
 
@@ -30,7 +30,7 @@ class GESolution():
 
     def copy(self, deep=False):
         if deep: return copy.deepcopy(self)
-        return GESolution(copy.deepcopy(self.genotype))
+        return Solution(copy.deepcopy(self.genotype))
 
     @classmethod
     def from_json(cls, json_data):

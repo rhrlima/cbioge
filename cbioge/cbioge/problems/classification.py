@@ -7,7 +7,7 @@ from .dnns import layers as clayers
 from ..datasets import Dataset
 from ..grammars import Grammar
 from ..problems import DNNProblem
-from ..algorithms import GESolution
+from ..algorithms import Solution
 
 
 class CNNProblem(DNNProblem):
@@ -56,7 +56,7 @@ class CNNProblem(DNNProblem):
             self.logger.exception('Invalid model')
             return None
 
-    def map_genotype_to_phenotype(self, solution: GESolution) -> Model:
+    def map_genotype_to_phenotype(self, solution: Solution) -> Model:
 
         # try using existing mapping to build
         if 'mapping' in solution.data: mapping = solution.data['mapping']

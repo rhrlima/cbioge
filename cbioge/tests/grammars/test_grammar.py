@@ -63,26 +63,26 @@ def test_group_mapping():
         ['dense', 10]
     ]
 
-def test_dsge_create_solution():
+def test_create_solution():
     np.random.seed(0)
     grammar = Grammar(get_mockup_parser())
     genotype = grammar.create_solution()
     print(genotype)
     assert genotype == [[4], [1, 1], [2], [1, 0], [0, 0], [0]]
 
-def test_dsge_create_solution_with_max_depth():
+def test_create_solution_with_max_depth():
     np.random.seed(312)
     grammar = Grammar(get_mockup_parser(), verbose=True)
     genotype = grammar.create_solution(max_depth=2)
     assert genotype == [[0, 4, 3], [2, 2, 1], [2, 0], [0, 0, 1], [1, 0, 0], [0, 1]]
 
-def test_dsge_recursive_parse():
+def test_recursive_parse():
     np.random.seed(0)
     grammar = Grammar(get_mockup_parser())
     genotype = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
     assert grammar.recursive_parse(genotype) == [['conv', 32, 3], ['conv', 16, 3], ['dense', 64]]
 
-def test_dsge_create_solution_adding_values():
+def test_create_solution_adding_values():
     np.random.seed(0)
     grammar = Grammar(get_mockup_parser(), True)
     original = [[4], [0], [0], [1], [1], [1]]
@@ -94,7 +94,7 @@ def test_dsge_create_solution_adding_values():
     assert original != expected
     assert solution == expected
 
-def test_dsge_create_solution_removing_values():
+def test_create_solution_removing_values():
     np.random.seed(0)
     grammar = Grammar(get_mockup_parser())
     original = [[4, 0, 0, 0], [0, 0], [0], [1, 1], [1, 0], [1]]

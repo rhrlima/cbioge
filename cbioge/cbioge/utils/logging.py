@@ -7,31 +7,48 @@ log_format = '%(asctime)s %(levelname)s: %(message)s'
 date_format = '%x %X'
 
 
-def setup(out_file=_out_file, err_file=_err_file, log_lvl=logging.INFO):
+def setup(gen_ext_logs: bool=False, out_file: str=_out_file, err_file: str=_err_file):
+
+    if gen_ext_logs:
+        setup_with_external_logs(out_file, err_file)
+    else:
+        base_setup()
+
+
+def base_setup():
 
     logger = logging.getLogger('cbioge')
 
-    logger.setLevel(log_lvl)
+    logger.setLevel(logging.DEBUG)
 
     sout_handler = logging.StreamHandler(sys.stdout)
-    # serr_handler = logging.StreamHandler(sys.stderr)
-    fout_handler = logging.FileHandler(out_file)
-    ferr_handler = logging.FileHandler(err_file)
-
     sout_handler.setLevel(logging.DEBUG)
-    fout_handler.setLevel(logging.INFO)
-    ferr_handler.setLevel(logging.ERROR)
 
     base_format = logging.Formatter(fmt=log_format, datefmt=date_format)
     sout_handler.setFormatter(base_format)
+
+    logger.addHandler(sout_handler)
+
+
+def setup_with_external_logs(out_file=_out_file, err_file=_err_file):
+
+    base_setup()
+
+    logger = logging.getLogger('cbioge')
+
+    fout_handler = logging.FileHandler(out_file)
+    ferr_handler = logging.FileHandler(err_file)
+
+    fout_handler.setLevel(logging.DEBUG)
+    ferr_handler.setLevel(logging.ERROR)
+
+    base_format = logging.Formatter(fmt=log_format, datefmt=date_format)
     fout_handler.setFormatter(base_format)
     ferr_handler.setFormatter(base_format)
 
-    base_filter = LevelFilter(allowed_lvls=[logging.INFO, logging.DEBUG])
-    sout_handler.addFilter(base_filter)
-    fout_handler.addFilter(base_filter)
+    fout_filter = LevelFilter(allowed_lvls=[logging.INFO, logging.DEBUG])
+    fout_handler.addFilter(fout_filter)
 
-    logger.addHandler(sout_handler)
     logger.addHandler(fout_handler)
     logger.addHandler(ferr_handler)
 

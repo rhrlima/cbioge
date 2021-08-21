@@ -3,7 +3,7 @@ import os, logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..algorithms import GESolution
+from ..algorithms import Solution
 from . import checkpoint as ckpt
 
 
@@ -30,7 +30,7 @@ def get_best_from_checkpoint(folder=None):
 
     json_data = max(data['population'], key=lambda x: x['fitness'])
 
-    return GESolution.from_json(json_data)
+    return Solution.from_json(json_data)
 
 
 def plot_history(history, folder=None, name='plot.png'):
