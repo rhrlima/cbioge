@@ -37,6 +37,4 @@ class ElitistReplacement(ReplacementOperator):
             # full replacement
             self.logger.warning(f'{self} not applied. Number of elites less than 1.')
 
-        population = population[:elites] + offspring[elites:]
-
-        return population
+        return population[:elites] + offspring[elites:]
