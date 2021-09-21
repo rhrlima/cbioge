@@ -38,6 +38,7 @@ class OnePointCrossover(CrossoverOperator):
 
 
 class TwoPointsCrossover(CrossoverOperator):
+    # usar mascara para deixar o operador mais generico 1-N points
     pass
 
 

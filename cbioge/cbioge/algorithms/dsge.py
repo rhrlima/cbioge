@@ -4,16 +4,20 @@ from ..utils import checkpoint as ckpt
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
+    '''Genetic Algorithm modified to work with the DSGE encoding.
+
+    This modified version mainstains a list of unique solutions stored, which
+    helps increasing the diversity.'''
 
     def __init__(self, problem, 
-        seed=None, 
         pop_size=10, 
         max_evals=20, 
         verbose=False, 
         selection=None, 
         replacement=None, 
         crossover=None, 
-        mutation=None):
+        mutation=None, 
+        seed=None):
 
         super().__init__(problem, seed, pop_size, max_evals, verbose, selection, 
             replacement, crossover, mutation)
@@ -33,6 +37,11 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         return population
 
     def evaluate_solution(self, solution: Solution):
+        '''Evaluates a solution
+        
+        This procedure is ignored if the solution has been evaluated already.
+        It calls the defined mapping method followed by the evaluate method, 
+        both defined in the problem assigned.'''
 
         # skip solutions already executed
         if solution.evaluated:
@@ -66,6 +75,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         return True
 
     def execute(self, checkpoint=False):
+        '''Runs the evolution.
+        
+        The parameter checkpoint will define if the execution will be from scratch
+        or continue from a previous checkpoint (if any).'''
 
         if checkpoint: self.load_state()
 
@@ -113,7 +126,13 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         return max(self.population, key=lambda x: x.fitness)
     
     def save_state(self):
-        '''Saves the current population of the evolution'''
+        '''Saves the current population of the evolution.
+        
+        A file named data_X.ckpt (by default) is created after each generation, 
+        where X is the number of evaluations, including the following information:
+        - evals
+        - current population
+        - unique solutions found so far'''
 
         data = {
             'evals': self.evals,
@@ -132,7 +151,9 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.logger.debug(f'Checkpoint [{file_name}] created.')
 
     def load_state(self):
-        '''Loads the last generation saved as checkpoint'''
+        '''Loads the last generation saved as checkpoint.
+        
+        Seaches for the most recent data_X.ckpt file, where X is the number of evaluations.'''
 
         # searches for data checkpoints
         data_ckpts = ckpt.get_files_with_name(ckpt.data_name.format('*'))

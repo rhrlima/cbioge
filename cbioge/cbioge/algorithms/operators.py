@@ -58,6 +58,13 @@ class SelectionOperator(GeneticOperator):
 
 
 class HalfAndHalfOperator(GeneticOperator):
+    '''Custom operator
+    
+    # Parameters
+    - op1: first operator (can be either crossover or mutation)
+    - op2: second operator (can be either crossover or mutation)
+    - rate: float probability [0, 1] of applying the first operator, the second is applied 
+    with probability of 1-rate'''
 
     def __init__(self, op1, op2, rate=0.5):
         self.op1 = op1

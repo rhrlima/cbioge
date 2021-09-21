@@ -9,6 +9,10 @@ from ..utils import checkpoint as ckpt
 
 
 class BaseEvolutionaryAlgorithm:
+    '''Base structure for the evolutionary search.
+    
+    It defines basic operations for creating solutions, applying operators, 
+    logging, and saving the state of the algorithm.'''
 
     def __init__(self, problem, 
         seed=None, 
@@ -40,6 +44,10 @@ class BaseEvolutionaryAlgorithm:
         self.logger = logging.getLogger('cbioge')
 
     def create_solution(self):
+        '''Creates a solution following the encoding defined by the grammar-system
+        in DSGE.
+        
+        Ex: [[a, b, c], [d, e, f], ...] where a-f represents integer values.'''
         return Solution(self.problem.parser.create_solution())
 
     def evaluate_solution(self, solution):

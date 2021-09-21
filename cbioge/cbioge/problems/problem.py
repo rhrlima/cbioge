@@ -14,10 +14,11 @@ from cbioge.utils import checkpoint as ckpt
 
 
 class BaseProblem(ABC):
-    ''' This BaseProblem class should be used as a reference of what a 
-        problem class must have to be used with the evolutionary algorithms. 
-        During the evolution the methods in this class are called.
-    '''
+    '''BaseProblem class that works as a reference of what a problem class must 
+    have to be used with the evolutionary algorithms. 
+    
+    Child classes must implement map_genotype_to_phenotype and evaluate.'''
+
     def __init__(self, parser: Grammar, verbose: bool=False):
         if parser is None: raise AttributeError('Grammar parser cannot be None')
 
@@ -35,10 +36,9 @@ class BaseProblem(ABC):
 
 
 class DNNProblem(BaseProblem):
-    ''' Base class used for Problems related to the automatic design of
-        deep neural networks. Specific behavior must be implemented in child
-        classes after calling the super() funcions.
-    '''
+    '''Base class used for Problems related to the design of deep neural networks. 
+    Specific behavior must be implemented in child classes.'''
+
     def __init__(self, parser: Grammar, dataset: Dataset, 
         batch_size=10, 
         epochs=1, 
@@ -48,7 +48,7 @@ class DNNProblem(BaseProblem):
         test_eval=False, 
         verbose=False, 
         train_args={}, 
-        test_args={}):
+        test_args={}) -> None:
 
         super().__init__(parser, verbose)
 
@@ -65,7 +65,6 @@ class DNNProblem(BaseProblem):
         self.train_args = train_args
         self.test_args = test_args
 
-
     def _parse_opt(self, opt):
         if type(opt) == str: return opt
         return {'class': opt.__class__, 'config': opt.get_config()}
@@ -79,7 +78,16 @@ class DNNProblem(BaseProblem):
 
     def evaluate(self, solution: Solution) -> bool:
         '''Evaluates a solution by executing the training and calculating the 
-        fitness on the validation or test'''
+        fitness on the validation or test
+        
+        The fitness is calculated on the validation set by default.
+        Use test_eval to evaluate on the test set.
+        
+        Results are stored in the solution, including:
+        - accuracy (on validation or test)
+        - loss 
+        '''
+
         try:
             model = model_from_json(solution.phenotype)
 

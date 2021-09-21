@@ -3,9 +3,28 @@ import numpy as np
 from keras.utils import np_utils
 
 
-class Dataset():
+class Dataset:
+    '''Dataset class that holds the most common data structures used in
+    the training, validation and test of deep neural networks.'''
 
     def __init__(self, data_dict, **kwargs):
+        '''# Parameters
+        - x_train: train data
+        - y_train: train labels
+        - x_test: test data
+        - y_test: test labels
+
+        ## Optional
+        - x_valid: validation data
+        - y_valid: validation labels
+        - num_classes: number of classes (if any)
+        - train_size: defines the number of training instances (default len(x_train))
+        - test_size: defines the number of test instances (default len(x_test))
+        - valid_size: defines the number of validation instances 
+        (default len(x_valid) if exists)
+        - valid_split: float between [0, 1] that expresses the % of the training
+        data that will be used as validation'''
+
         self.input_shape = data_dict['input_shape']
 
         self.x_train = data_dict['x_train']

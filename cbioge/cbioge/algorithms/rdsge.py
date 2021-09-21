@@ -3,6 +3,10 @@ from .dsge import GrammaticalEvolution
 
 
 class RandomGrammaticalEvolution(GrammaticalEvolution):
+    '''Random search based on the DSGE algorithm.
+
+    Follows the same base structure of GA algorithm, without applying genetic
+    operators, and seaching the best solutions generated randomly.'''
 
     def __init__(self, problem, 
         seed=None, 

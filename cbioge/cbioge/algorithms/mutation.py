@@ -4,8 +4,10 @@ from .operators import MutationOperator
 
 
 class PointMutation(MutationOperator):
-    '''Changes one value for a new valid one
+    '''Selects a random value present in the solution and replaces it by a new
+    valid value according to the grammar.  
 
+    # Parameters
     mut_rate: chance to apply the operator
     parser: parser object needed to replace the values'''
 
@@ -56,7 +58,11 @@ class PointMutation(MutationOperator):
 
 
 class TerminalMutation(PointMutation):
-    '''Changes a value for a new valid one, starting from a given index'''
+    '''Follows similar behavior than the Point Mutation.
+    Changes a value for a new valid one, starting from a given index
+    
+    Ex: [[1,2,3], | [4,5,6], [7,8,9]] start_index = 3\n
+    means that values [1,2,3] will not be changed.'''
 
     def __init__(self, parser, mut_rate=1.0, start_index=0):
         super().__init__(parser, mut_rate, start_index=start_index)
@@ -67,7 +73,11 @@ class TerminalMutation(PointMutation):
 
 
 class NonterminalMutation(PointMutation):
-    '''Changes a value for a new valid one, up to a given index'''
+    '''Follows similar behavior than the Point Mutation.
+    Changes a value for a new valid one, up to a given index
+    
+    Ex: [[1,2,3], [4,5,6], | [7,8,9]] start_index = 6\n
+    means that values [7,8,9] will not be changed.'''
 
     def __init__(self, parser, mut_rate=1.0, end_index=None):
         super().__init__(parser, mut_rate, end_index=end_index)

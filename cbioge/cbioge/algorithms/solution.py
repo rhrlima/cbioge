@@ -1,6 +1,12 @@
 import copy
 
 class Solution():
+    '''Represents a solution and common components that can be used in a
+    wide range of problems. Custom data should use the data dictionary to store
+    statistics or other useful info accessed by the problem. 
+    
+    The search engine will use the basic components, and the problem
+    (usually a custom class) will make use of most of it, or even more.'''
 
     def __init__(self, 
         genotype=[], 
