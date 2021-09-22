@@ -1,0 +1,36 @@
+{
+	"name": "UNET MIRROR 2.0 (restricted)",
+
+	"blocks": {
+		"input": ["InputLayer", "batch_input_shape"],
+		"conv": ["Conv2D", "filters", "kernel_size", "strides", "padding", "activation"],
+		"avgpool": ["AveragePooling2D", "pool_size", "strides", "padding"],
+		"maxpool": ["MaxPooling2D", "pool_size", "strides", "padding"],
+		"dropout": ["Dropout", "rate"],
+        "upsamp": ["UpSampling2D", "size"],
+        "concat": ["Concatenate", "axis"],
+        "crop": ["Cropping2D", "cropping"],
+        "flatten": ["Flatten"],
+        "bridge": ["bridge"]
+	},
+
+	"rules": {
+		"<cnn>": [["<conv>", "<next>"]],
+
+        "<next>": [["<conv>", "<next>"], ["<dropout>", "<next>"], ["<pool>", "<nextp>"], ["bridge", "<pool>", "<nextp>"]],
+        "<nextp>": [["<conv>", "<next>"], ["<middle>"]],
+        "<middle>": [["<conv>", "<middle>"], ["<dropout>", "<middle>"], ["<conv>"], ["<dropout>"]],
+		
+		"<conv>" : [["conv", "<filters>", "<ksize>", 1, "same", "<activation>"]],
+		"<dense>" : [["dense", "<units>", "<activation>"]],
+		"<dropout>" : [["dropout", "<rate>"]],
+		"<pool>" : [["maxpool", 2, 2, "same"]],
+
+		"<activation>" : [["relu"], ["selu"], ["sigmoid"], ["linear"]],
+		"<padding>" : [["valid"], ["same"]],
+		"<filters>" : [[16], [32], [64], [128], [256]],
+		"<strides>" : [[1], [2]],
+		"<ksize>" : [[1], [2], [3], [4]],
+		"<rate>" : [["[0.0,0.5]"]]
+	}
+}
