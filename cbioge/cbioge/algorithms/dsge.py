@@ -1,6 +1,5 @@
 from ..algorithms import Solution
 from ..algorithms import BaseEvolutionaryAlgorithm
-from ..utils import checkpoint as ckpt
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
@@ -125,55 +124,24 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         return max(self.population, key=lambda x: x.fitness)
 
-    def save_state(self):
-        '''Saves the current population of the evolution.
-        
-        A file named data_X.ckpt (by default) is created after each generation, 
-        where X is the number of evaluations, including the following information:
-        - evals
-        - current population
-        - unique solutions found so far'''
+    def save_state(self, data={}):
+        '''Saves the current population and evaluations by default.
+        Additionally saves the list of unique solutions'''
 
         data = {
-            'evals': self.evals,
-            'population': [s.to_json() for s in self.population],
             'unique': self.unique_solutions,
         }
 
-        # creates the data checkpoint
-        file_name = ckpt.data_name.format(self.evals)
-        saved = ckpt.save_data(data, file_name)
-
-        # remove solution files already evaluated if data ckpt exists
-        if saved: 
-            for i in range(self.evals):
-                ckpt.delete_data(ckpt.solution_name.format(i))
-            self.logger.debug(f'Checkpoint [{file_name}] created.')
+        super().save_state(data)
 
     def load_state(self):
-        '''Loads the last generation saved as checkpoint.
-        
-        Seaches for the most recent data_X.ckpt file, where X is the number of evaluations.'''
 
-        # searches for data checkpoints
-        data_ckpts = ckpt.get_files_with_name(ckpt.data_name.format('*'))
+        data = super().load_state()
 
-        if len(data_ckpts) == 0:
-            self.logger.debug('No checkpoint found.')
+        if data is None:
             return
-
-        last_ckpt = max(data_ckpts, key=lambda c: ckpt.natural_key(c))
-        data = ckpt.load_data(last_ckpt)
-
-        self.evals = data['evals']
-        self.population = [
-            Solution.from_json(s) for s in data['population']
-        ]
 
         if 'unique' in data: self.unique_solutions = data['unique']
 
         if self.verbose:
-            self.logger.debug(f'Latest checkpoint file found: {last_ckpt}')
-            self.logger.debug(f'Current evals: {self.evals}/{self.max_evals}')
-            self.logger.debug(f'Population size: {len(self.population)}')
             self.logger.debug(f'Unique solutions: {len(self.unique_solutions)}')
