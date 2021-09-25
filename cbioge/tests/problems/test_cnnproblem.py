@@ -8,7 +8,7 @@ from cbioge.problems import CNNProblem
 
 def get_mockup_data_dict():
 
-    return Dataset({
+    return Dataset(**{
         'x_train': [], 
         'y_train': [], 
         'x_test': [], 

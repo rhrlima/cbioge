@@ -16,9 +16,9 @@ def _get_layer(blocK_name, layers_database=[]):
     raise AttributeError(f'{blocK_name} not found in the databases')
 
 
-class ResBlock():
+class ResBlock:
     ''' Custom layer that encapsulates and reproduce a Residual Block.
-    
+
     A residual layer is composed of:\n
         Conv > Conv > BatchNorm > Add > ReLU'''
 

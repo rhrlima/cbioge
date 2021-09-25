@@ -124,7 +124,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.print_progress()
 
         return max(self.population, key=lambda x: x.fitness)
-    
+
     def save_state(self):
         '''Saves the current population of the evolution.
         
