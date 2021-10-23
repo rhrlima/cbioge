@@ -2,16 +2,15 @@ import json
 
 from keras.models import Model, model_from_json
 
-from ..datasets import Dataset
-from ..grammars import Grammar
-from ..problems import DNNProblem
-from ..algorithms import Solution
+from ...datasets import Dataset
+from ...grammars import Grammar
+from ...problems import DNNProblem
 
 
 class UNetProblem(DNNProblem):
     ''' Problem class for problems related to classification tasks for DNNs.
-        This class includes methods focused on the design of U-Nets.
-    '''
+        This class includes methods focused on the design of U-Nets.'''
+
     def __init__(self, parser: Grammar, dataset: Dataset, 
         batch_size=10, 
         epochs=1, 
@@ -26,7 +25,7 @@ class UNetProblem(DNNProblem):
         super().__init__(parser, dataset, batch_size, epochs, opt, loss, 
             metrics, test_eval, verbose, train_args, test_args)
 
-    def _build_right_side(self, mapping):
+    def _build_right_side(self, mapping: list):
         blocks = None
         for block in reversed(mapping):
             name, _ = block[0], block[1:]
@@ -63,7 +62,7 @@ class UNetProblem(DNNProblem):
         oh = ((h - k + 2 * p) // s) + 1
         return (int(ow), int(oh))
 
-    def _get_layer_outputs(self, mapping):
+    def _get_layer_outputs(self, mapping: list):
         outputs = []
         depth = 0
         for _, block in enumerate(mapping):
@@ -86,7 +85,7 @@ class UNetProblem(DNNProblem):
             outputs.append(output_shape)
         return outputs
 
-    def _non_recursive_repair(self, mapping):
+    def _repair(self, mapping: list):
         # changes the kernel size of pooling layers to keep image dimensions
         # as valid values (avoid reducing the size to less than 1x1)
         outputs = self._get_layer_outputs(mapping)
@@ -101,7 +100,7 @@ class UNetProblem(DNNProblem):
                     mapping[i][1] = 1
                 mapping[i+1][1] = aux_output[2]
 
-    def _build_block(self, block_name, params):
+    def _build_block(self, block_name: str, params: list):
 
         base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
 
@@ -117,7 +116,7 @@ class UNetProblem(DNNProblem):
             base_block['config'][name] = value
         return base_block
 
-    def _build(self, mapping):
+    def _build_json_model(self, mapping: list) -> dict:
 
         self.naming = {}
 
@@ -156,33 +155,23 @@ class UNetProblem(DNNProblem):
 
         return model
 
-    def map_genotype_to_phenotype(self, solution: Solution) -> Model:
+    def _build_model(self, mapping: list) -> Model:
 
-        mapping = self.parser.recursive_parse(solution.genotype)
+        reshaped_mapping = self._reshape_mapping(mapping)
 
         # build right part of the network based on the left
-        mapping = self._build_right_side(mapping)
+        reshaped_mapping = self._build_right_side(reshaped_mapping)
 
         # insert base layers
-        mapping.insert(0, ['input', (None,)+self.dataset.input_shape]) # input layer
-        mapping.append(['conv', 2, 3, 1, 'same', 'relu']) # classification layer
-        mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) # output layer
+        reshaped_mapping.insert(0, ['input', (None,)+self.dataset.input_shape]) # input layer
+        reshaped_mapping.append(['conv', 2, 3, 1, 'same', 'relu']) # classification layer
+        reshaped_mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) # output layer
 
         # repair possible invalid connections
-        self._non_recursive_repair(mapping)
+        self._repair(reshaped_mapping)
 
         # build the json structure of the model
-        model = self._build(mapping)
+        model = self._build_json_model(reshaped_mapping)
 
         # creates the model from json
-        model = model_from_json(json.dumps(model))
-
-        if model is not None:
-            solution.phenotype = model.to_json()
-            solution.data['params'] = model.count_params()
-        else:
-            solution.phenotype = None
-            solution.data['params'] = 0
-        solution.data['mapping'] = mapping
-
-        return model
+        return model_from_json(json.dumps(model))

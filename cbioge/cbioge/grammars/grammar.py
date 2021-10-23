@@ -36,7 +36,6 @@ class Grammar:
             data = json.load(f)
 
         self.name: str = data['name']
-        self.blocks: dict = data['blocks']
         self.rules: dict = data['rules']
         self.nonterm = list(self.rules.keys())
 
@@ -74,20 +73,6 @@ class Grammar:
         else:
             raise TypeError(f'Type mismatch: \"{value}\"')
 
-    def _group_mapping(self, mapping: List[str]) -> List[List[str]]:
-        # groups layer name and parameters together
-
-        new_mapping = list()
-
-        while len(mapping) > 0:
-            if mapping[0] not in self.blocks:
-                raise ValueError(f'Invalid value present in the grammar: \"{mapping[0]}\".')
-    
-            new_mapping.append(mapping[:len(self.blocks[mapping[0]])])
-            mapping = mapping[len(self.blocks[mapping[0]]):]
-
-        return new_mapping
-
     def _recursive_parse_call(self, 
         genotype: List[List[int]], 
         added: List[List[int]], 
@@ -95,7 +80,7 @@ class Grammar:
         depth: int) -> List[List[Any]]:
 
         production = list()
-       
+
         if genotype[self.nonterm.index(symb)] == []:
             value = np.random.randint(0, len(self.rules[symb]))
             added[self.nonterm.index(symb)].append(value)
@@ -107,11 +92,11 @@ class Grammar:
         value = genotype[self.nonterm.index(symb)].pop(0)
         expansion = self.rules[symb][value]
 
-        for s in expansion:
-            if s not in self.nonterm:
-                production.append(self._parse_special_types(s))
+        for curr_symb in expansion:
+            if curr_symb in self.nonterm:
+                production += self._recursive_parse_call(genotype, added, curr_symb, depth+1)
             else:
-                production += self._recursive_parse_call(genotype, added, s, depth+1)
+                production.append(self._parse_special_types(curr_symb))
 
         return production
 
@@ -182,7 +167,7 @@ class Grammar:
             # adds the values present in the 'added' list, to the original genotype
             genotype[symb].extend(added[symb])
 
-        mapping = self._group_mapping(list(filter(lambda x: x != '&', production)))
+        mapping = list(filter(lambda x: x != '&', production))
 
         if self.verbose:
             self.logger.debug(f'Genotype: {genotype}')

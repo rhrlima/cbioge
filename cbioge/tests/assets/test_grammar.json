@@ -1,11 +1,6 @@
 {
 	"name": "test_grammar",
 
-	"blocks": {
-		"conv": ["Conv2D", "filters", "kernel_size"],
-        "dense": ["Dense", "units"]
-	},
-
 	"rules": {
 		"<start>": [
             ["<start>", "<start>"], 

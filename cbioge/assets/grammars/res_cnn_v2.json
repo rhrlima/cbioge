@@ -1,0 +1,33 @@
+{
+	"name": "Residual CNN 2.0", 
+
+	"rules": {
+		"<cnn>": [
+			["<layer>"], 
+			["<layer>", "<layer>", "<layer>"], 
+			["<layer>", "<layer>", "<layer>", "<layer>", "<layer>"]
+		], 
+		"<layer>": [ 
+			["<conv>", "<layer>"], ["<conv>"], 
+			["<resblock>", "<layer>"], ["<resblock>"], 
+			["<pool>", "<layer>"], ["<pool>"], 
+			["<dropout>", "<layer>"], ["<dropout>"], 
+			["<dense>", "<layer>"], ["<dense>"], 
+			["&"]
+		], 
+		"<conv>": [ ["Conv2D", "filters", "<filters>", "kernel_size", "<ksize>", "strides", "<strides>", "padding", "<padding>", "activation", "<activation>", "#"] ], 
+		"<resblock>": [ ["ResBlock", "filters", "<filters>", "kernel_size", "<ksize>", "#"] ], 
+		"<dense>": [ ["Dense", "units", "<units>", "activation", "<activation>", "#"] ], 
+		"<dropout>": [ ["Dropout", "rate", "<rate>", "#"] ], 
+		"<pool>": [ ["<pool_type>", "pool_size", "<ksize>", "strides", "<strides>", "padding", "<padding>", "#"] ], 
+
+		"<pool_type>": [ ["MaxPooling2D"], ["AveragePooling2D"] ], 
+		"<activation>": [ ["relu"], ["selu"], ["elu"], ["tanh"], ["sigmoid"], ["linear"] ], 
+		"<padding>": [ ["valid"], ["same"] ], 
+		"<filters>": [ [16], [32], [64], [128], [256], [512] ], 
+		"<strides>": [ [1], [2] ], 
+		"<ksize>": [ [1], [2], [3], [4], [5] ], 
+		"<units>": [ [32], [64], [128], [256], [512], [1024] ], 
+		"<rate>": [ ["[0.0,0.5]"] ]
+	}
+}

@@ -6,6 +6,9 @@
 *.pyc
 **/__pycache__/
 
+# pylint config
+.pylintrc
+
 # coverage and pytest
 .coverage
 .pytest_cache

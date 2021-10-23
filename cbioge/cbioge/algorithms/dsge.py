@@ -89,7 +89,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.print_progress()
 
-        offspring_pop = []
+        offspring_pop = list()
         while self.evals < self.max_evals:
 
             # creates a new population from recombining the current one

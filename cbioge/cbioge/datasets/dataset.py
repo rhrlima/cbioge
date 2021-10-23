@@ -10,13 +10,13 @@ class Dataset:
     the training, validation and test of deep neural networks.'''
 
     def __init__(self, 
-        input_shape, 
         x_train, 
         y_train, 
         x_test, 
         y_test, 
         x_valid=None, 
         y_valid=None, 
+        input_shape=None, 
         num_classes=None, 
         train_size=None, 
         test_size=None, 
@@ -28,9 +28,10 @@ class Dataset:
         - x_test: test data
         - y_test: test labels
 
-        ## Optional
+        # Optional
         - x_valid: validation data
         - y_valid: validation labels
+        - input_shape: shape of input data
         - num_classes: number of classes (if any)
         - train_size: defines the number of training instances (default len(x_train))
         - test_size: defines the number of test instances (default len(x_test))
@@ -38,8 +39,6 @@ class Dataset:
         (default len(x_valid) if exists). It has priotity over split_size
         - valid_split: float between [0, 1] that expresses the % of the training
         data that will be used as validation'''
-
-        self.input_shape = input_shape
 
         self.x_train = x_train
         self.y_train = y_train
@@ -52,13 +51,16 @@ class Dataset:
 
         self.train_size = self._parse_attr_size(train_size, x_train)
         self.test_size = self._parse_attr_size(test_size, x_test)
+        self.valid_size = valid_size
+
+        self.input_shape = input_shape or x_train[0].shape
 
         # adds a validation set
         if x_valid is not None:
             self.valid_size = self._parse_attr_size(valid_size, x_valid)
             
         # creates a validation set using a portion of the training
-        elif valid_split:
+        elif valid_split is not None:
             self.valid_size = int(self.train_size * valid_split)
             self.train_size -= self.valid_size
             self.x_valid, self.y_valid, self.x_train, self.y_train = self.split(
