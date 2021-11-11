@@ -1,16 +1,11 @@
-'''module responsible for the checkpoint system
+import glob
+import os
+import re
+import pickle
 
-it helps with saving/loading information that is used by the lib, assuming that
-every save/load will be performed on the checkpoint folder
-
-also includes some util functions that might be used in some other places.
-'''
-
-import glob, os, re, pickle
-
-ckpt_folder = 'checkpoints'
-data_name = 'data_{0}.ckpt'
-solution_name = 'solution_{0}.ckpt'
+CKPT_FOLDER = 'checkpoints'
+DATA_NAME = 'data_{0}.ckpt'
+SOLUTION_NAME = 'solution_{0}.ckpt'
 
 
 def get_new_unique_path(base_path, name=None):
@@ -23,7 +18,7 @@ def get_latest_pid_or_new(base_path):
     # gets the latest pid folder inside base path
     folders = glob.glob(os.path.join(base_path, '*/'))
 
-    if folders == []:
+    if len(folders) == 0:
         return get_new_unique_path(base_path)
 
     folders.sort(reverse=True)
@@ -38,38 +33,38 @@ def natural_key(string_):
 
 def get_most_recent(name_pattern, folder=None):
 
-    data_files = glob.glob(os.path.join(folder or ckpt_folder, name_pattern))
+    data_files = glob.glob(os.path.join(folder or CKPT_FOLDER, name_pattern))
 
     if len(data_files) == 0:
         return None
 
     # returns the file containing the higher number in its name
-    return os.path.basename(max(data_files, key=lambda f: natural_key(f)))
+    return os.path.basename(max(data_files, key=natural_key))
 
 
 def get_files_with_name(name_pattern, folder=None):
-    files = glob.glob(os.path.join(folder or ckpt_folder, name_pattern))
+    files = glob.glob(os.path.join(folder or CKPT_FOLDER, name_pattern))
     return [os.path.basename(f) for f in files]
 
 
 def save_data(data, filename):
     # try saving the data in the checkpoint folder
     try:
-        with open(os.path.join(ckpt_folder, filename), 'wb') as f:
+        with open(os.path.join(CKPT_FOLDER, filename), 'wb') as f:
             pickle.dump(data, f)
         return True
-    except:
+    except IOError:
         print(f'[checkpoint] fail to save {filename}')
         return False
 
 
 def load_data(file_name, folder=None):
     # loads the file stored in the checkpoint folder
-    with open(os.path.join(folder or ckpt_folder, file_name), 'rb') as f:
+    with open(os.path.join(folder or CKPT_FOLDER, file_name), 'rb') as f:
         return pickle.load(f)
 
 
 def delete_data(name_pattern):
     # deletes all files that matches the name pattern
-    data_files = glob.glob(os.path.join(ckpt_folder, name_pattern))
-    [os.remove(file) for file in data_files]
+    data_files = glob.glob(os.path.join(CKPT_FOLDER, name_pattern))
+    [os.remove(file) for file in data_files] # pylint: disable=expression-not-assigned

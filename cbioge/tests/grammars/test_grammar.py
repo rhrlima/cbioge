@@ -64,6 +64,7 @@ def test_recursive_parse():
     np.random.seed(0)
     grammar = Grammar(get_mockup_parser())
     genotype = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
+
     assert grammar.recursive_parse(genotype) == ['conv', 32, 3, 'conv', 16, 3, 'dense', 64]
 
 def test_create_solution_adding_values():
@@ -89,9 +90,7 @@ def test_create_solution_removing_values():
     solution = [[4, 0, 0, 0], [0, 0], [0], [1, 1], [1, 0], [1]]
     expected = [[4], [0, 0], [0], [1, 1], [1, 0], [1]]
 
-    mapping = ['conv', 32, 3, 'conv', 16, 3, 'dense', 64]
-
-    assert grammar.recursive_parse(solution) == mapping
+    assert grammar.recursive_parse(solution) == ['conv', 32, 3, 'conv', 16, 3, 'dense', 64]
     assert original != solution
     assert original != expected
     assert solution == expected

@@ -8,13 +8,13 @@ def test_create_solution_from_list():
 
 def test_create_solution_from_json():
     json_string = {
-        'id': None, 
-        'genotype': [[1, 1], [1, 1, 1], [1]], 
-        'phenotype': {'a': 123}, 
-        'fitness': 200, 
-        'evaluated': False, 
+        's_id': None,
+        'genotype': [[1, 1], [1, 1, 1], [1]],
+        'phenotype': {'a': 123},
+        'fitness': 200,
+        'evaluated': False,
         'data': {
-            'time': None, 
+            'time': None,
             'params': None
         }
     }
@@ -25,10 +25,10 @@ def test_create_solution_from_json():
 
 def test_create_solution_from_incomplete_json():
     json_string = {
-        'id': None, 
-        'genotype': [[1, 1], [1, 1, 1], [1]], 
-        'phenotype': None, 
-        'evaluated': False, 
+        's_id': None,
+        'genotype': [[1, 1], [1, 1, 1], [1]],
+        'phenotype': None,
+        'evaluated': False,
         'data': {
             'params': None
         }
@@ -40,74 +40,74 @@ def test_create_solution_from_incomplete_json():
     assert 'fitness' not in json_string
     assert 'fitness' in json_data
 
-def test_create_solution_from_incomplete_json2():  
+def test_create_solution_from_incomplete_json2():
     json_string = {
-        'id': None, 
-        'genotype': [], 
-        'phenotype': None, 
-        'fitness': -1, 
-        'evaluated': False, 
+        's_id': None,
+        'genotype': [],
+        'phenotype': None,
+        'fitness': -1,
+        'evaluated': False,
         'data': {}
     }
     solution = Solution.from_json(None)
     assert solution.to_json() == json_string
 
-def test_create_empty_solution():  
+def test_create_empty_solution():
     json_string = {
-        'id': None, 
-        'genotype': [], 
-        'phenotype': None, 
-        'fitness': -1, 
-        'evaluated': False, 
+        's_id': None,
+        'genotype': [],
+        'phenotype': None,
+        'fitness': -1,
+        'evaluated': False,
         'data': {}
     }
     solution = Solution()
     assert solution.to_json() == json_string
 
 
-@pytest.mark.parametrize("genA, genB, expected", [
+@pytest.mark.parametrize("gen_a, gen_b, expected", [
     ([[0,0],[0,0,0],[0]], [[0,0],[0,0,0],[0]], True),
     ([[0,0],[0,0,0],[0]], [[0,0],[0,0,0],[1]], False),
     ([[0,0],[0,0,0],[0]], 'copy', True),
     ([[0,0],[0,0,0],[0]], 'json', True),
     ([[0,0],[0,0,0],[0]], None, False),
     ([[0,0],[0,0,0],[0]], [], False)])
-def test_eq_override(genA, genB, expected):
-    objA = Solution(genA)
-    if genB == 'copy':
-        objB = objA.copy()
-    elif genB == 'json':
-        objB = Solution.from_json(objA.to_json())
+def test_eq_override(gen_a, gen_b, expected):
+    obj_a = Solution(gen_a)
+    if gen_b == 'copy':
+        obj_b = obj_a.copy()
+    elif gen_b == 'json':
+        obj_b = Solution.from_json(obj_a.to_json())
     else:
-        objB = Solution(genB)
-    
-    assert (objA == objB) == expected
+        obj_b = Solution(gen_b)
+
+    assert (obj_a == obj_b) == expected
 
 def test_modified_copy():
-    solA = Solution([[0], [0], [0], [0]])
-    solB = solA.copy()
+    sol_a = Solution([[0], [0], [0], [0]])
+    sol_b = sol_a.copy()
 
-    assert solA == solB
-    assert solA.to_json() == solB.to_json()
+    assert sol_a == sol_b
+    assert sol_a.to_json() == sol_b.to_json()
 
-    solB.genotype[0][0] = 1
+    sol_b.genotype[0][0] = 1
 
-    assert solA != solB
-    assert solA.to_json() != solB.to_json()
+    assert sol_a != sol_b
+    assert sol_a.to_json() != sol_b.to_json()
 
 def test_modified_deepcopy():
 
-    solA = Solution([[0], [0], [0], [0]])
-    solB = solA.copy(deep=True)
+    sol_a = Solution([[0], [0], [0], [0]])
+    sol_b = sol_a.copy(deep=True)
 
-    assert solA == solB
-    assert solA.to_json() == solB.to_json()
+    assert sol_a == sol_b
+    assert sol_a.to_json() == sol_b.to_json()
 
-    solB.genotype[0][0] = 1
-    solB.fitness = 999
+    sol_b.genotype[0][0] = 1
+    sol_b.fitness = 999
 
-    assert solA != solB
-    assert solA.to_json() != solB.to_json()
+    assert sol_a != sol_b
+    assert sol_a.to_json() != sol_b.to_json()
 
 def test_solution_in_list():
 

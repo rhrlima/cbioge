@@ -9,19 +9,20 @@ class Dataset:
     '''Dataset class that holds the most common data structures used in
     the training, validation and test of deep neural networks.'''
 
-    def __init__(self, 
-        x_train, 
-        y_train, 
-        x_test, 
-        y_test, 
-        x_valid=None, 
-        y_valid=None, 
-        input_shape=None, 
-        num_classes=None, 
-        train_size=None, 
-        test_size=None, 
-        valid_size=None, 
-        valid_split=None):
+    def __init__(self,
+        x_train: list,
+        y_train: list,
+        x_test: list,
+        y_test: list,
+        x_valid: list=None,
+        y_valid: list=None,
+        input_shape: tuple=None,
+        num_classes: int=None,
+        train_size: int=None,
+        test_size: int=None,
+        valid_size: int=None,
+        valid_split: float=None
+    ):
         '''# Parameters
         - x_train: train data
         - y_train: train labels
@@ -35,7 +36,7 @@ class Dataset:
         - num_classes: number of classes (if any)
         - train_size: defines the number of training instances (default len(x_train))
         - test_size: defines the number of test instances (default len(x_test))
-        - valid_size: defines the number of validation instances 
+        - valid_size: defines the number of validation instances
         (default len(x_valid) if exists). It has priotity over split_size
         - valid_split: float between [0, 1] that expresses the % of the training
         data that will be used as validation'''
@@ -58,7 +59,7 @@ class Dataset:
         # adds a validation set
         if x_valid is not None:
             self.valid_size = self._parse_attr_size(valid_size, x_valid)
-            
+
         # creates a validation set using a portion of the training
         elif valid_split is not None:
             self.valid_size = int(self.train_size * valid_split)
@@ -75,9 +76,9 @@ class Dataset:
                 self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
 
     @classmethod
-    def from_pickle(cls, pickle_file, **kwargs):
-        with open(pickle_file, 'rb') as f:
-            data_dict = pickle.load(f)
+    def from_pickle(cls, pickle_file: str):
+        with open(pickle_file, 'rb') as file:
+            data_dict = pickle.load(file)
         return cls(**data_dict)
 
     @classmethod
@@ -95,7 +96,7 @@ class Dataset:
         ----label1
         ----label2
         '''
-        pass
+        # TODO missing implementation
 
     def _parse_attr_size(self, value, attr_data):
 

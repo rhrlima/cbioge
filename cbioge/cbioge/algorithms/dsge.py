@@ -1,5 +1,13 @@
-from ..algorithms import Solution
-from ..algorithms import BaseEvolutionaryAlgorithm
+from typing import List
+
+from .operators import (
+    SelectionOperator,
+    ReplacementOperator,
+    CrossoverOperator,
+    MutationOperator,
+)
+from ..problems import BaseProblem
+from ..algorithms import Solution, BaseEvolutionaryAlgorithm
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
@@ -8,44 +16,45 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
     This modified version mainstains a list of unique solutions stored, which
     helps increasing the diversity.'''
 
-    def __init__(self, problem, 
-        pop_size=10, 
-        max_evals=20, 
-        verbose=False, 
-        selection=None, 
-        replacement=None, 
-        crossover=None, 
-        mutation=None, 
-        seed=None):
+    def __init__(self, problem: BaseProblem,
+        pop_size: int=10,
+        max_evals: int=20,
+        verbose: bool=False,
+        selection: SelectionOperator=None,
+        replacement: ReplacementOperator=None,
+        crossover: CrossoverOperator=None,
+        mutation: MutationOperator=None,
+        seed: int=None
+    ):
 
-        super().__init__(problem, seed, pop_size, max_evals, verbose, selection, 
-            replacement, crossover, mutation)
+        super().__init__(problem, pop_size, max_evals, verbose, selection,
+            replacement, crossover, mutation, seed)
 
         self.unique_solutions = list()
 
-    def create_population(self, size: int):
+    def create_population(self, size: int) -> List[Solution]:
         population = list()
         index = 0
         while len(population) < size:
             solution = self.create_solution()
             if self.accept_solution(solution):
-                solution.id = index
+                solution.s_id = index
                 population.append(solution)
                 self.save_solution(solution)
                 index += 1
         return population
 
-    def evaluate_solution(self, solution: Solution):
+    def evaluate_solution(self, solution: Solution) -> None:
         '''Evaluates a solution
-        
+
         This procedure is ignored if the solution has been evaluated already.
-        It calls the defined mapping method followed by the evaluate method, 
+        It calls the defined mapping method followed by the evaluate method,
         both defined in the problem assigned.'''
 
         # skip solutions already executed
         if solution.evaluated:
             if self.verbose:
-                log_text = f'Solution {solution.id} already evaluated. Skipping...'
+                log_text = f'Solution {solution.s_id} already evaluated. Skipping...'
                 self.logger.debug(log_text)
             return
 
@@ -59,27 +68,29 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.save_solution(solution)
 
         if self.verbose:
-            log_text = f'Solution {solution.id} fit: {float(solution.fitness):.2f} gen: {solution}'
+            log_text = (f'Solution {solution.s_id} '
+                + f'fit: {float(solution.fitness):.2f} gen: {solution}')
             self.logger.debug(log_text)
 
-    def evaluate_population(self, population):
-        for s in population:
-            self.evaluate_solution(s)
+    def evaluate_population(self, population: List[Solution]) -> None:
+        for solution in population:
+            self.evaluate_solution(solution)
 
-    def accept_solution(self, solution):
+    def accept_solution(self, solution: Solution) -> bool:
         # maintain only unique solutions
         if solution is None or solution.genotype in self.unique_solutions:
-           return False
+            return False
         self.unique_solutions.append(solution.genotype[:])
         return True
 
-    def execute(self, checkpoint=False):
+    def execute(self, checkpoint: bool=False) -> Solution:
         '''Runs the evolution.
-        
+
         The parameter checkpoint will define if the execution will be from scratch
         or continue from a previous checkpoint (if any).'''
 
-        if checkpoint: self.load_state()
+        if checkpoint:
+            self.load_state()
 
         if len(self.population) == 0:
             self.population = self.create_population(self.pop_size)
@@ -105,7 +116,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     parents = self.apply_selection()
                     offspring = self.apply_crossover(parents)
                     offspring = self.apply_mutation(offspring)
-                    offspring.id = self.evals + index # check
+                    offspring.s_id = self.evals + index # check
 
                 if self.accept_solution(offspring):
                     self.save_solution(offspring)
@@ -124,7 +135,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         return max(self.population, key=lambda x: x.fitness)
 
-    def save_state(self, data={}):
+    def save_state(self, data: dict=None) -> None:
         '''Saves the current population and evaluations by default.
         Additionally saves the list of unique solutions'''
 
@@ -132,16 +143,20 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             'unique': self.unique_solutions,
         }
 
+        # super method will add population and evals
         super().save_state(data)
 
-    def load_state(self):
+    def load_state(self) -> dict:
 
         data = super().load_state()
 
         if data is None:
             return
 
-        if 'unique' in data: self.unique_solutions = data['unique']
+        # super method already loads population and evals
+        if 'unique' in data:
+            self.unique_solutions = data['unique']
 
         if self.verbose:
-            self.logger.debug(f'Unique solutions: {len(self.unique_solutions)}')
+            debug_text = f'Unique solutions: {len(self.unique_solutions)}'
+            self.logger.debug(debug_text)
