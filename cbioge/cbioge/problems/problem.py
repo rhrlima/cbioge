@@ -181,7 +181,7 @@ class DNNProblem(BaseProblem):
 
             return True
 
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             self.logger.exception('A problem was found during evaluation.')
             solution.fitness = -1
 
