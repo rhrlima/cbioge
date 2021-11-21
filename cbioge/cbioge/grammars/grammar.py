@@ -25,7 +25,6 @@ class Grammar:
         self.max_depth = max_depth
         self.verbose = verbose
         self.precision = precision
-
         self.logger = logging.getLogger('cbioge')
 
     def _read_grammar(self, grammar_file: str):
@@ -46,6 +45,8 @@ class Grammar:
         self.name: str = data['name']
         self.rules: dict = data['rules']
         self.nonterm = list(self.rules.keys())
+        if "blocks" in data:
+            self.blocks = data['blocks']
 
     def _parse_special_types(self, value: Any) -> Any:
         '''Parses special types present in the grammar.
