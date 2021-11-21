@@ -50,7 +50,7 @@ class DNNProblem(BaseProblem):
         epochs: int=1,
         opt: str='adam',
         loss: Union[str, callable]='categorical_crossentropy',
-        metrics=('accuracy'),
+        metrics: list=['accuracy'],
         test_eval: bool=False,
         verbose: bool=False,
         train_args: dict=None,
@@ -181,7 +181,7 @@ class DNNProblem(BaseProblem):
 
             return True
 
-        except ValueError:
+        except Exception:
             self.logger.exception('A problem was found during evaluation.')
             solution.fitness = -1
 

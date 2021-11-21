@@ -12,7 +12,7 @@ def get_layer(block_name: str, layers_database: list=None):
     for ldb in layers_database:
         try:
             return getattr(ldb, block_name)
-        except ValueError:
+        except AttributeError:
             # exceptions should be handled only in the end
             continue
 

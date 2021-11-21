@@ -1,13 +1,18 @@
-from typing import List
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 
-from .operators import (
-    SelectionOperator,
-    ReplacementOperator,
-    CrossoverOperator,
-    MutationOperator,
-)
-from ..problems import BaseProblem
-from ..algorithms import Solution, BaseEvolutionaryAlgorithm
+from ..algorithms import BaseEvolutionaryAlgorithm
+
+# avoids import cycles while using typing
+if TYPE_CHECKING:
+    from .operators import (
+        SelectionOperator,
+        ReplacementOperator,
+        CrossoverOperator,
+        MutationOperator,
+    )
+    from ..algorithms import Solution
+    from ..problems import BaseProblem
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):

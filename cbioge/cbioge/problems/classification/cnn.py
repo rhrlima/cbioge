@@ -18,7 +18,7 @@ class CNNProblem(DNNProblem):
         epochs: int=1,
         opt: str='adam',
         loss: Union[str, callable]='categorical_crossentropy',
-        metrics: list=('accuracy'),
+        metrics: list=['accuracy'],
         test_eval: bool=False,
         verbose: bool=False,
         train_args=None,

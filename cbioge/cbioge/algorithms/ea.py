@@ -1,19 +1,22 @@
+from __future__ import annotations
 import logging
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import numpy as np
 
-from .operators import (
-    CrossoverOperator,
-    MutationOperator,
-    ReplacementOperator,
-    SelectionOperator
-)
 from .solution import Solution
-from .replacement import ReplaceWorst
 from .selection import TournamentSelection
-from ..problems import BaseProblem
+from .replacement import ReplaceWorst
 from ..utils import checkpoint as ckpt
+
+if TYPE_CHECKING:
+    from .operators import (
+        CrossoverOperator,
+        MutationOperator,
+        ReplacementOperator,
+        SelectionOperator
+    )
+    from ..problems import BaseProblem
 
 
 class BaseEvolutionaryAlgorithm:
