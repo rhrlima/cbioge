@@ -76,10 +76,10 @@ class Dataset:
                 self.y_valid = np_utils.to_categorical(self.y_valid, self.num_classes)
 
     @classmethod
-    def from_pickle(cls, pickle_file: str):
+    def from_pickle(cls, pickle_file: str, **kwargs):
         with open(pickle_file, 'rb') as file:
             data_dict = pickle.load(file)
-        return cls(**data_dict)
+        return cls(**data_dict, **kwargs)
 
     @classmethod
     def from_npy(cls):
