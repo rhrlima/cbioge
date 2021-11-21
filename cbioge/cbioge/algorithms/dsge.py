@@ -1,6 +1,18 @@
-from ..algorithms import Solution
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
+
 from ..algorithms import BaseEvolutionaryAlgorithm
-from ..utils import checkpoint as ckpt
+
+# avoids import cycles while using typing
+if TYPE_CHECKING:
+    from .operators import (
+        SelectionOperator,
+        ReplacementOperator,
+        CrossoverOperator,
+        MutationOperator,
+    )
+    from ..algorithms import Solution
+    from ..problems import BaseProblem
 
 
 class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
@@ -9,44 +21,45 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
     This modified version mainstains a list of unique solutions stored, which
     helps increasing the diversity.'''
 
-    def __init__(self, problem, 
-        pop_size=10, 
-        max_evals=20, 
-        verbose=False, 
-        selection=None, 
-        replacement=None, 
-        crossover=None, 
-        mutation=None, 
-        seed=None):
+    def __init__(self, problem: BaseProblem,
+        pop_size: int=10,
+        max_evals: int=20,
+        verbose: bool=False,
+        selection: SelectionOperator=None,
+        replacement: ReplacementOperator=None,
+        crossover: CrossoverOperator=None,
+        mutation: MutationOperator=None,
+        seed: int=None
+    ):
 
-        super().__init__(problem, seed, pop_size, max_evals, verbose, selection, 
-            replacement, crossover, mutation)
+        super().__init__(problem, pop_size, max_evals, verbose, selection,
+            replacement, crossover, mutation, seed)
 
         self.unique_solutions = list()
 
-    def create_population(self, size: int):
+    def create_population(self, size: int) -> List[Solution]:
         population = list()
         index = 0
         while len(population) < size:
             solution = self.create_solution()
             if self.accept_solution(solution):
-                solution.id = index
+                solution.s_id = index
                 population.append(solution)
                 self.save_solution(solution)
                 index += 1
         return population
 
-    def evaluate_solution(self, solution: Solution):
+    def evaluate_solution(self, solution: Solution) -> None:
         '''Evaluates a solution
-        
+
         This procedure is ignored if the solution has been evaluated already.
-        It calls the defined mapping method followed by the evaluate method, 
+        It calls the defined mapping method followed by the evaluate method,
         both defined in the problem assigned.'''
 
         # skip solutions already executed
         if solution.evaluated:
             if self.verbose:
-                log_text = f'Solution {solution.id} already evaluated. Skipping...'
+                log_text = f'Solution {solution.s_id} already evaluated. Skipping...'
                 self.logger.debug(log_text)
             return
 
@@ -60,27 +73,29 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.save_solution(solution)
 
         if self.verbose:
-            log_text = f'Solution {solution.id} fit: {float(solution.fitness):.2f} gen: {solution}'
+            log_text = (f'Solution {solution.s_id} '
+                + f'fit: {float(solution.fitness):.2f} gen: {solution}')
             self.logger.debug(log_text)
 
-    def evaluate_population(self, population):
-        for s in population:
-            self.evaluate_solution(s)
+    def evaluate_population(self, population: List[Solution]) -> None:
+        for solution in population:
+            self.evaluate_solution(solution)
 
-    def accept_solution(self, solution):
+    def accept_solution(self, solution: Solution) -> bool:
         # maintain only unique solutions
         if solution is None or solution.genotype in self.unique_solutions:
-           return False
+            return False
         self.unique_solutions.append(solution.genotype[:])
         return True
 
-    def execute(self, checkpoint=False):
+    def execute(self, checkpoint: bool=False) -> Solution:
         '''Runs the evolution.
-        
+
         The parameter checkpoint will define if the execution will be from scratch
         or continue from a previous checkpoint (if any).'''
 
-        if checkpoint: self.load_state()
+        if checkpoint:
+            self.load_state()
 
         if len(self.population) == 0:
             self.population = self.create_population(self.pop_size)
@@ -90,7 +105,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.print_progress()
 
-        offspring_pop = []
+        offspring_pop = list()
         while self.evals < self.max_evals:
 
             # creates a new population from recombining the current one
@@ -106,7 +121,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     parents = self.apply_selection()
                     offspring = self.apply_crossover(parents)
                     offspring = self.apply_mutation(offspring)
-                    offspring.id = self.evals + index # check
+                    offspring.s_id = self.evals + index # check
 
                 if self.accept_solution(offspring):
                     self.save_solution(offspring)
@@ -124,56 +139,29 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
             self.print_progress()
 
         return max(self.population, key=lambda x: x.fitness)
-    
-    def save_state(self):
-        '''Saves the current population of the evolution.
-        
-        A file named data_X.ckpt (by default) is created after each generation, 
-        where X is the number of evaluations, including the following information:
-        - evals
-        - current population
-        - unique solutions found so far'''
+
+    def save_state(self, data: dict=None) -> None:
+        '''Saves the current population and evaluations by default.
+        Additionally saves the list of unique solutions'''
 
         data = {
-            'evals': self.evals,
-            'population': [s.to_json() for s in self.population],
             'unique': self.unique_solutions,
         }
 
-        # creates the data checkpoint
-        file_name = ckpt.data_name.format(self.evals)
-        saved = ckpt.save_data(data, file_name)
+        # super method will add population and evals
+        super().save_state(data)
 
-        # remove solution files already evaluated if data ckpt exists
-        if saved: 
-            for i in range(self.evals):
-                ckpt.delete_data(ckpt.solution_name.format(i))
-            self.logger.debug(f'Checkpoint [{file_name}] created.')
+    def load_state(self) -> dict:
 
-    def load_state(self):
-        '''Loads the last generation saved as checkpoint.
-        
-        Seaches for the most recent data_X.ckpt file, where X is the number of evaluations.'''
+        data = super().load_state()
 
-        # searches for data checkpoints
-        data_ckpts = ckpt.get_files_with_name(ckpt.data_name.format('*'))
-
-        if len(data_ckpts) == 0:
-            self.logger.debug('No checkpoint found.')
+        if data is None:
             return
 
-        last_ckpt = max(data_ckpts, key=lambda c: ckpt.natural_key(c))
-        data = ckpt.load_data(last_ckpt)
-
-        self.evals = data['evals']
-        self.population = [
-            Solution.from_json(s) for s in data['population']
-        ]
-
-        if 'unique' in data: self.unique_solutions = data['unique']
+        # super method already loads population and evals
+        if 'unique' in data:
+            self.unique_solutions = data['unique']
 
         if self.verbose:
-            self.logger.debug(f'Latest checkpoint file found: {last_ckpt}')
-            self.logger.debug(f'Current evals: {self.evals}/{self.max_evals}')
-            self.logger.debug(f'Population size: {len(self.population)}')
-            self.logger.debug(f'Unique solutions: {len(self.unique_solutions)}')
+            debug_text = f'Unique solutions: {len(self.unique_solutions)}'
+            self.logger.debug(debug_text)

@@ -1,58 +1,60 @@
 import json
+from typing import Union
 
 from keras.models import Model, model_from_json
 
-from ..datasets import Dataset
-from ..grammars import Grammar
-from ..problems import DNNProblem
-from ..algorithms import Solution
+from ...datasets import Dataset
+from ...grammars import Grammar
+from ...problems import DNNProblem
 
 
 class UNetProblem(DNNProblem):
     ''' Problem class for problems related to classification tasks for DNNs.
-        This class includes methods focused on the design of U-Nets.
-    '''
-    def __init__(self, parser: Grammar, dataset: Dataset, 
-        batch_size=10, 
-        epochs=1, 
-        opt='adam', 
-        loss='binary_crossentropy', 
-        metrics=['accuracy'], 
-        test_eval=False, 
-        verbose=False, 
-        train_args={}, 
-        test_args={}):
+        This class includes methods focused on the design of U-Nets.'''
 
-        super().__init__(parser, dataset, batch_size, epochs, opt, loss, 
+    def __init__(self, parser: Grammar, dataset: Dataset,
+        batch_size: int=10,
+        epochs: int=1,
+        opt: str='adam',
+        loss: Union[str, callable]='binary_crossentropy',
+        metrics: list=['accuracy'],
+        test_eval: bool=False,
+        verbose: bool=False,
+        train_args: dict=None,
+        test_args: dict=None
+    ):
+
+        super().__init__(parser, dataset, batch_size, epochs, opt, loss,
             metrics, test_eval, verbose, train_args, test_args)
 
-    def _build_right_side(self, mapping):
+    def _build_right_side(self, mapping: list):
+
         blocks = None
         for block in reversed(mapping):
             name, _ = block[0], block[1:]
             if name == 'maxpool':
-                if blocks != None:
+                if blocks is not None:
                     mapping.append(['upsamp', 2])
                     mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
                     if ['bridge'] in blocks:
                         mapping.append(['concat', 3])
                         blocks.remove(['bridge'])
                     mapping.extend(blocks)
-                blocks = []
-            elif blocks != None:
+                blocks = list()
+            elif blocks is not None:
                 blocks.append(block)
-        if blocks != None:
-            if blocks != None:
-                mapping.append(['upsamp', 2])
-                mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
-                if ['bridge'] in blocks:
-                    mapping.append(['concat', 3])
-                    blocks.remove(['bridge'])
-                mapping.extend(blocks)
+
+        if blocks is not None:
+            mapping.append(['upsamp', 2])
+            mapping.append(['conv', 0, 2, 1, 'same', 'relu'])
+            if ['bridge'] in blocks:
+                mapping.append(['concat', 3])
+                blocks.remove(['bridge'])
+            mapping.extend(blocks)
 
         return mapping
 
-    def _calculate_output_size(self, img_shape, k, s, p):
+    def _calculate_output_size(self, img_shape: tuple, k: int, s: int, p: int) -> tuple:
         '''(width, height), kernel, stride, padding'''
         index = 1 if len(img_shape) == 4 else 0
         w = img_shape[index]
@@ -63,7 +65,7 @@ class UNetProblem(DNNProblem):
         oh = ((h - k + 2 * p) // s) + 1
         return (int(ow), int(oh))
 
-    def _get_layer_outputs(self, mapping):
+    def _get_layer_outputs(self, mapping: list):
         outputs = []
         depth = 0
         for _, block in enumerate(mapping):
@@ -86,7 +88,7 @@ class UNetProblem(DNNProblem):
             outputs.append(output_shape)
         return outputs
 
-    def _non_recursive_repair(self, mapping):
+    def _repair(self, mapping: list):
         # changes the kernel size of pooling layers to keep image dimensions
         # as valid values (avoid reducing the size to less than 1x1)
         outputs = self._get_layer_outputs(mapping)
@@ -101,15 +103,18 @@ class UNetProblem(DNNProblem):
                     mapping[i][1] = 1
                 mapping[i+1][1] = aux_output[2]
 
-    def _build_block(self, block_name, params):
+    def _build_block(self, block_name: str, params: list, naming: dict):
+
+        if naming is None:
+            naming = dict()
 
         base_block = {'class_name': None, 'name': None, 'config': {}, 'inbound_nodes': []}
 
-        if block_name in self.naming:
-            self.naming[block_name] += 1
+        if block_name in naming:
+            naming[block_name] += 1
         else:
-            self.naming[block_name] = 0
-        name = f'{block_name}_{self.naming[block_name]}'
+            naming[block_name] = 0
+        name = f'{block_name}_{naming[block_name]}'
 
         base_block['class_name'] = self.parser.blocks[block_name][0]
         base_block['name'] = name
@@ -117,20 +122,20 @@ class UNetProblem(DNNProblem):
             base_block['config'][name] = value
         return base_block
 
-    def _build(self, mapping):
+    def _build_json_model(self, mapping: list) -> dict:
 
-        self.naming = {}
+        names = dict()
 
-        model = {'class_name': 'Model', 
+        model = {'class_name': 'Model',
             'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
 
         for i, layer in enumerate(mapping):
             block_name, params = layer[0], layer[1:]
-            block = self._build_block(block_name, params)
+            block = self._build_block(block_name, params, names)
             model['config']['layers'].append(block)
 
         # creates a stack with the layers that will have a bridge (concat) connection
-        stack = []
+        stack = list()
         for i, layer in enumerate(model['config']['layers']):
             if layer['class_name'] in ['bridge']: #CHECK
                 stack.append(model['config']['layers'][i-1]) #layer before (conv)
@@ -147,7 +152,7 @@ class UNetProblem(DNNProblem):
         model['config']['input_layers'].append([input_layer, 0, 0])
         model['config']['output_layers'].append([output_layer, 0, 0])
 
-        # iterates over the layers looking for the concatenate ones to then 
+        # iterates over the layers looking for the concatenate ones to then
         # adds the connection that comes from the bridge (stored in the stack)
         for i, layer in enumerate(model['config']['layers'][1:]):
             if layer['class_name'] == 'Concatenate':
@@ -156,33 +161,23 @@ class UNetProblem(DNNProblem):
 
         return model
 
-    def map_genotype_to_phenotype(self, solution: Solution) -> Model:
+    def _build_model(self, mapping: list) -> Model:
 
-        mapping = self.parser.recursive_parse(solution.genotype)
+        reshaped_mapping = self._reshape_mapping(mapping)
 
         # build right part of the network based on the left
-        mapping = self._build_right_side(mapping)
+        reshaped_mapping = self._build_right_side(reshaped_mapping)
 
         # insert base layers
-        mapping.insert(0, ['input', (None,)+self.dataset.input_shape]) # input layer
-        mapping.append(['conv', 2, 3, 1, 'same', 'relu']) # classification layer
-        mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) # output layer
+        reshaped_mapping.insert(0, ['input', (None,)+self.dataset.input_shape]) # input layer
+        reshaped_mapping.append(['conv', 2, 3, 1, 'same', 'relu']) # classification layer
+        reshaped_mapping.append(['conv', 1, 1, 1, 'same', 'sigmoid']) # output layer
 
         # repair possible invalid connections
-        self._non_recursive_repair(mapping)
+        self._repair(reshaped_mapping)
 
         # build the json structure of the model
-        model = self._build(mapping)
+        model = self._build_json_model(reshaped_mapping)
 
         # creates the model from json
-        model = model_from_json(json.dumps(model))
-
-        if model is not None:
-            solution.phenotype = model.to_json()
-            solution.data['params'] = model.count_params()
-        else:
-            solution.phenotype = None
-            solution.data['params'] = 0
-        solution.data['mapping'] = mapping
-
-        return model
+        return model_from_json(json.dumps(model))

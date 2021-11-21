@@ -8,11 +8,12 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
     Follows the same base structure of GA algorithm, without applying genetic
     operators, and seaching the best solutions generated randomly.'''
 
-    def __init__(self, problem, 
-        seed=None, 
-        pop_size=10, 
-        max_evals=20, 
-        verbose=False):
+    def __init__(self, problem,
+        seed=None,
+        pop_size=10,
+        max_evals=20,
+        verbose=False
+    ):
 
         super().__init__(problem, seed, pop_size, max_evals, verbose)
 
@@ -22,7 +23,8 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
         self.population = []
         self.unique_solutions = []
 
-        if checkpoint: self.load_state()
+        if checkpoint:
+            self.load_state()
 
         self.print_progress()
 
@@ -33,7 +35,7 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
             index = 0
             while len(offspring_pop) < self.pop_size:
                 solution = self.create_solution()
-                solution.id = self.evals + index
+                solution.s_id = self.evals + index
                 offspring_pop.append(solution)
                 index += 1
 

@@ -1,5 +1,5 @@
 from .problem import BaseProblem
 from .problem import DNNProblem
 
-from .classification import CNNProblem
-from .segmentation import UNetProblem
+from .classification.cnn import CNNProblem
+from .segmentation.unet import UNetProblem

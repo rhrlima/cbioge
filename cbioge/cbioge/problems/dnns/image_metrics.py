@@ -16,27 +16,23 @@ def jaccard_distance(y_true, y_pred, smooth=100):
 
 
 def specificity(y_true,y_pred):
-    specificity=0
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
-    # TP=K.sum(y_true_f*y_pred_f)
-    TN=K.sum((1-y_true_f)*(1-y_pred_f))
-    FP=K.sum((1-y_true_f)*y_pred_f)
-    # FN=K.sum(y_true_f*(1-y_pred_f))
-    specificity=(TN)/((TN+FP))
-    return specificity
+
+    tn_ = K.sum((1-y_true_f)*(1-y_pred_f))
+    fp_ = K.sum((1-y_true_f)*y_pred_f)
+
+    return (tn_)/(tn_+fp_)
 
 
 def sensitivity(y_true,y_pred):
-    sensitivity=0
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
-    TP=K.sum(y_true_f*y_pred_f)
-    # TN=K.sum((1-y_true_f)*(1-y_pred_f))
-    # FP=K.sum((1-y_true_f)*y_pred_f)
-    FN=K.sum(y_true_f*(1-y_pred_f))
-    sensitivity=(TP)/((TP+FN))
-    return sensitivity
+
+    tp_ = K.sum(y_true_f*y_pred_f)
+    fn_ = K.sum(y_true_f*(1-y_pred_f))
+
+    return (tp_)/((tp_+fn_))
 
 
 def dice_coef(y_true, y_pred):

@@ -3,6 +3,11 @@ from .solution import Solution
 from .ea import BaseEvolutionaryAlgorithm
 from .dsge import GrammaticalEvolution
 
+from .operators import SelectionOperator
+from .operators import CrossoverOperator
+from .operators import MutationOperator
+from .operators import ReplacementOperator
+
 from .selection import TournamentSelection
 
 from .crossover import OnePointCrossover

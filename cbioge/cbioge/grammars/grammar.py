@@ -1,23 +1,30 @@
-import json, logging, re
+import json
+import logging
+import re
 from typing import Any, List
 
 import numpy as np
 
 
+RAND_INTERVAL_PATTERN = r'\[(\d+[.\d+]*),\s*(\d+[.\d+]*)\]'
+INT_PATTERN = r'\d+'
+FLOAT_PATTERN = r'\d+.\d+'
+
+
 class Grammar:
     '''Grammar class'''
 
-    def __init__(self, 
-        grammar_file: str, 
-        verbose: bool=False, 
-        max_depth: int=10, 
-        precision: int=5):
+    def __init__(self,
+        grammar_file: str,
+        verbose: bool=False,
+        max_depth: int=10,
+        precision: int=5
+    ):
 
         self._read_grammar(grammar_file)
         self.max_depth = max_depth
         self.verbose = verbose
         self.precision = precision
-
         self.logger = logging.getLogger('cbioge')
 
     def _read_grammar(self, grammar_file: str):
@@ -32,13 +39,14 @@ class Grammar:
         grammar: pair of key/value with the key being the nonterminal, and
         the value being a list of the productions for that nonterminal'''
 
-        with open(grammar_file) as f:
-            data = json.load(f)
+        with open(grammar_file) as file:
+            data = json.load(file)
 
         self.name: str = data['name']
-        self.blocks: dict = data['blocks']
         self.rules: dict = data['rules']
         self.nonterm = list(self.rules.keys())
+        if "blocks" in data:
+            self.blocks = data['blocks']
 
     def _parse_special_types(self, value: Any) -> Any:
         '''Parses special types present in the grammar.
@@ -51,75 +59,60 @@ class Grammar:
 
         ex: [min, max] is parsed to random between min and max.'''
 
-        # TODO buscar maneira melhor de representar rand(min, max) na gramatica
-
-        if type(value) is int or type(value) is float:
+        # TODO get a better way to represent rand(min, max) in the grammar
+        if isinstance(value, (int, float)):
             return value
 
-        # value must be str to work 
-        m = re.match('\\[(\\d+[.\\d+]*),\\s*(\\d+[.\\d+]*)\\]', value)
+        # value must be str to work
+        match = re.match(RAND_INTERVAL_PATTERN, value)
 
-        if m is None:
+        if match is None:
             return value
 
-        min_ = eval(m.group(1))
-        max_ = eval(m.group(2))
+        min_ = match.group(1)
+        max_ = match.group(2)
 
-        if type(min_) == int and type(max_) == int:
-            return np.random.randint(min_, max_)
+        if re.match(FLOAT_PATTERN, min_) and re.match(FLOAT_PATTERN, max_):
+            return round(np.random.uniform(float(min_), float(max_)), self.precision)
 
-        elif type(min_) == float and type(max_) == float:
-            return round(np.random.uniform(min_, max_), self.precision)
+        if re.match(INT_PATTERN, min_) and re.match(INT_PATTERN, max_):
+            return np.random.randint(int(min_), int(max_))
 
-        else:
-            raise TypeError(f'Type mismatch: \"{value}\"')
+        raise TypeError(f'Type mismatch: \"{value}\"')
 
-    def _group_mapping(self, mapping: List[str]) -> List[List[str]]:
-        # groups layer name and parameters together
-
-        new_mapping = list()
-
-        while len(mapping) > 0:
-            if mapping[0] not in self.blocks:
-                raise ValueError(f'Invalid value present in the grammar: \"{mapping[0]}\".')
-    
-            new_mapping.append(mapping[:len(self.blocks[mapping[0]])])
-            mapping = mapping[len(self.blocks[mapping[0]]):]
-
-        return new_mapping
-
-    def _recursive_parse_call(self, 
-        genotype: List[List[int]], 
-        added: List[List[int]], 
-        symb: str, 
+    def _recursive_parse_call(self,
+        genotype: List[List[int]],
+        added: List[List[int]],
+        symb: str,
         depth: int) -> List[List[Any]]:
 
         production = list()
-       
+
         if genotype[self.nonterm.index(symb)] == []:
             value = np.random.randint(0, len(self.rules[symb]))
             added[self.nonterm.index(symb)].append(value)
             genotype[self.nonterm.index(symb)].append(value)
 
             if self.verbose:
-                self.logger.debug(f'Not enough values. Adding: {value} to {symb}')
+                self.logger.debug('Not enough values. Adding: %s to %s', value, symb)
 
         value = genotype[self.nonterm.index(symb)].pop(0)
         expansion = self.rules[symb][value]
 
-        for s in expansion:
-            if s not in self.nonterm:
-                production.append(self._parse_special_types(s))
+        for curr_symb in expansion:
+            if curr_symb in self.nonterm:
+                production += self._recursive_parse_call(genotype, added, curr_symb, depth+1)
             else:
-                production += self._recursive_parse_call(genotype, added, s, depth+1)
+                production.append(self._parse_special_types(curr_symb))
 
         return production
 
-    def _recursive_create_call(self, 
-        max_depth: int, 
-        genotype: List[List[int]], 
-        symb: str, 
-        depth: int=0) -> List[List[int]]:
+    def _recursive_create_call(self,
+        max_depth: int,
+        genotype: List[List[int]],
+        symb: str,
+        depth: int=0
+    ) -> List[List[int]]:
 
         value = np.random.randint(0, len(self.rules[symb]))
         expansion = self.rules[symb][value]
@@ -171,23 +164,25 @@ class Grammar:
         added = [[] for _ in range(len(self.nonterm))]
         symb = self.nonterm[0]
 
-        production = self._recursive_parse_call(genotype=gen_cpy, 
-                                                added=added, 
-                                                symb=symb, depth=0)
+        production = self._recursive_parse_call(
+            genotype=gen_cpy,
+            added=added,
+            symb=symb, depth=0
+        )
 
-        for symb in range(len(genotype)):
+        for symb, _ in enumerate(genotype):
             # removes the values left off during the expansion, from the original genotype
             for _ in range(len(gen_cpy[symb])):
                 genotype[symb].pop()
             # adds the values present in the 'added' list, to the original genotype
             genotype[symb].extend(added[symb])
 
-        mapping = self._group_mapping(list(filter(lambda x: x != '&', production)))
+        mapping = list(filter(lambda x: x != '&', production))
 
         if self.verbose:
-            self.logger.debug(f'Genotype: {genotype}')
-            self.logger.debug(f'Mapping: {mapping}')
-            self.logger.debug(f'Added: {added}')
-            self.logger.debug(f'Removed: {gen_cpy}')
+            self.logger.debug('Genotype: %s', genotype)
+            self.logger.debug('Mapping: %s', mapping)
+            self.logger.debug('Added: %s', added)
+            self.logger.debug('Removed: %s', gen_cpy)
 
         return mapping

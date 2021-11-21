@@ -13,45 +13,32 @@ def get_mockup_parser():
     base_dir = os.path.dirname(os.path.dirname(__file__))
     return Grammar(os.path.join(base_dir, 'assets', 'test_grammar.json'))
 
-
 @pytest.mark.parametrize('mutation', [
-    PointMutation, 
-    TerminalMutation, 
+    PointMutation,
+    TerminalMutation,
     NonterminalMutation])
-def test_negative_crossover_rate(mutation):
-
-    invalid_rate = -1
+@pytest.mark.parametrize('rate', [-1, 2])
+def test_invalid_crossover_rate(mutation, rate):
 
     with pytest.raises(ValueError):
-        mutation(get_mockup_parser(), invalid_rate)
-
-@pytest.mark.parametrize('mutation', [
-    PointMutation, 
-    TerminalMutation, 
-    NonterminalMutation])
-def test_invalid_crossover_rate(mutation):
-
-    invalid_rate = 2
-
-    with pytest.raises(ValueError):
-        mutation(get_mockup_parser(), invalid_rate)
+        mutation(get_mockup_parser(), rate)
 
 @pytest.mark.parametrize("gen, expected, seed", [
-    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 
-     [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]], 0), 
-    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 
-     [[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]], 42), 
-    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 
+    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+     [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]], 0),
+    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+     [[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]], 42),
+    ([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
      [[0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0]], 99)
 ])
-def test_PointMutation(gen, expected, seed):
-    
+def test_point_mutation(gen, expected, seed):
+
     np.random.seed(seed)
 
     solution = Solution(gen)
 
     parser = get_mockup_parser()
-    offspring = PointMutation(parser).execute(solution)
+    offspring = PointMutation(parser, 1).execute(solution)
 
     assert gen != expected
     assert solution.genotype == gen

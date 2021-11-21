@@ -1,13 +1,14 @@
-import sys, logging
+import sys
+import logging
 
-_out_file = 'out.log'
-_err_file = 'err.log'
+OUT_FILE = 'out.log'
+ERR_FILE = 'err.log'
 
-log_format = '%(asctime)s %(levelname)s: %(message)s'
-date_format = '%x %X'
+LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+DATE_FORMAT = '%x %X'
 
 
-def setup(gen_ext_logs: bool=False, out_file: str=_out_file, err_file: str=_err_file):
+def setup(gen_ext_logs: bool=False, out_file: str=OUT_FILE, err_file: str=ERR_FILE):
 
     if gen_ext_logs:
         setup_with_external_logs(out_file, err_file)
@@ -24,13 +25,13 @@ def base_setup():
     sout_handler = logging.StreamHandler(sys.stdout)
     sout_handler.setLevel(logging.DEBUG)
 
-    base_format = logging.Formatter(fmt=log_format, datefmt=date_format)
+    base_format = logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT)
     sout_handler.setFormatter(base_format)
 
     logger.addHandler(sout_handler)
 
 
-def setup_with_external_logs(out_file=_out_file, err_file=_err_file):
+def setup_with_external_logs(out_file=OUT_FILE, err_file=ERR_FILE):
 
     base_setup()
 
@@ -42,7 +43,7 @@ def setup_with_external_logs(out_file=_out_file, err_file=_err_file):
     fout_handler.setLevel(logging.DEBUG)
     ferr_handler.setLevel(logging.ERROR)
 
-    base_format = logging.Formatter(fmt=log_format, datefmt=date_format)
+    base_format = logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT)
     fout_handler.setFormatter(base_format)
     ferr_handler.setFormatter(base_format)
 
@@ -55,9 +56,9 @@ def setup_with_external_logs(out_file=_out_file, err_file=_err_file):
 
 class LevelFilter(logging.Filter):
 
-    def __init__(self, name='', allowed_lvls=[]):
+    def __init__(self, name='', allowed_lvls=None):
         super().__init__(name)
-        self.allowed_lvls = allowed_lvls
+        self.allowed_lvls = allowed_lvls or []
 
     def filter(self, record):
         return record.levelno in self.allowed_lvls

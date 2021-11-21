@@ -1,24 +1,27 @@
 import keras.layers as klayers
 
 
-def _get_layer(blocK_name, layers_database=[]):
+def get_layer(block_name: str, layers_database: list=None):
+
+    if layers_database is None:
+        layers_database = list()
 
     # seaches first in custom layers, then keras layers
     layers_database.append(klayers)
 
-    for db in layers_database:
+    for ldb in layers_database:
         try:
-            return getattr(db, blocK_name)
-        except Exception:
+            return getattr(ldb, block_name)
+        except AttributeError:
             # exceptions should be handled only in the end
-            pass
+            continue
 
-    raise AttributeError(f'{blocK_name} not found in the databases')
+    raise AttributeError(f'{block_name} not found in the databases')
 
 
-class ResBlock():
+class ResBlock:
     ''' Custom layer that encapsulates and reproduce a Residual Block.
-    
+
     A residual layer is composed of:\n
         Conv > Conv > BatchNorm > Add > ReLU'''
 

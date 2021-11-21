@@ -1,5 +1,8 @@
+from typing import List
+
 import numpy as np
 
+from .solution import Solution
 from .operators import SelectionOperator
 
 
@@ -13,10 +16,12 @@ class TournamentSelection(SelectionOperator):
     t_size: number of solutions selected for the tournament (default 2)
     maximize: if the problem is a maximization problem (default False)'''
 
-    def __init__(self, n_parents=2, t_size=2, maximize=False):
+    def __init__(self, n_parents: int=2, t_size: int=2, maximize: bool=False):
         self.n_parents = n_parents
         self.t_size = t_size
         self.maximize = maximize
+
+        super().__init__()
 
         if self.t_size < 1 or self.n_parents < 1:
             raise ValueError('t_size and n_parents must be greater than 0')
@@ -24,7 +29,10 @@ class TournamentSelection(SelectionOperator):
     def __str__(self):
         return 'Tournament Selection'
 
-    def _get_n_random(self, population, n_size):
+    def _get_n_random(self,
+        population: List[Solution],
+        n_size: int
+    ) -> List[Solution]:
         pool = list()
         while len(pool) < n_size:
             temp = np.random.choice(population)
@@ -32,12 +40,11 @@ class TournamentSelection(SelectionOperator):
                 pool.append(temp)
         return pool
 
-    def _get_best(self, options):
-        if self.maximize:
-            return max(options, key=lambda s: s.fitness)
-        return min(options, key=lambda s: s.fitness)
+    def _get_best(self, options: List[Solution]) -> Solution:
+        best_func = max if self.maximize else min
+        return best_func(options, key=lambda s: s.fitness)
 
-    def execute(self, population):
+    def execute(self, population: List[Solution]) -> List[Solution]:
 
         if len(population) <= self.t_size:
             raise ValueError('Selection not applied: pop_size <= t_size')

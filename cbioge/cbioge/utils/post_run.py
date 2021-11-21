@@ -1,4 +1,5 @@
-import os, logging
+import os
+import logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,9 +23,10 @@ def run_solution(problem, solution):
 def get_best_from_checkpoint(folder=None):
     '''searches for the latest checkpoint, loads and runs the best solution stored'''
 
-    last_ckpt = ckpt.get_most_recent(ckpt.data_name.format('*'), folder)
+    last_ckpt = ckpt.get_most_recent(ckpt.DATA_NAME.format('*'), folder)
 
-    if last_ckpt is None: raise ValueError(f'No checkpoint found.')
+    if last_ckpt is None:
+        raise ValueError('No checkpoint found.')
 
     data = ckpt.load_data(last_ckpt, folder)
 
@@ -43,7 +45,8 @@ def plot_history(history, folder=None, name='plot.png'):
     plt.title(name)
 
     axs[0].plot(l_epochs+1, history['loss'], label='loss')
-    if 'val_loss' in history: axs[0].plot(l_epochs+1, history['val_loss'], label='val loss')
+    if 'val_loss' in history:
+        axs[0].plot(l_epochs+1, history['val_loss'], label='val loss')
     #axs[0].set_xticks(l_epochs+1)
     #axs[0].set_xlabel('epochs')
     axs[0].set_ylabel('loss')
@@ -51,7 +54,8 @@ def plot_history(history, folder=None, name='plot.png'):
     axs[0].legend()
 
     axs[1].plot(a_epochs+1, history['acc'], label='acc')
-    if 'val_acc' in history: axs[1].plot(a_epochs+1, history['val_acc'], label='val acc')
+    if 'val_acc' in history:
+        axs[1].plot(a_epochs+1, history['val_acc'], label='val acc')
     #axs[1].set_xticks(a_epochs+1)
     axs[1].set_xlabel('epochs')
     axs[1].set_ylabel('accuracy')
@@ -61,7 +65,7 @@ def plot_history(history, folder=None, name='plot.png'):
     fig.tight_layout()
 
     if folder is None:
-        folder = ckpt.ckpt_folder
+        folder = ckpt.CKPT_FOLDER
 
     fig.savefig(os.path.join(folder, f'{name}.png'))
     #plt.show()
