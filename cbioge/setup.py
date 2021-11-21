@@ -21,7 +21,7 @@ setup(
 	license='MIT',
     packages=find_packages(where="."),
 	package_dir={"": "."},
-	python_requires='>=3.6',
+	python_requires='>=3.7',
 	install_requires=install_requires,
 	setup_requires=['pytest-runner'],
 	tests_require=['pytest>=4.4.1'],
