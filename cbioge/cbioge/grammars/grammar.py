@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Any, List
+from typing import List, Union
 
 import numpy as np
 
@@ -48,7 +48,7 @@ class Grammar:
         if "blocks" in data:
             self.blocks = data['blocks']
 
-    def _parse_special_types(self, value: Any) -> Any:
+    def _parse_special_types(self, value: Union[int, float, str]) -> Union[int, float, str]:
         '''Parses special types present in the grammar.
 
         Current covered cases:
@@ -84,9 +84,9 @@ class Grammar:
         genotype: List[List[int]],
         added: List[List[int]],
         symb: str,
-        depth: int) -> List[List[Any]]:
+        depth: int) -> List[List[Union[int, float, str]]]:
 
-        production = list()
+        production = []
 
         if genotype[self.nonterm.index(symb)] == []:
             value = np.random.randint(0, len(self.rules[symb]))
@@ -157,7 +157,7 @@ class Grammar:
 
         return genotype
 
-    def recursive_parse(self, genotype: List[List[int]]) -> List[List[Any]]:
+    def recursive_parse(self, genotype: List[List[int]]) -> List[List[Union[int, float, str]]]:
         '''Performs the mapping of a genotype according to the grammar'''
 
         gen_cpy = [g[:] for g in genotype]

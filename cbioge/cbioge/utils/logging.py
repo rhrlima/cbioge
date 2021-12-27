@@ -58,7 +58,7 @@ class LevelFilter(logging.Filter):
 
     def __init__(self, name='', allowed_lvls=None):
         super().__init__(name)
-        self.allowed_lvls = allowed_lvls or []
+        self.allowed_lvls = allowed_lvls
 
     def filter(self, record):
         return record.levelno in self.allowed_lvls

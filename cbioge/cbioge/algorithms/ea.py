@@ -50,7 +50,7 @@ class BaseEvolutionaryAlgorithm:
         self.verbose = verbose
 
         self.evals: int = 0
-        self.population: list = list()
+        self.population: list = []
 
         np.random.seed(seed=self.seed)
         self.logger = logging.getLogger('cbioge')

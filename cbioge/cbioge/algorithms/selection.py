@@ -33,7 +33,7 @@ class TournamentSelection(SelectionOperator):
         population: List[Solution],
         n_size: int
     ) -> List[Solution]:
-        pool = list()
+        pool = []
         while len(pool) < n_size:
             temp = np.random.choice(population)
             if temp not in pool:
@@ -49,7 +49,7 @@ class TournamentSelection(SelectionOperator):
         if len(population) <= self.t_size:
             raise ValueError('Selection not applied: pop_size <= t_size')
 
-        parents = list()
+        parents = []
         while len(parents) < self.n_parents:
             pool = self._get_n_random(population, self.t_size)
 

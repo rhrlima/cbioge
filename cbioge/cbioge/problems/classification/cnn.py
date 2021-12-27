@@ -32,7 +32,7 @@ class CNNProblem(DNNProblem):
 
         reshaped_mapping = self._reshape_mapping(mapping)
 
-        layers = list()
+        layers = []
 
         # input layer
         layers.append(Input(shape=self.dataset.input_shape))

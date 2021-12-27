@@ -85,7 +85,7 @@ class DNNProblem(BaseProblem):
     def _reshape_mapping(self, mapping: List[Any]) -> List[List[Any]]:
         # groups layer name and parameters together
 
-        new_mapping = list()
+        new_mapping = []
 
         group = list()
         while len(mapping) > 0:
@@ -93,8 +93,7 @@ class DNNProblem(BaseProblem):
                 group.append(mapping.pop(0))
             else:
                 new_mapping.append(group)
-                mapping.pop(0)
-                group = list()
+                group = []
 
         return new_mapping
 

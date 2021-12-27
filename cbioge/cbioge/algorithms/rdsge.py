@@ -28,7 +28,7 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
 
         self.print_progress()
 
-        offspring_pop = list()
+        offspring_pop = []
         while self.evals < self.max_evals:
 
             # creates a new population from recombining the current one

@@ -3,6 +3,7 @@ from typing import List, TYPE_CHECKING
 
 from ..algorithms import BaseEvolutionaryAlgorithm
 
+# TODO study better way to handle this
 # avoids import cycles while using typing
 if TYPE_CHECKING:
     from .operators import (
@@ -35,10 +36,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         super().__init__(problem, pop_size, max_evals, verbose, selection,
             replacement, crossover, mutation, seed)
 
-        self.unique_solutions = list()
+        self.unique_solutions = []
 
     def create_population(self, size: int) -> List[Solution]:
-        population = list()
+        population = []
         index = 0
         while len(population) < size:
             solution = self.create_solution()
@@ -105,7 +106,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
 
         self.print_progress()
 
-        offspring_pop = list()
+        offspring_pop = []
         while self.evals < self.max_evals:
 
             # creates a new population from recombining the current one

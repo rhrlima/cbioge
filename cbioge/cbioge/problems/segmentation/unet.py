@@ -40,7 +40,7 @@ class UNetProblem(DNNProblem):
                         mapping.append(['concat', 3])
                         blocks.remove(['bridge'])
                     mapping.extend(blocks)
-                blocks = list()
+                blocks = []
             elif blocks is not None:
                 blocks.append(block)
 
@@ -135,7 +135,7 @@ class UNetProblem(DNNProblem):
             model['config']['layers'].append(block)
 
         # creates a stack with the layers that will have a bridge (concat) connection
-        stack = list()
+        stack = []
         for i, layer in enumerate(model['config']['layers']):
             if layer['class_name'] in ['bridge']: #CHECK
                 stack.append(model['config']['layers'][i-1]) #layer before (conv)
