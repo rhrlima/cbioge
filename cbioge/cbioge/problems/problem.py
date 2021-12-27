@@ -85,14 +85,16 @@ class DNNProblem(BaseProblem):
     def _reshape_mapping(self, mapping: List[Any]) -> List[List[Any]]:
         # groups layer name and parameters together
 
+        cpy_mapping = mapping[:] # works for basic types
         new_mapping = []
 
-        group = list()
-        while len(mapping) > 0:
-            if mapping[0] != '#':
-                group.append(mapping.pop(0))
+        group = []
+        while len(cpy_mapping) > 0:
+            if cpy_mapping[0] != '#':
+                group.append(cpy_mapping.pop(0))
             else:
                 new_mapping.append(group)
+                cpy_mapping.pop(0)
                 group = []
 
         return new_mapping
