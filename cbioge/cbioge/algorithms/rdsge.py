@@ -35,7 +35,7 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
             index = 0
             while len(offspring_pop) < self.pop_size:
                 solution = self.create_solution()
-                solution.s_id = self.evals + index
+                solution.id = self.evals + index
                 offspring_pop.append(solution)
                 index += 1
 

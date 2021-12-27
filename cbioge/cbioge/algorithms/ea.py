@@ -94,7 +94,7 @@ class BaseEvolutionaryAlgorithm:
 
     def save_solution(self, solution: Solution) -> None:
         json_solution = solution.to_json()
-        filename = ckpt.SOLUTION_NAME.format(solution.s_id)
+        filename = ckpt.SOLUTION_NAME.format(solution.id)
         ckpt.save_data(json_solution, filename)
 
     def load_solution(self, solution_id: int) -> Solution:

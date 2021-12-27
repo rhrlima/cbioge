@@ -44,7 +44,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         while len(population) < size:
             solution = self.create_solution()
             if self.accept_solution(solution):
-                solution.s_id = index
+                solution.id = index
                 population.append(solution)
                 self.save_solution(solution)
                 index += 1
@@ -60,7 +60,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         # skip solutions already executed
         if solution.evaluated:
             if self.verbose:
-                log_text = f'Solution {solution.s_id} already evaluated. Skipping...'
+                log_text = f'Solution {solution.id} already evaluated. Skipping...'
                 self.logger.debug(log_text)
             return
 
@@ -74,7 +74,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         self.save_solution(solution)
 
         if self.verbose:
-            log_text = (f'Solution {solution.s_id} '
+            log_text = (f'Solution {solution.id} '
                 + f'fit: {float(solution.fitness):.2f} gen: {solution}')
             self.logger.debug(log_text)
 
@@ -122,7 +122,7 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                     parents = self.apply_selection()
                     offspring = self.apply_crossover(parents)
                     offspring = self.apply_mutation(offspring)
-                    offspring.s_id = self.evals + index # check
+                    offspring.id = self.evals + index # check
 
                 if self.accept_solution(offspring):
                     self.save_solution(offspring)
