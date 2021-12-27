@@ -129,8 +129,9 @@ class BaseEvolutionaryAlgorithm:
         if saved:
             for i in range(self.evals):
                 ckpt.delete_data(ckpt.SOLUTION_NAME.format(i))
-            debug_text = f'Checkpoint [{file_name}] created.'
-            self.logger.debug(debug_text)
+            if self.verbose:
+                debug_text = f'Checkpoint [{file_name}] created.'
+                self.logger.debug(debug_text)
 
     def load_state(self) -> dict:
         '''Loads the last generation saved as checkpoint.
@@ -140,7 +141,8 @@ class BaseEvolutionaryAlgorithm:
         data_ckpts = ckpt.get_files_with_name(ckpt.DATA_NAME.format('*'))
 
         if len(data_ckpts) == 0:
-            self.logger.debug('No checkpoint found.')
+            if self.verbose:
+                self.logger.debug('No checkpoint found.')
             return None
 
         last_ckpt = max(data_ckpts, key=ckpt.natural_key)
