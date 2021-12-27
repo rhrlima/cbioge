@@ -53,8 +53,8 @@ class DNNProblem(BaseProblem):
         metrics: list=['accuracy'],
         test_eval: bool=False,
         verbose: bool=False,
-        train_args: dict=None,
-        test_args: dict=None
+        train_args: dict={},
+        test_args: dict={}
     ):
 
         super().__init__(parser, verbose)
