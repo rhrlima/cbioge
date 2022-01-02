@@ -19,3 +19,6 @@ from .mutation import NonterminalMutation
 
 from .replacement import ReplaceWorst
 from .replacement import ElitistReplacement
+
+from .operators import HalfAndHalfOperator
+from .operators import HalfAndChoiceOperator

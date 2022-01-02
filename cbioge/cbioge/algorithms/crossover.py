@@ -22,7 +22,7 @@ class OnePointCrossover(CrossoverOperator):
     def execute(self, parents: List[Solution], cut: int=None) -> Solution:
 
         # crossover is not applied
-        if np.random.rand() > self.cross_rate:
+        if np.random.rand() > self.rate:
             return parents[0].copy()
 
         gen1 = parents[0].genotype[:]
@@ -57,7 +57,7 @@ class GeneCrossover(CrossoverOperator):
     def execute(self, parents: List[Solution], cuts: List[int]=None) -> Solution:
 
         # crossover is not applied
-        if np.random.rand() > self.cross_rate:
+        if np.random.rand() > self.rate:
             return parents[0].copy()
 
         gen1 = parents[0].genotype[:]
