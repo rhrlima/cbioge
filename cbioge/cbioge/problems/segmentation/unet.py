@@ -97,7 +97,7 @@ class UNetProblem(DNNProblem):
             name, _ = layer[0], layer[1:]
             if name == 'maxpool':
                 stack.append(outputs[i-1])
-            elif name == 'upsamp' and stack != []:
+            elif name == 'upsamp' and stack:
                 aux_output = stack.pop()
                 if aux_output[:-1] == (1, 1):
                     mapping[i][1] = 1
