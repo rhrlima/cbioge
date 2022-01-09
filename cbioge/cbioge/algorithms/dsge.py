@@ -117,7 +117,10 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 offspring = self.load_solution(self.evals + index)
 
                 # creates new solution if load fails
-                if offspring is None:
+                # TODO temp fix for possible infinite loop when loading 
+                # solution that already exists
+                # rework the load solution strategy
+                if offspring is None or not self.accept_solution(offspring):
                     # apply selection and recombination operators
                     parents = self.apply_selection()
                     offspring = self.apply_crossover(parents)
