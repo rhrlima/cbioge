@@ -151,8 +151,12 @@ class DNNProblem(BaseProblem):
             # defines the portions of data used for training and eval
             x_train, y_train = self.dataset.get_data('train')
 
+            # there is validation data
+            if self.dataset.x_valid is not None:
+                self.train_args['validation_data'] = self.dataset.get_data('valid')
+
             # defines the folder for saving the model if requested
-            # solution_path = f'solution_{solution.s_id}_weights.h5'
+            # solution_path = f'solution_{solution.id}_weights.h5'
 
             # runs training
             start_time = dt.datetime.today()
@@ -170,6 +174,7 @@ class DNNProblem(BaseProblem):
                     verbose=self.verbose,
                     **self.test_args)
             else:
+                # TODO tornar generico para qualquer metrica
                 loss = history.history['val_loss'][-1]
                 accuracy = history.history['val_acc'][-1]
 
