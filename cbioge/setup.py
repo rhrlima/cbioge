@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-CURRENT_VERSION = '0.1.6'
+CURRENT_VERSION = '0.1.7'
 
 install_requires = [
     'numpy',
@@ -16,8 +16,8 @@ install_requires = [
 setup(
 	name='cbioge',
 	version=CURRENT_VERSION,
-	author='CBio Group',
-	description='CBio lib for grammar evolution',
+	author='CBio Group (UFPR)',
+	description='Neuroevolution through grammars',
 	license='MIT',
     packages=find_packages(where="."),
 	package_dir={"": "."},
