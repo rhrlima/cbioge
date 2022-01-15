@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Any, Union, List
 
 from keras.models import Model, model_from_json
 
@@ -26,6 +26,19 @@ class UNetProblem(DNNProblem):
 
         super().__init__(parser, dataset, batch_size, epochs, opt, loss,
             metrics, test_eval, verbose, train_args, test_args)
+
+    def _reshape_mapping(self, mapping: List[Any]) -> List[List[Any]]:
+        
+        # groups layer name and parameters together
+        new_mapping = []
+        index = 0
+        while index < len(mapping):
+            block = mapping[index]
+            end = index + len(self.parser.blocks[block])
+            new_mapping.append(mapping[index:end])
+            mapping = mapping[end:]
+
+        return new_mapping
 
     def _build_right_side(self, mapping: list):
 
@@ -124,7 +137,7 @@ class UNetProblem(DNNProblem):
 
     def _build_json_model(self, mapping: list) -> dict:
 
-        names = dict()
+        names = {}
 
         model = {'class_name': 'Model',
             'config': {'layers': [], 'input_layers': [], 'output_layers': []}}
