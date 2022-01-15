@@ -1,11 +1,11 @@
 from setuptools import find_packages, setup
 
-CURRENT_VERSION = '0.1.7'
+CURRENT_VERSION = '0.1.8'
 
 install_requires = [
     'numpy',
     'scikit-image',
-    'tensorflow>=1.14',
+    'tensorflow==1.14',
     'keras==2.2.5',
     # 'scipy==1.4.1',
     # 'spektral==0.6.1',
