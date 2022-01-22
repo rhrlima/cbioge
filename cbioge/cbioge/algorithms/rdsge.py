@@ -28,14 +28,14 @@ class RandomGrammaticalEvolution(GrammaticalEvolution):
 
         self.print_progress()
 
-        offspring_pop = list()
+        offspring_pop = []
         while self.evals < self.max_evals:
 
             # creates a new population from recombining the current one
             index = 0
             while len(offspring_pop) < self.pop_size:
                 solution = self.create_solution()
-                solution.s_id = self.evals + index
+                solution.id = self.evals + index
                 offspring_pop.append(solution)
                 index += 1
 

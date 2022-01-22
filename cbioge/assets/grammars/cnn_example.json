@@ -1,5 +1,5 @@
 {
-	"name": "CNN2.0",
+	"name": "CNN example",
 
 	"blocks": {
 		"input": ["InputLayer", "batch_input_shape"],

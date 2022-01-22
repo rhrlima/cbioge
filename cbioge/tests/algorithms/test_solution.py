@@ -8,7 +8,7 @@ def test_create_solution_from_list():
 
 def test_create_solution_from_json():
     json_string = {
-        's_id': None,
+        'id': None,
         'genotype': [[1, 1], [1, 1, 1], [1]],
         'phenotype': {'a': 123},
         'fitness': 200,
@@ -25,7 +25,7 @@ def test_create_solution_from_json():
 
 def test_create_solution_from_incomplete_json():
     json_string = {
-        's_id': None,
+        'id': None,
         'genotype': [[1, 1], [1, 1, 1], [1]],
         'phenotype': None,
         'evaluated': False,
@@ -42,7 +42,7 @@ def test_create_solution_from_incomplete_json():
 
 def test_create_solution_from_incomplete_json2():
     json_string = {
-        's_id': None,
+        'id': None,
         'genotype': [],
         'phenotype': None,
         'fitness': -1,
@@ -54,7 +54,7 @@ def test_create_solution_from_incomplete_json2():
 
 def test_create_empty_solution():
     json_string = {
-        's_id': None,
+        'id': None,
         'genotype': [],
         'phenotype': None,
         'fitness': -1,

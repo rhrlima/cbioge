@@ -4,7 +4,7 @@ import keras.layers as klayers
 def get_layer(block_name: str, layers_database: list=None):
 
     if layers_database is None:
-        layers_database = list()
+        layers_database = []
 
     # seaches first in custom layers, then keras layers
     layers_database.append(klayers)

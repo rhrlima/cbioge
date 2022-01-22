@@ -22,14 +22,14 @@ class OnePointCrossover(CrossoverOperator):
     def execute(self, parents: List[Solution], cut: int=None) -> Solution:
 
         # crossover is not applied
-        if np.random.rand() > self.cross_rate:
+        if np.random.rand() > self.rate:
             return parents[0].copy()
 
         gen1 = parents[0].genotype[:]
         gen2 = parents[1].genotype[:]
 
         if cut is None:
-            # picks a random cut
+            # picks a random cut (protected when max is 0)
             cut = np.random.randint(0, len(gen1) or 1)
         else:
             cut = min(cut, len(gen1))
@@ -57,13 +57,13 @@ class GeneCrossover(CrossoverOperator):
     def execute(self, parents: List[Solution], cuts: List[int]=None) -> Solution:
 
         # crossover is not applied
-        if np.random.rand() > self.cross_rate:
+        if np.random.rand() > self.rate:
             return parents[0].copy()
 
         gen1 = parents[0].genotype[:]
         gen2 = parents[1].genotype[:]
 
-        new_gen = list()
+        new_gen = []
         for c_idx, _ in enumerate(gen1):
 
             min_len = min(len(gen1[c_idx]), len(gen2[c_idx]))

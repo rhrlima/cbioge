@@ -1,6 +1,6 @@
 from __future__ import annotations
-import logging
 from typing import List, TYPE_CHECKING
+import logging
 
 import numpy as np
 
@@ -50,7 +50,7 @@ class BaseEvolutionaryAlgorithm:
         self.verbose = verbose
 
         self.evals: int = 0
-        self.population: list = list()
+        self.population: list = []
 
         np.random.seed(seed=self.seed)
         self.logger = logging.getLogger('cbioge')
@@ -94,7 +94,7 @@ class BaseEvolutionaryAlgorithm:
 
     def save_solution(self, solution: Solution) -> None:
         json_solution = solution.to_json()
-        filename = ckpt.SOLUTION_NAME.format(solution.s_id)
+        filename = ckpt.SOLUTION_NAME.format(solution.id)
         ckpt.save_data(json_solution, filename)
 
     def load_solution(self, solution_id: int) -> Solution:
@@ -129,8 +129,9 @@ class BaseEvolutionaryAlgorithm:
         if saved:
             for i in range(self.evals):
                 ckpt.delete_data(ckpt.SOLUTION_NAME.format(i))
-            debug_text = f'Checkpoint [{file_name}] created.'
-            self.logger.debug(debug_text)
+            if self.verbose:
+                debug_text = f'Checkpoint [{file_name}] created.'
+                self.logger.debug(debug_text)
 
     def load_state(self) -> dict:
         '''Loads the last generation saved as checkpoint.
@@ -140,7 +141,8 @@ class BaseEvolutionaryAlgorithm:
         data_ckpts = ckpt.get_files_with_name(ckpt.DATA_NAME.format('*'))
 
         if len(data_ckpts) == 0:
-            self.logger.debug('No checkpoint found.')
+            if self.verbose:
+                self.logger.debug('No checkpoint found.')
             return None
 
         last_ckpt = max(data_ckpts, key=ckpt.natural_key)

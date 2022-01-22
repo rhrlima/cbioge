@@ -53,8 +53,8 @@ class DNNProblem(BaseProblem):
         metrics: list=['accuracy'],
         test_eval: bool=False,
         verbose: bool=False,
-        train_args: dict=None,
-        test_args: dict=None
+        train_args: dict={},
+        test_args: dict={}
     ):
 
         super().__init__(parser, verbose)
@@ -85,16 +85,17 @@ class DNNProblem(BaseProblem):
     def _reshape_mapping(self, mapping: List[Any]) -> List[List[Any]]:
         # groups layer name and parameters together
 
-        new_mapping = list()
+        cpy_mapping = mapping[:] # works for basic types
+        new_mapping = []
 
-        group = list()
-        while len(mapping) > 0:
-            if mapping[0] != '#':
-                group.append(mapping.pop(0))
+        group = []
+        while len(cpy_mapping) > 0:
+            if cpy_mapping[0] != '#':
+                group.append(cpy_mapping.pop(0))
             else:
                 new_mapping.append(group)
-                mapping.pop(0)
-                group = list()
+                cpy_mapping.pop(0)
+                group = []
 
         return new_mapping
 
@@ -150,8 +151,12 @@ class DNNProblem(BaseProblem):
             # defines the portions of data used for training and eval
             x_train, y_train = self.dataset.get_data('train')
 
+            # there is validation data
+            if self.dataset.x_valid is not None:
+                self.train_args['validation_data'] = self.dataset.get_data('valid')
+
             # defines the folder for saving the model if requested
-            # solution_path = f'solution_{solution.s_id}_weights.h5'
+            # solution_path = f'solution_{solution.id}_weights.h5'
 
             # runs training
             start_time = dt.datetime.today()
@@ -169,6 +174,8 @@ class DNNProblem(BaseProblem):
                     verbose=self.verbose,
                     **self.test_args)
             else:
+                # TODO custom metrics have to be named 'acc' and 'loss'
+                # in order for this to work
                 loss = history.history['val_loss'][-1]
                 accuracy = history.history['val_acc'][-1]
 

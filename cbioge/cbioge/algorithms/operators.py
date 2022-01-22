@@ -6,6 +6,7 @@ import numpy as np
 
 from .solution import Solution
 
+
 class GeneticOperator(ABC):
 
     def __init__(self):
@@ -17,13 +18,13 @@ class GeneticOperator(ABC):
 
 class CrossoverOperator(GeneticOperator):
 
-    def __init__(self, cross_rate: float):
+    def __init__(self, rate: float):
         super().__init__()
 
-        if not 0.0 <= cross_rate <= 1.0:
-            raise ValueError(f'Crossover rate must be between 0 and 1: {cross_rate}')
+        if not 0.0 <= rate <= 1.0:
+            raise ValueError(f'Crossover rate must be between 0 and 1: {rate}')
 
-        self.cross_rate = cross_rate
+        self.rate = rate
 
     def execute(self, parents: List[Solution], *args) -> Solution:
         pass
@@ -31,13 +32,13 @@ class CrossoverOperator(GeneticOperator):
 
 class MutationOperator(GeneticOperator):
 
-    def __init__(self, mut_rate: float):
+    def __init__(self, rate: float):
         super().__init__()
 
-        if not 0.0 <= mut_rate <= 1.0:
-            raise ValueError(f'Mutation rate must be between 0 and 1: {mut_rate}')
+        if not 0.0 <= rate <= 1.0:
+            raise ValueError(f'Mutation rate must be between 0 and 1: {rate}')
 
-        self.mut_rate = mut_rate
+        self.rate = rate
 
     def execute(self, solution: Solution) -> Solution:
         raise NotImplementedError('Not implemented yet.')
@@ -94,14 +95,14 @@ class HalfAndChoiceOperator(GeneticOperator):
         h_op: GeneticOperator,
         o_ops: List[GeneticOperator],
         h_rate: float=0.5,
-        o_rate: List[float]=None
+        o_rate: List[float]=[0.5]
     ):
         super().__init__()
 
         self.h_op = h_op
         self.o_ops = o_ops
         self.h_rate = h_rate
-        self.o_rate = o_rate or [0.5]
+        self.o_rate = o_rate
 
     def execute(self, parents: List[Solution]) -> Solution:
 

@@ -29,7 +29,6 @@ build/
 dist/
 
 # temp
-experiments/
 tmp*/
 tmp*.*
 best_sgd/

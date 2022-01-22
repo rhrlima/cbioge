@@ -21,8 +21,8 @@ class CNNProblem(DNNProblem):
         metrics: list=['accuracy'],
         test_eval: bool=False,
         verbose: bool=False,
-        train_args=None,
-        test_args=None
+        train_args: dict={},
+        test_args: dict={}
     ):
 
         super().__init__(parser, dataset, batch_size, epochs, opt, loss,
@@ -32,7 +32,7 @@ class CNNProblem(DNNProblem):
 
         reshaped_mapping = self._reshape_mapping(mapping)
 
-        layers = list()
+        layers = []
 
         # input layer
         layers.append(Input(shape=self.dataset.input_shape))

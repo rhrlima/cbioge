@@ -1,6 +1,7 @@
 import sys
 import logging
 
+
 OUT_FILE = 'out.log'
 ERR_FILE = 'err.log'
 
@@ -8,22 +9,23 @@ LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
 DATE_FORMAT = '%x %X'
 
 
-def setup(gen_ext_logs: bool=False, out_file: str=OUT_FILE, err_file: str=ERR_FILE):
+def setup(disable_file_logs: bool=False,
+    out_file: str=OUT_FILE,
+    err_file: str=ERR_FILE
+):
 
-    if gen_ext_logs:
-        setup_with_external_logs(out_file, err_file)
-    else:
-        base_setup()
+    base_logger()
+    if not disable_file_logs:
+        logger_with_external_files(out_file, err_file)
 
 
-def base_setup():
+def base_logger():
 
     logger = logging.getLogger('cbioge')
 
     logger.setLevel(logging.DEBUG)
 
     sout_handler = logging.StreamHandler(sys.stdout)
-    sout_handler.setLevel(logging.DEBUG)
 
     base_format = logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT)
     sout_handler.setFormatter(base_format)
@@ -31,9 +33,7 @@ def base_setup():
     logger.addHandler(sout_handler)
 
 
-def setup_with_external_logs(out_file=OUT_FILE, err_file=ERR_FILE):
-
-    base_setup()
+def logger_with_external_files(out_file=OUT_FILE, err_file=ERR_FILE):
 
     logger = logging.getLogger('cbioge')
 
@@ -56,9 +56,9 @@ def setup_with_external_logs(out_file=OUT_FILE, err_file=ERR_FILE):
 
 class LevelFilter(logging.Filter):
 
-    def __init__(self, name='', allowed_lvls=None):
+    def __init__(self, name='', allowed_lvls=[]):
         super().__init__(name)
-        self.allowed_lvls = allowed_lvls or []
+        self.allowed_lvls = allowed_lvls
 
     def filter(self, record):
         return record.levelno in self.allowed_lvls

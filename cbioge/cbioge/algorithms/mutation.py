@@ -14,11 +14,11 @@ class PointMutation(MutationOperator):
     parser: parser object needed to replace the values'''
 
     def __init__(self, parser: Grammar,
-        mut_rate: float,
+        rate: float,
         start_index: int=0,
         end_index: int=None
     ):
-        super().__init__(mut_rate)
+        super().__init__(rate)
 
         self.parser = parser
 
@@ -32,7 +32,7 @@ class PointMutation(MutationOperator):
     def execute(self, solution: Solution) -> Solution:
 
         offspring = solution.copy()
-        if np.random.rand() > self.mut_rate:
+        if np.random.rand() > self.rate:
             return offspring
 
         if self.end_index is None:
@@ -67,14 +67,14 @@ class TerminalMutation(PointMutation):
     '''Follows similar behavior than the Point Mutation.
     Changes a value for a new valid one, starting from a given index
 
-    Ex: [[1,2,3], | [4,5,6], [7,8,9]] start_index = 3\n
+    Ex: [[1,2,3], | [4,5,6], [7,8,9]] start_index = 1\n
     means that values [1,2,3] will not be changed.'''
 
     def __init__(self, parser: Grammar,
-        mut_rate: float,
+        rate: float,
         start_index: int=0
     ):
-        super().__init__(parser, mut_rate, start_index=start_index)
+        super().__init__(parser, rate, start_index=start_index)
 
     def __str__(self):
 
@@ -85,14 +85,14 @@ class NonterminalMutation(PointMutation):
     '''Follows similar behavior than the Point Mutation.
     Changes a value for a new valid one, up to a given index
 
-    Ex: [[1,2,3], [4,5,6], | [7,8,9]] start_index = 6\n
+    Ex: [[1,2,3], [4,5,6], | [7,8,9]] end_index = 2\n
     means that values [7,8,9] will not be changed.'''
 
     def __init__(self, parser: Grammar,
-        mut_rate: float,
+        rate: float,
         end_index: int=None
     ):
-        super().__init__(parser, mut_rate, end_index=end_index)
+        super().__init__(parser, rate, end_index=end_index)
 
     def __str__(self):
 

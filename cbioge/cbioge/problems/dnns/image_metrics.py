@@ -79,21 +79,20 @@ class WeightedMetric:
     def __str__(self):
         return 'weighted_metric'
 
-    def execute_metric(self, y_true, y_pred):
+    def acc(self, y_true, y_pred):
+        return self.w_jac * (1 - jaccard_distance(y_true, y_pred))\
+            + self.w_dic * dice_coef(y_true, y_pred)\
+            + self.w_spe * specificity(y_true, y_pred)\
+            + self.w_sen * sensitivity(y_true, y_pred)
 
-        return self.w_jac * (1 - jaccard_distance(y_true, y_pred)) \
-             + self.w_dic * dice_coef(y_true, y_pred) \
-             + self.w_spe * specificity(y_true, y_pred) \
-             + self.w_sen * sensitivity(y_true, y_pred)
+    def loss(self, y_true, y_pred):
 
-    def execute_loss(self, y_true, y_pred):
-
-        return 1 - self.execute_metric(y_true, y_pred)
+        return 1 - self.acc(y_true, y_pred)
 
     def get_metric(self):
 
-        return self.execute_metric
+        return self.acc
 
     def get_loss(self):
 
-        return self.execute_loss
+        return self.loss

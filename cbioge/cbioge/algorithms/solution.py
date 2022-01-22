@@ -13,20 +13,20 @@ class Solution:
     (usually a custom class) will make use of most of it, or even more.'''
 
     def __init__(self,
-        genotype: list=None,
+        genotype: list=[],
         phenotype: Any=None,
         fitness: float=-1.0,
         evaluated: bool=False,
-        data: dict=None,
-        s_id: int=None
+        data: dict={},
+        id: int=None # pylint: disable=redefined-builtin
     ):
 
-        self.s_id = s_id
-        self.genotype = genotype or []
+        self.id = id # pylint: disable=invalid-name
+        self.genotype = genotype
         self.phenotype = phenotype
         self.fitness = fitness
         self.evaluated = evaluated
-        self.data = data or {}
+        self.data = data
 
     def __str__(self):
         return str(self.genotype)
@@ -41,7 +41,9 @@ class Solution:
 
     def copy(self, deep: bool=False) -> 'Solution':
         if deep:
+            # with all data inside
             return copy.deepcopy(self)
+        # all defaults but the genotype
         return Solution(copy.deepcopy(self.genotype))
 
     @classmethod
