@@ -174,7 +174,8 @@ class DNNProblem(BaseProblem):
                     verbose=self.verbose,
                     **self.test_args)
             else:
-                # TODO tornar generico para qualquer metrica
+                # TODO custom metrics have to be named 'acc' and 'loss'
+                # in order for this to work
                 loss = history.history['val_loss'][-1]
                 accuracy = history.history['val_acc'][-1]
 

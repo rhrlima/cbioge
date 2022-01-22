@@ -1,8 +1,11 @@
 import os
 import argparse
+import logging
 
-from ..utils import logging
+from ..utils import logging as cbio_logger
 from ..utils import checkpoint as ckpt
+
+LOGGER = logging.getLogger('cbioge')
 
 base_parser = argparse.ArgumentParser()
 
@@ -82,15 +85,16 @@ def parse_default_args():
     if not os.path.exists(ckpt.CKPT_FOLDER):
         os.makedirs(ckpt.CKPT_FOLDER)
 
-    logging.setup(args.no_logs,
+    cbio_logger.setup(args.no_logs,
         out_file=os.path.join(ckpt.CKPT_FOLDER, args.output),
         err_file=os.path.join(ckpt.CKPT_FOLDER, args.error))
+
+    if args.verbose:
+        LOGGER.debug(args)
 
 
 def _overwrite_defaults(new_args):
     for key, value in new_args.items():
-        # if key in DEFAULTS:
-        # replaces or add new key/value
         DEFAULTS[key] = value
 
 
@@ -99,7 +103,7 @@ def evolution_args(defaults={}):
     _overwrite_defaults(defaults)
 
     # configures the default args global to all experiments
-    basic_args(defaults, True)
+    basic_args(defaults, avoid_parse=True)
 
     # grammar args
     base_parser.add_argument('--grammar', type=str, default=DEFAULTS['grammar'])
