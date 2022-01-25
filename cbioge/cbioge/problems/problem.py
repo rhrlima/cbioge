@@ -173,14 +173,16 @@ class DNNProblem(BaseProblem):
                     batch_size=self.batch_size,
                     verbose=self.verbose,
                     **self.test_args)
+                fitness = accuracy
             else:
                 # TODO custom metrics have to be named 'acc' and 'loss'
                 # in order for this to work
                 loss = history.history['val_loss'][-1]
                 accuracy = history.history['val_acc'][-1]
+                fitness = accuracy / np.mean(history.history['val_acc'])
 
             # updates the solution information
-            solution.fitness = accuracy
+            solution.fitness = fitness
             solution.data['time'] = dt.datetime.today() - start_time
             solution.data['acc'] = accuracy
             solution.data['loss'] = loss
