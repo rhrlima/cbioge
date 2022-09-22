@@ -26,6 +26,9 @@ class BaseProblem(ABC):
         if parser is None:
             raise AttributeError('Grammar parser cannot be None')
 
+        if not isinstance(parser, Grammar):
+            raise AttributeError('parser must be of type Grammar')
+
         self.parser = parser
         self.verbose = verbose
         self.logger = logging.getLogger('cbioge')
@@ -175,11 +178,19 @@ class DNNProblem(BaseProblem):
                     **self.test_args)
                 fitness = accuracy
             else:
+                print(history.history.keys())
                 # TODO custom metrics have to be named 'acc' and 'loss'
                 # in order for this to work
+
+                # temp solution that handles both naming styles
+                if "val_acc" in history.history.keys():
+                    acc_dict_key = "val_acc"
+                else:
+                    acc_dict_key = "val_accuracy"
+
                 loss = history.history['val_loss'][-1]
-                accuracy = history.history['val_acc'][-1]
-                fitness = accuracy / np.mean(history.history['val_acc'])
+                accuracy = history.history[acc_dict_key][-1]
+                fitness = accuracy / np.mean(history.history[acc_dict_key])
 
             # updates the solution information
             solution.fitness = fitness

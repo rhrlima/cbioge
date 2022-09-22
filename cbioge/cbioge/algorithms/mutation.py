@@ -20,6 +20,9 @@ class PointMutation(MutationOperator):
     ):
         super().__init__(rate)
 
+        if not isinstance(parser, Grammar):
+            raise AttributeError('parser must be of type Grammar')
+
         self.parser = parser
 
         self.start_index = start_index
