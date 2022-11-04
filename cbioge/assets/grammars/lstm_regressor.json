@@ -1,0 +1,27 @@
+{
+    "name": "LSTM design",
+
+    "rules": {
+		"<start>": 
+            [["<lstm>", "<node>"]
+        ],
+
+        "<node>": [
+            ["<lstm>", "<node>"], 
+            ["<dropout>", "<node>"],
+            ["&"]
+        ],
+
+		"<lstm>" : [["LSTM", "units", "<units>", "activation", "<activation>",
+            "recurrent_activation", "<recurrent_activation>", 
+            "return_sequences", "<return_sequences>", 
+            "#"]],
+		"<dropout>" : [["Dropout","rate", "<rate>", "#"]],
+		"<activation>" : [["relu"], ["sigmoid"], ["tanh"]],
+        "<recurrent_activation>" : [["relu"], ["sigmoid"], ["tanh"]],
+        "<return_sequences>": [["True"], ["False"]],
+        "<return_state>": [["True"], ["False"]],
+		"<units>" : [[32], [64], [128], [256], [512], [1024]],
+		"<rate>" : [["[0.0,0.5]"]]
+	}
+}
