@@ -26,6 +26,9 @@ class BaseProblem(ABC):
         if parser is None:
             raise AttributeError('Grammar parser cannot be None')
 
+        if not isinstance(parser, Grammar):
+            raise AttributeError('parser must be of type Grammar')
+
         self.parser = parser
         self.verbose = verbose
         self.logger = logging.getLogger('cbioge')
@@ -87,7 +90,6 @@ class DNNProblem(BaseProblem):
 
         cpy_mapping = mapping[:] # works for basic types
         new_mapping = []
-
         group = []
         while len(cpy_mapping) > 0:
             if cpy_mapping[0] != '#':
@@ -104,13 +106,7 @@ class DNNProblem(BaseProblem):
 
     def map_genotype_to_phenotype(self, solution: Solution) -> Model:
 
-        # try using existing mapping to build
-        if 'mapping' in solution.data:
-            mapping = solution.data['mapping']
-
-        # creates mapping using the grammar
-        else:
-            mapping = self.parser.recursive_parse(solution.genotype)
+        mapping = self.parser.recursive_parse(solution.genotype)
 
         # creates the model
         model = self._build_model(mapping)
@@ -121,6 +117,7 @@ class DNNProblem(BaseProblem):
         else:
             solution.phenotype = None
             solution.data['params'] = 0
+
         solution.data['mapping'] = mapping
 
         return model
@@ -173,14 +170,24 @@ class DNNProblem(BaseProblem):
                     batch_size=self.batch_size,
                     verbose=self.verbose,
                     **self.test_args)
+                fitness = accuracy
             else:
+                print(history.history.keys())
                 # TODO custom metrics have to be named 'acc' and 'loss'
                 # in order for this to work
+
+                # temp solution that handles both naming styles
+                if "val_acc" in history.history.keys():
+                    acc_dict_key = "val_acc"
+                else:
+                    acc_dict_key = "val_accuracy"
+
                 loss = history.history['val_loss'][-1]
-                accuracy = history.history['val_acc'][-1]
+                accuracy = history.history[acc_dict_key][-1]
+                fitness = accuracy / np.mean(history.history[acc_dict_key])
 
             # updates the solution information
-            solution.fitness = accuracy
+            solution.fitness = fitness
             solution.data['time'] = dt.datetime.today() - start_time
             solution.data['acc'] = accuracy
             solution.data['loss'] = loss

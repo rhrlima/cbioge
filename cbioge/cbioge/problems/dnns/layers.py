@@ -8,7 +8,6 @@ def get_layer(block_name: str, layers_database: list=None):
 
     # seaches first in custom layers, then keras layers
     layers_database.append(klayers)
-
     for ldb in layers_database:
         try:
             return getattr(ldb, block_name)
