@@ -78,7 +78,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
                 + f'fit: {float(solution.fitness):.2f} gen: {solution}')
             self.logger.debug(log_text)
 
-
     def evaluate_population(self, population: List[Solution]) -> None:
         for solution in population:
             self.evaluate_solution(solution)
@@ -99,7 +98,6 @@ class GrammaticalEvolution(BaseEvolutionaryAlgorithm):
         if checkpoint:
             self.load_state()
 
-        #Initial Evaluation
         if len(self.population) == 0:
             self.population = self.create_population(self.pop_size)
             self.evaluate_population(self.population)
